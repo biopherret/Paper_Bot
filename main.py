@@ -43,7 +43,7 @@ async def getArticles(listofTopics):
             allArticles.append(topicArticles)
         return(allArticles)
     
-def checkDuplicates(allArticles, wd, listofTopics): #Add Retval for the topics
+async def checkDuplicates(allArticles, wd, listofTopics): #Add Retval for the topics
     if(os.path.isfile(wd + 'OverallSummary.csv')):        
         oldTitles=pd.read_csv(wd+'OverallSummary.csv')['Title'].values
         repeatedArticles=set(itertools.chain(*allArticles)).intersection(set(oldTitles))
@@ -102,14 +102,14 @@ async def _set_topic_interests(ctx, topic1, topic2 = None, topic3 = None, topic4
     await write_json(topics_json, "topics.json")
     await ctx.send("Topics have been set!")
 
-@slash.slash(name="find_papers", description="Find papers based on your topic interests")
+@slash.slash(name="find_papers", description="Find papers based on your topic interests") 
 async def _find_papers(ctx):
     author = ctx.author.id
     topics_json = await open_json("topics.json")
     topics = topics_json[str(author)]
 
-    allArticles=getArticles(topics)
-    listNewArticles,newTopics=checkDuplicates(allArticles,wd,topics)
+    allArticles = await getArticles(topics)
+    listNewArticles,newTopics = await checkDuplicates(allArticles,wd,topics)
     await ctx.send(listNewArticles)
 
 client.run(discord_token)
