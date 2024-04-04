@@ -10,4 +10,8 @@ discord_token = open("discord_token.txt", "r").read()
 async def on_ready():
     print("Ready!")
 
+@slash.slash(name="ping")
+async def _ping(ctx): # Defines a new "context" (ctx) command called "ping."
+    await ctx.send(f"Pong! ({client.latency*1000}ms)")
+
 client.run(discord_token)
