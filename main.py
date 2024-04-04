@@ -19,7 +19,7 @@ async def on_ready():
                     create_option(name = 'topic4', option_type = 3, required = False, description = "The fourth topic you are interested in"),
                     create_option(name = 'topic5', option_type = 3, required = False, description = "The fifth topic you are interested in"),
              ])
-async def _set_topic_interests(ctx): # Defines a new "context" (ctx) command called "ping."
-    await ctx.send(Topic1)
+async def _set_topic_interests(ctx, topic1, topic2 = None, topic3 = None, topic4 = None, topic5 = None): # Defines a new "context" (ctx) command called "ping."
+    await ctx.send(topic1)
 
 client.run(discord_token)
