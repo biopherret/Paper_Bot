@@ -11,7 +11,7 @@ discord_token = open("discord_token.txt", "r").read()
 async def on_ready():
     print("Ready!")
 
-@slash.slash(name="Set Topic Interests", description="Set the topics of papers you want Paper Bot to find for you", 
+@slash.slash(name="Set_Topic_Interests", description="Set the topics of papers you want Paper Bot to find for you", 
              options=[
                  create_option(name = 'Topic 1', option_type = 3, required = True, description = "The first topic you are interested in"),
                     create_option(name = 'Topic 2', option_type = 3, required = False, description = "The second topic you are interested in"),
@@ -19,7 +19,7 @@ async def on_ready():
                     create_option(name = 'Topic 4', option_type = 3, required = False, description = "The fourth topic you are interested in"),
                     create_option(name = 'Topic 5', option_type = 3, required = False, description = "The fifth topic you are interested in"),
              ])
-async def _set_topic_interests(ctx): # Defines a new "context" (ctx) command called "ping."
+async def _Set_Topic_Interests(ctx): # Defines a new "context" (ctx) command called "ping."
     await ctx.send(f"Pong! ({client.latency*1000}ms)")
 
 client.run(discord_token)
