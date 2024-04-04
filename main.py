@@ -13,13 +13,13 @@ async def on_ready():
 
 @slash.slash(name="Set_Topic_Interests", description="Set the topics of papers you want Paper Bot to find for you", 
              options=[
-                 create_option(name = 'Topic 1', option_type = 3, required = True, description = "The first topic you are interested in"),
-                    create_option(name = 'Topic 2', option_type = 3, required = False, description = "The second topic you are interested in"),
-                    create_option(name = 'Topic 3', option_type = 3, required = False, description = "The third topic you are interested in"),
-                    create_option(name = 'Topic 4', option_type = 3, required = False, description = "The fourth topic you are interested in"),
-                    create_option(name = 'Topic 5', option_type = 3, required = False, description = "The fifth topic you are interested in"),
+                 create_option(name = 'Topic1', option_type = 3, required = True, description = "The first topic you are interested in"),
+                    create_option(name = 'Topic2', option_type = 3, required = False, description = "The second topic you are interested in"),
+                    create_option(name = 'Topic3', option_type = 3, required = False, description = "The third topic you are interested in"),
+                    create_option(name = 'Topic4', option_type = 3, required = False, description = "The fourth topic you are interested in"),
+                    create_option(name = 'Topic5', option_type = 3, required = False, description = "The fifth topic you are interested in"),
              ])
 async def _Set_Topic_Interests(ctx): # Defines a new "context" (ctx) command called "ping."
-    await ctx.send(f"Pong! ({client.latency*1000}ms)")
+    await ctx.send(Topic1)
 
 client.run(discord_token)
