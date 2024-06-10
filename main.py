@@ -11,7 +11,7 @@ import pandas as pd
 from datetime import date
 
 bot = commands.Bot(intents=discord.Intents.all())
-slash = SlashCommand(bot, sync_commands=True) # Declares slash commands through the client.
+slash = SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
 
 discord_token = open("discord_token.txt", "r").read()
 serpapi_token = open("serpapi_token.txt", "r").read()
@@ -81,7 +81,7 @@ async def checkDuplicates(allArticles, wd, listofTopics): #Add Retval for the to
         retVal.append('No Repeated Articles!')
         return (retVal,listofTopics)
 
-@client.event
+@bot.event
 async def on_ready():
     print("Ready!")
 
