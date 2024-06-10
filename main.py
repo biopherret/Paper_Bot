@@ -1,6 +1,5 @@
 import discord
 import discord_slash
-from discord_slash import SlashCommand # Importing the newly installed library.
 from discord.ext import commands
 
 import json
@@ -12,7 +11,7 @@ import pandas as pd
 from datetime import date
 
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.all())
-slash = SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
+slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
 
 discord_token = open("discord_token.txt", "r").read()
 serpapi_token = open("serpapi_token.txt", "r").read()
@@ -26,6 +25,15 @@ async def write_json(data, file_name):
 async def open_json(file_name):
     with open (file_name) as file:
         return json.load(file)
+    
+async def format_paper_message(topic_list, all_articles):
+    message = ""
+    for topic in topic_list:
+        message += f"**{topic}**\n"
+        for article in all_articles[topic]:
+            message += f"{article}\n"
+        message += "\n"
+    return message
 
 async def getArticles(listofTopics, num_papers):
     allArticles = list()
@@ -80,6 +88,7 @@ async def _find_papers(ctx, num_papers):
     topics = topics_json[str(author)]
 
     allArticles = await getArticles(topics, num_papers)
-    await ctx.send(allArticles)
+    mes = await format_paper_message(topics, allArticles)
+    await ctx.send(mes)
 
 bot.run(discord_token)
