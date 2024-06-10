@@ -1,6 +1,5 @@
 import discord
 from discord_slash import SlashCommand # Importing the newly installed library.
-from discord_slash.manage_commands import create_option
 from discord.ext import commands
 
 import json
@@ -88,11 +87,11 @@ async def on_ready():
 
 @slash.slash(name="set_topic_interests", description="Set the topics of papers you want Paper Bot to find for you", 
              options=[
-                 create_option(name = 'topic1', option_type = 3, required = True, description = "The first topic you are interested in"),
-                    create_option(name = 'topic2', option_type = 3, required = False, description = "The second topic you are interested in"),
-                    create_option(name = 'topic3', option_type = 3, required = False, description = "The third topic you are interested in"),
-                    create_option(name = 'topic4', option_type = 3, required = False, description = "The fourth topic you are interested in"),
-                    create_option(name = 'topic5', option_type = 3, required = False, description = "The fifth topic you are interested in"),
+                 discord_slash.manage_commands.create_option(name = 'topic1', option_type = 3, required = True, description = "The first topic you are interested in"),
+                    discord_slash.manage_commands.create_option(name = 'topic2', option_type = 3, required = False, description = "The second topic you are interested in"),
+                    discord_slash.manage_commands.create_option(name = 'topic3', option_type = 3, required = False, description = "The third topic you are interested in"),
+                    discord_slash.manage_commands.create_option(name = 'topic4', option_type = 3, required = False, description = "The fourth topic you are interested in"),
+                    discord_slash.manage_commands.create_option(name = 'topic5', option_type = 3, required = False, description = "The fifth topic you are interested in"),
              ])
 async def _set_topic_interests(ctx, topic1, topic2 = None, topic3 = None, topic4 = None, topic5 = None): # Defines a new "context" (ctx) command called "ping."
     topic_list = [topic1, topic2, topic3, topic4, topic5]
