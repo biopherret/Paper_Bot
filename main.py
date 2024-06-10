@@ -37,6 +37,7 @@ async def getArticles(listofTopics):
               "api_key": serpapi_token,
                 "scisbd": 1
             }
+            print(topic, params)
             search1=serpapi.search(params)
             topicArticles = list()
             for article in range(len(search1)):
