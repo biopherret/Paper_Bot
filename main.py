@@ -43,44 +43,6 @@ async def getArticles(listofTopics):
                 topicArticles.append(search1['organic_results'][article]['title'])
             allArticles.append(topicArticles)
         return(allArticles)
-    
-async def checkDuplicates(allArticles, wd, listofTopics): #Add Retval for the topics
-    if(os.path.isfile(wd + 'OverallSummary.csv')):        
-        oldTitles=pd.read_csv(wd+'OverallSummary.csv')['Title'].values
-        repeatedArticles=set(itertools.chain(*allArticles)).intersection(set(oldTitles))
-        if(len(repeatedArticles) == 0):
-            retVal =list()
-            retVal.append('No Repeated Articles!')
-            return(retVal,listofTopics)
-        elif(len(repeatedArticles) == len(oldTitles)):
-            retVal =list()
-            retVal.append('No New Articles!')
-            return(retVal,listofTopics)
-        else:
-            listofTopicsNew = list()
-            allArticlesNew=list()
-            for x in range(len(listofTopics)):
-                topic1 = listofTopics[x]
-                topicArticles = allArticles[x]
-                topicArticlesNew = list()
-                if(isinstance(topicArticles,list)):
-                    for y in range(len(topicArticles)):
-                        if(topicArticles[y] not in list(repeatedArticles)):
-                            topicArticlesNew.append(topicArticles[y])
-                    if(len(topicArticlesNew) != 0):
-                        listofTopicsNew.append(topic1)
-                        allArticlesNew.append(topicArticlesNew)
-                else:
-                    if(topicArticles not in list(repeatedArticles)):
-                        topicArticlesNew.append(topicArticles)
-                        listofTopicsNew.append(topic1)
-                        allArticlesNew.append(topicArticlesNew)
-            #retVal = list(repeatedArticles)
-            return(allArticlesNew,listofTopicsNew)
-    else:
-        retVal =list()
-        retVal.append('No Repeated Articles!')
-        return (retVal,listofTopics)
 
 @bot.event
 async def on_ready():
@@ -112,7 +74,6 @@ async def _find_papers(ctx):
     topics = topics_json[str(author)]
 
     allArticles = await getArticles(topics)
-    listNewArticles,newTopics = await checkDuplicates(allArticles,wd,topics)
-    await ctx.send(listNewArticles)
+    await ctx.send(allArticles)
 
 bot.run(discord_token)
