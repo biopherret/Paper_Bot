@@ -1,5 +1,6 @@
 import discord
 from discord_slash import SlashCommand # Importing the newly installed library.
+from discord_slash.manage_commands import create_option
 from discord.ext import commands
 
 import json
