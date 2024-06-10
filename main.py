@@ -1,6 +1,6 @@
 import discord
 from discord_slash import SlashCommand # Importing the newly installed library.
-from discord_slash.utils.manage_commands import create_option
+from discord.ext import commands
 
 import json
 
@@ -10,8 +10,8 @@ import os
 import pandas as pd
 from datetime import date
 
-client = discord.Client(intents=discord.Intents.all())
-slash = SlashCommand(client, sync_commands=True) # Declares slash commands through the client.
+bot = commands.Bot(intents=discord.Intents.all())
+slash = SlashCommand(bot, sync_commands=True) # Declares slash commands through the client.
 
 discord_token = open("discord_token.txt", "r").read()
 serpapi_token = open("serpapi_token.txt", "r").read()
@@ -112,4 +112,4 @@ async def _find_papers(ctx):
     listNewArticles,newTopics = await checkDuplicates(allArticles,wd,topics)
     await ctx.send(listNewArticles)
 
-client.run(discord_token)
+bot.run(discord_token)
