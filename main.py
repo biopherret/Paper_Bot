@@ -37,7 +37,6 @@ async def getArticles(listofTopics):
               "api_key": serpapi_token,
                 "scisbd": 1
             }
-            print(topic, params)
             search1=serpapi.search(params)
             topicArticles = list()
             for article in range(len(search1)):
@@ -101,6 +100,7 @@ async def _set_topic_interests(ctx, topic1, topic2 = None, topic3 = None, topic4
     author = ctx.author.id #save topic preferences in json
     topics_json = await open_json("topics.json")
     topics_json[str(author)] = topic_list
+    print(topic_list, [type(t) for t in topic_list])
     await write_json(topics_json, "topics.json")
     await ctx.send("Topics have been set!")
 
