@@ -10,7 +10,7 @@ import os
 import pandas as pd
 from datetime import date
 
-bot = commands.Bot(intents=discord.Intents.all())
+bot = commands.Bot(command_prefix = '.', intents=discord.Intents.all())
 slash = SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
 
 discord_token = open("discord_token.txt", "r").read()
