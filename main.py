@@ -27,22 +27,25 @@ async def open_json(file_name):
     with open (file_name) as file:
         return json.load(file)
 
-async def getArticles(listofTopics):
+async def getArticles(listofTopics, num_papers):
     allArticles = list()
-    if(len(listofTopics) > 1):
-        for topic in listofTopics:
-            params = {
-              "engine": "google_scholar",
-              "q": topic,
-              "api_key": serpapi_token,
-                "scisbd": 1
+    for topic in listofTopics:
+        params = {
+            "engine": "google_scholar",
+            "q": topic,
+            "api_key": serpapi_token,
+            "scisbd": 1
             }
-            search1=serpapi.search(params)
-            topicArticles = list()
-            for article in range(len(search1)):
-                topicArticles.append(search1['organic_results'][article]['title'])
-            allArticles.append(topicArticles)
-        return(allArticles)
+        search1=serpapi.search(params)
+        topicArticles = list()
+        n = 0
+        for article in range(len(search1)):
+            n += 1
+            topicArticles.append(search1['organic_results'][article]['title'])
+            if n == num_papers:
+                break
+        allArticles.append(topicArticles)
+    return(allArticles)
 
 @bot.event
 async def on_ready():
@@ -68,12 +71,12 @@ async def _set_topic_interests(ctx, topic1, topic2 = None, topic3 = None, topic4
     await ctx.send("Topics have been set!")
 
 @slash.slash(name="find_papers", description="Find papers based on your topic interests") 
-async def _find_papers(ctx):
+async def _find_papers(ctx, num_papers):
     author = ctx.author.id
     topics_json = await open_json("topics.json")
     topics = topics_json[str(author)]
 
-    allArticles = await getArticles(topics)
+    allArticles = await getArticles(topics, num_papers)
     await ctx.send(allArticles)
 
 bot.run(discord_token)
