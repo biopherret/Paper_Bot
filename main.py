@@ -30,8 +30,10 @@ async def format_paper_message(topic_list, all_articles):
     message = ""
     for topic in topic_list:
         message += f"**{topic}**\n"
-        for article in all_articles[topic]:
+        t = 0
+        for article in all_articles[t]:
             message += f"{article}\n"
+            t += 1
         message += "\n"
     return message
 
