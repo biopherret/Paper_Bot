@@ -70,7 +70,10 @@ async def _set_topic_interests(ctx, topic1, topic2 = None, topic3 = None, topic4
     await write_json(topics_json, "topics.json")
     await ctx.send("Topics have been set!")
 
-@slash.slash(name="find_papers", description="Find papers based on your topic interests") 
+@slash.slash(name="find_papers", description="Find papers based on your topic interests",
+             options=[
+                 discord_slash.manage_commands.create_option(name = 'num_papers', option_type = 4, required = True, description = "The number of papers you want to find for each topic"),
+             ])
 async def _find_papers(ctx, num_papers):
     author = ctx.author.id
     topics_json = await open_json("topics.json")
