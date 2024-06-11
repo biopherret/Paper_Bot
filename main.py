@@ -36,12 +36,11 @@ async def getArticles(topics_list, num_papers):
             "hl": "en"
             }
         search1=serpapi.search(params)
-        n = 0
-        for article in range(len(search1)):
-            n += 1
-            article_dict = {'title': search1['organic_results'][article]['title'], 'online_link': search1['organic_results'][article]['link'], 'topic': topic_dict['topic']}
+        for a in range(len(search1)):
+            print(search1['organic_results'][a]['resources'])
+            article_dict = {'title': search1['organic_results'][a]['title'], 'online_link': search1['organic_results'][a]['link'], 'topic': topic_dict['topic']}
             found_articles.append(article_dict)
-            if n == num_papers:
+            if a == num_papers:
                 break
     return found_articles
 
