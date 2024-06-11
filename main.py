@@ -25,7 +25,8 @@ async def write_json(data, file_name):
 async def open_json(file_name):
     with open (file_name) as file:
         return json.load(file)
-    
+
+#TODO: update with new format
 async def format_paper_message(topic_list, all_articles):
     message = ""
     for topic in topic_list:
@@ -37,6 +38,7 @@ async def format_paper_message(topic_list, all_articles):
         message += "\n"
     return message
 
+#TODO: update with new format
 async def getArticles(listofTopics, num_papers, recents):
     allArticles = list()
     for topic, recent in zip(listofTopics, recents):
@@ -63,11 +65,18 @@ async def getArticles(listofTopics, num_papers, recents):
 async def on_ready():
     print("Ready!")
 
+@slash.slash(name="clear_history", description="Clear all Paper Bot topic settings and found articles. Note that clearing your history may result in Paper Bot sending you papers you have already seen.")
+async def _clear_history(ctx):
+    author = ctx.author.id
+    topics_json = await open_json("topics.json")
+    topics_json.pop(str(author)) #remove the user from the json
+    await write_json(topics_json, "topics.json")
+
 @slash.slash(name="clear_topics", description="Clear your saved topic settings.")
 async def _clear_topics(ctx):
     author = ctx.author.id
     topics_json = await open_json("topics.json")
-    topics_json.pop(str(author))
+    topics_json[str(author)]['topic_settings'] = [] #empty the topic settings list
     await write_json(topics_json, "topics.json")
     await ctx.send("Topics have been cleared!")
 
@@ -75,7 +84,7 @@ async def _clear_topics(ctx):
 async def _view_topics(ctx):
     author = ctx.author.id
     topics_json = await open_json("topics.json")
-    topics_list = topics_json[str(author)]
+    topics_list = topics_json[str(author)]['topic_settings']
     mes = 'Here are your current topics:'
     for topic_dict in topics_list:
         mes += f"\n{topic_dict['topic']}"
@@ -91,8 +100,9 @@ async def _view_topics(ctx):
 async def _add_topic(ctx, topic, recent):
     author = ctx.author.id #save topic preferences in json
     topics_json = await open_json("topics.json")
-    if str(author) not in topics_json.keys(): #if this user dosn't have set topics already
-        topics_json[str(author)] = [] #create a topic list for them
+    if str(author) not in topics_json.keys(): #if this user dosn't exist yet
+        topics_json[str(author)] = {'topic_settings': [], 'found_articles': []} #create a dictionary object for the new user
+        await ctx.send("Welcome to Paper Bot! I've created a new user profile for you.")
 
     topics_json[str(author)].append({"topic": topic, "recent": recent}) #add the new topic
     await write_json(topics_json, "topics.json")
@@ -106,10 +116,10 @@ async def _add_topic(ctx, topic, recent):
 async def _find_papers(ctx, num_papers):
     author = ctx.author.id
     topics_json = await open_json("topics.json")
-    topics = topics_json[str(author)]
+    topics_list = topics_json[str(author)]
 
-    allArticles = await getArticles(topics, num_papers)
-    mes = await format_paper_message(topics, allArticles)
+    allArticles = await getArticles(topics_list, num_papers)
+    mes = await format_paper_message(topics_list, allArticles)
     await ctx.send(mes)
 
 bot.run(discord_token)
