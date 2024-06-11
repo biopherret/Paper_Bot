@@ -75,7 +75,7 @@ async def _view_topics(ctx):
     mes = 'Here are your current topics:'
     for topic_dict in topics_list:
         mes += f"\n{topic_dict['topic']}"
-        if topic_dict['recent'] == 'y':
+        if topic_dict['recent'] == 1:
             mes += " (recent papers only)"
     await ctx.send(mes)
     
@@ -90,6 +90,11 @@ async def _add_topic(ctx, topic, recent):
     if str(author) not in topics_json.keys(): #if this user dosn't exist yet
         topics_json[str(author)] = {'topic_settings': [], 'found_articles': []} #create a dictionary object for the new user
         await ctx.send("Welcome to Paper Bot! I've created a new user profile for you.")
+
+    if recent == 'y':
+        recent = 1
+    else:
+        recent = 0
 
     topics_json[str(author)].append({"topic": topic, "recent": recent}) #add the new topic
     await write_json(topics_json, "topics.json")
