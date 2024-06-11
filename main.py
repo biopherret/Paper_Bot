@@ -37,20 +37,22 @@ async def format_paper_message(topic_list, all_articles):
         message += "\n"
     return message
 
-async def getArticles(listofTopics, num_papers):
+async def getArticles(listofTopics, num_papers, recents):
     allArticles = list()
-    for topic in listofTopics:
+    for topic, recent in zip(listofTopics, recents):
         params = {
             "engine": "google_scholar",
             "q": topic,
             "api_key": serpapi_token,
-            "scisbd": 1
+            "scisbd": recent,
+            "hl": "en"
             }
         search1=serpapi.search(params)
         topicArticles = list()
         n = 0
         for article in range(len(search1)):
             n += 1
+            print(search1['organic_results'][article]['link'])
             topicArticles.append(search1['organic_results'][article]['title'])
             if n == num_papers:
                 break
