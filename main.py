@@ -24,9 +24,17 @@ async def write_json(data, file_name):
 async def open_json(file_name):
     with open (file_name) as file:
         return json.load(file)
+    
+async def not_a_repeat_article(title, found_articles):
+    for article_dict in found_articles:
+        if title == article_dict['title']:
+            return False
+    return True
 
-async def getArticles(topics_list, num_papers):
-    found_articles = []
+async def getArticles(topics_list, num_papers, author):
+    topics_json = await open_json("topics.json")
+    found_articles = topics_json[str(author)]["found_articles"]
+
     for topic_dict in topics_list:
         params = {
             "engine": "google_scholar",
@@ -36,28 +44,27 @@ async def getArticles(topics_list, num_papers):
             "hl": "en"
             }
         search1=serpapi.search(params)
-        for i in range(len(search1)):
+        n = 0
+        for i in range(len(search1)): #for each article found in the search
             title = search1['organic_results'][i]['title']
-            online_link = search1['organic_results'][i]['link']
+            if await not_a_repeat_article(title, found_articles): 
+                online_link = search1['organic_results'][i]['link']
+                n += 1
+                if 'resources' in search1['organic_results'][i].keys(): #if the search has attached docs
+                    doc_type = search1['organic_results'][i]['resources'][0]['file_format'] #get the doc type for the first resource
+                    doc_link = search1['organic_results'][i]['resources'][0]['link'] #get the link for the first resource
+                else: #if there are no attached docs
+                    print(search1['organic_results'][i]['snippet'])
+                    doc_type = None
+                    doc_link = None
 
-            if 'resources' in search1['organic_results'][i].keys(): #if the search has attached docs
-                doc_type = search1['organic_results'][i]['resources'][0]['file_format'] #get the doc type for the first resource
-                doc_link = search1['organic_results'][i]['resources'][0]['link'] #get the link for the first resource
-            else: #if there are no attached docs
-                print(search1['organic_results'][i]['snippet'])
-                doc_type = None
-                doc_link = None
-
-            article_dict = {'title': title, 'online_link': online_link, 'topic': topic_dict['topic'], 'doc_type': doc_type, 'doc_link': doc_link}
-            found_articles.append(article_dict)
-            if i == num_papers -1:
+                article_dict = {'title': title, 'online_link': online_link, 'topic': topic_dict['topic'], 'doc_type': doc_type, 'doc_link': doc_link}
+                found_articles.append(article_dict)
+    
+            if n == num_papers:
                 break
+    await write_json(topics_json, "topics.json") #save new articles to json
     return found_articles
-
-#TODO: find different way to get PDF or HTML (link is not it, maybe its resources?)
-#TODO: add doc_type and doc_link to article_dict
-#TODO: save list of article_dicts to json file
-#TODO: check for repeat articles
 
 @bot.event
 async def on_ready():
@@ -116,7 +123,7 @@ async def _add_topic(ctx, topic, recent):
              options=[
                  discord_slash.manage_commands.create_option(name = 'num_papers', option_type = 4, required = True, description = "The number of papers you want to find for each topic"),
              ])
-async def _find_papers(ctx, num_papers):
+async def _find_papers(ctx, num_papers, author):
     await ctx.send("Finding papers for you...") #sending an initial message b/c if the initial response from the bot takes too long, discord will send a no-response error message
     author = ctx.author.id
     topics_json = await open_json("topics.json")
@@ -124,7 +131,7 @@ async def _find_papers(ctx, num_papers):
 
     found_articles = await getArticles(topics_list, num_papers)
 
-    embed = discord.Embed(title="Papers I Found For You", description="For now, these can repeat, in a future update I will keep track of what I send you and avoid repeats.")
+    embed = discord.Embed(title="Papers I Found For You")
     for topic_dict in topics_list:
         paper_list = [f"[{article_dict['title']}]({article_dict['online_link']})" for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
         embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value="\n".join(paper_list), inline=False)
