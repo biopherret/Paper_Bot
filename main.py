@@ -123,13 +123,13 @@ async def _add_topic(ctx, topic, recent):
              options=[
                  discord_slash.manage_commands.create_option(name = 'num_papers', option_type = 4, required = True, description = "The number of papers you want to find for each topic"),
              ])
-async def _find_papers(ctx, num_papers, author):
+async def _find_papers(ctx, num_papers):
     await ctx.send("Finding papers for you...") #sending an initial message b/c if the initial response from the bot takes too long, discord will send a no-response error message
     author = ctx.author.id
     topics_json = await open_json("topics.json")
     topics_list = topics_json[str(author)]["topic_settings"]
 
-    found_articles = await getArticles(topics_list, num_papers)
+    found_articles = await getArticles(topics_list, num_papers, author)
 
     embed = discord.Embed(title="Papers I Found For You")
     for topic_dict in topics_list:
