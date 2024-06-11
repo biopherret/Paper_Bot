@@ -41,7 +41,7 @@ async def getArticles(topics_list, num_papers):
         n = 0
         for article in range(len(search1)):
             n += 1
-            print(search1['organic_results'][article]['link'])
+            print(search1['organic_results'][article]['title'], search1['organic_results'][article]['link'])
             topicArticles.append(search1['organic_results'][article]['title'])
             if n == num_papers:
                 break
@@ -106,7 +106,7 @@ async def _find_papers(ctx, num_papers):
     topics_list = topics_json[str(author)]
 
     allArticles = await getArticles(topics_list, num_papers)
-    mes = await print(allArticles)
-    await ctx.send(mes)
+    print(allArticles)
+    await ctx.send("found some articles, check terminal")
 
 bot.run(discord_token)
