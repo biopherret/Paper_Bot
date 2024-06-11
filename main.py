@@ -38,15 +38,14 @@ async def format_paper_message(topic_list, all_articles):
         message += "\n"
     return message
 
-#TODO: update with new format
-async def getArticles(listofTopics, num_papers, recents):
+async def getArticles(topics_list, num_papers):
     allArticles = list()
-    for topic, recent in zip(listofTopics, recents):
+    for topic_dict in topics_list:
         params = {
             "engine": "google_scholar",
-            "q": topic,
+            "q": topic_dict['topic'],
             "api_key": serpapi_token,
-            "scisbd": recent,
+            "scisbd": topic_dict['recent'],
             "hl": "en"
             }
         search1=serpapi.search(params)
