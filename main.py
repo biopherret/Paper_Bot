@@ -36,12 +36,21 @@ async def getArticles(topics_list, num_papers):
             "hl": "en"
             }
         search1=serpapi.search(params)
-        for a in range(len(search1)):
-            if 'resources' in search1['organic_results'][a].keys(): #if the search has attached docs
-                print(search1['organic_results'][a]['resources'])
-            article_dict = {'title': search1['organic_results'][a]['title'], 'online_link': search1['organic_results'][a]['link'], 'topic': topic_dict['topic']}
+        for i in range(len(search1)):
+            title = search1['organic_results'][i]['title']
+            online_link = search1['organic_results'][i]['link']
+
+            if 'resources' in search1['organic_results'][i].keys(): #if the search has attached docs
+                doc_type = search1['organic_results'][i]['resources'][0]['file_format'] #get the doc type for the first resource
+                doc_link = search1['organic_results'][i]['resources'][0]['link'] #get the link for the first resource
+            else: #if there are no attached docs
+                print(search1['organic_results'][i]['snippet'])
+                doc_type = None
+                doc_link = None
+
+            article_dict = {'title': title, 'online_link': online_link, 'topic': topic_dict['topic'], 'doc_type': doc_type, 'doc_link': doc_link}
             found_articles.append(article_dict)
-            if a == num_papers:
+            if i == num_papers -1:
                 break
     return found_articles
 
