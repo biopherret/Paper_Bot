@@ -26,18 +26,6 @@ async def open_json(file_name):
     with open (file_name) as file:
         return json.load(file)
 
-#TODO: update with new format
-async def format_paper_message(topic_list, all_articles):
-    message = ""
-    for topic in topic_list:
-        message += f"**{topic}**\n"
-        t = 0
-        for article in all_articles[t]:
-            message += f"{article}\n"
-            t += 1
-        message += "\n"
-    return message
-
 async def getArticles(topics_list, num_papers):
     allArticles = list()
     for topic_dict in topics_list:
@@ -118,7 +106,7 @@ async def _find_papers(ctx, num_papers):
     topics_list = topics_json[str(author)]
 
     allArticles = await getArticles(topics_list, num_papers)
-    mes = await format_paper_message(topics_list, allArticles)
+    mes = await print(allArticles)
     await ctx.send(mes)
 
 bot.run(discord_token)
