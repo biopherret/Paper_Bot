@@ -117,10 +117,6 @@ async def _find_papers(ctx, num_papers):
     for topic_dict in topics_list:
         paper_list = [f"[{article_dict['title']}]({article_dict['online_link']})" for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
         embed.add_field(name=topic_dict['topic'], value="\n".join(paper_list), inline=False)
-    try:
-        await ctx.send(embed = embed)
-    except:
-        print(embed)
-        print("\n".join(paper_list))
+    await ctx.send(embed = embed)
 
 bot.run(discord_token)
