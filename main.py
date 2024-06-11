@@ -25,7 +25,7 @@ async def open_json(file_name):
         return json.load(file)
 
 async def getArticles(topics_list, num_papers):
-    allArticles = list()
+    found_articles = []
     for topic_dict in topics_list:
         params = {
             "engine": "google_scholar",
@@ -35,20 +35,18 @@ async def getArticles(topics_list, num_papers):
             "hl": "en"
             }
         search1=serpapi.search(params)
-        topicArticles = list()
         n = 0
         for article in range(len(search1)):
             n += 1
-            print(search1['organic_results'][article]['title'], search1['organic_results'][article]['link'])
-            topicArticles.append(search1['organic_results'][article]['title'])
+            article_dict = {'title': search1['organic_results'][article]['title'], 'online_link': search1['organic_results'][article]['link'], 'topic': topic_dict['topic']}
+            found_articles.append(article_dict)
             if n == num_papers:
                 break
-        allArticles.append(topicArticles)
-    return(allArticles)
+    return found_articles
 
-#TODO: add embeds to view topics (make it pretty)
-#TODO: find different way to get PHD or HTML (link is not it, maybe its resources?)
-#TODO: return each article with a link to the website to start, so I can test multiple ppl
+#TODO: find different way to get PDF or HTML (link is not it, maybe its resources?)
+#TODO: embed with each article
+#TODO: add links to each article name
 
 @bot.event
 async def on_ready():
@@ -112,8 +110,12 @@ async def _find_papers(ctx, num_papers):
     topics_json = await open_json("topics.json")
     topics_list = topics_json[str(author)]["topic_settings"]
 
-    allArticles = await getArticles(topics_list, num_papers)
-    print(allArticles)
-    await ctx.send("found some articles, check terminal")
+    found_articles = await getArticles(topics_list, num_papers)
+
+    embed = discord.Embed(title="Papers I found For You", description="For now, these can repeat, in a future update I will keep track of what I send you and avoid repeats.")
+    for topic_dict in topics_list:
+        paper_list = [article_dict['title'] for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
+        embed.add_field(name=topic_dict['topic'], value="\n".join(paper_list), inline=False)
+    await ctx.send(embed = embed)
 
 bot.run(discord_token)
