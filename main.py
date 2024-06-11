@@ -37,7 +37,8 @@ async def getArticles(topics_list, num_papers):
             }
         search1=serpapi.search(params)
         for a in range(len(search1)):
-            print(search1['organic_results'][a]['resources'])
+            if 'resources' in search1['organic_results'][a].keys(): #if the search has attached docs
+                print(search1['organic_results'][a]['resources'])
             article_dict = {'title': search1['organic_results'][a]['title'], 'online_link': search1['organic_results'][a]['link'], 'topic': topic_dict['topic']}
             found_articles.append(article_dict)
             if a == num_papers:
