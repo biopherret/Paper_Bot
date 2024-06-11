@@ -45,7 +45,6 @@ async def getArticles(topics_list, num_papers):
                 break
     return found_articles
 
-#TODO: add recent or not in find papers imbend titles
 #TODO: find different way to get PDF or HTML (link is not it, maybe its resources?)
 #TODO: add doc_type and doc_link to article_dict
 #TODO: save list of article_dicts to json file
@@ -109,6 +108,7 @@ async def _add_topic(ctx, topic, recent):
                  discord_slash.manage_commands.create_option(name = 'num_papers', option_type = 4, required = True, description = "The number of papers you want to find for each topic"),
              ])
 async def _find_papers(ctx, num_papers):
+    await ctx.send("Finding papers for you...") #sending an initial message b/c if the initial response from the bot takes too long, discord will send a no-response error message
     author = ctx.author.id
     topics_json = await open_json("topics.json")
     topics_list = topics_json[str(author)]["topic_settings"]
@@ -120,6 +120,5 @@ async def _find_papers(ctx, num_papers):
         paper_list = [f"[{article_dict['title']}]({article_dict['online_link']})" for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
         embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value="\n".join(paper_list), inline=False)
     await ctx.send(embed = embed)
-
 
 bot.run(discord_token)
