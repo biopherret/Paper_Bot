@@ -95,7 +95,7 @@ async def _add_topic(ctx, topic, recent):
     else:
         recent = 0
 
-    topics_json[str(author)].append({"topic": topic, "recent": recent}) #add the new topic
+    topics_json[str(author)]['topic_settings'].append({"topic": topic, "recent": recent}) #add the new topic
     await write_json(topics_json, "topics.json")
 
     await ctx.send("Your new topic has been added!")
