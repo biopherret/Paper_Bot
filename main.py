@@ -16,8 +16,6 @@ slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash com
 discord_token = open("discord_token.txt", "r").read()
 serpapi_token = open("serpapi_token.txt", "r").read()
 
-wd=os.getcwd()
-
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
         json.dump(data, file, indent = 4)
@@ -58,6 +56,7 @@ async def _clear_history(ctx):
     topics_json = await open_json("topics.json")
     topics_json.pop(str(author)) #remove the user from the json
     await write_json(topics_json, "topics.json")
+    await ctx.send("Your history has been cleared! All topic settings and found articles have been removed.")
 
 @slash.slash(name="clear_topics", description="Clear your saved topic settings.")
 async def _clear_topics(ctx):
