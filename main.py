@@ -46,6 +46,9 @@ async def getArticles(topics_list, num_papers):
         allArticles.append(topicArticles)
     return(allArticles)
 
+#TODO: add DM functionality
+#TODO: add embeds to view topics (make it pretty)
+
 @bot.event
 async def on_ready():
     print("Ready!")
@@ -107,7 +110,7 @@ async def _add_topic(ctx, topic, recent):
 async def _find_papers(ctx, num_papers):
     author = ctx.author.id
     topics_json = await open_json("topics.json")
-    topics_list = topics_json[str(author)]
+    topics_list = topics_json[str(author)]["topic_settings"]
 
     allArticles = await getArticles(topics_list, num_papers)
     print(allArticles)
