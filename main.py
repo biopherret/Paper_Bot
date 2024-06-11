@@ -3,6 +3,7 @@ import discord_slash
 from discord.ext import commands
 
 import json
+import time
 
 import serpapi
 import itertools
@@ -117,6 +118,10 @@ async def _find_papers(ctx, num_papers):
     for topic_dict in topics_list:
         paper_list = [f"[{article_dict['title']}]({article_dict['online_link']})" for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
         embed.add_field(name=topic_dict['topic'], value="\n".join(paper_list), inline=False)
-    await ctx.send(embed = embed)
+    try:
+        await ctx.send(embed = embed)
+    except:
+        time.sleep(2) #sometimes discord appears to time out and throw an error, if this happens try again after a few seconds
+        await ctx.send(embed = embed)
 
 bot.run(discord_token)
