@@ -79,7 +79,7 @@ async def _view_topics(ctx):
             mes += " (recent papers only)"
     await ctx.send(mes)
     
-@slash.slash(name="add_topic", description="Add a topics of papers you want Paper Bot to find for you", 
+@slash.slash(name="add_topic", description='Add a topics of papers you want Paper Bot to find for you. To search for an author, place "author:" before the author name', 
              options=[
                  discord_slash.manage_commands.create_option(name = 'topic', option_type = 3, required = True, description = "The topic you are interested in"),
                  discord_slash.manage_commands.create_option(name = 'recent', option_type = 3, required = True, description = "Do you want to restrict the search to papers published in the last year? (y/n)"),
