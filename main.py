@@ -45,7 +45,6 @@ async def getArticles(topics_list, num_papers):
     return found_articles
 
 #TODO: find different way to get PDF or HTML (link is not it, maybe its resources?)
-#TODO: embed with each article
 #TODO: add links to each article name
 
 @bot.event
@@ -112,9 +111,9 @@ async def _find_papers(ctx, num_papers):
 
     found_articles = await getArticles(topics_list, num_papers)
 
-    embed = discord.Embed(title="Papers I found For You", description="For now, these can repeat, in a future update I will keep track of what I send you and avoid repeats.")
+    embed = discord.Embed(title="Papers I Found For You", description="For now, these can repeat, in a future update I will keep track of what I send you and avoid repeats.")
     for topic_dict in topics_list:
-        paper_list = [article_dict['title'] for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
+        paper_list = [f'[{article_dict['title']}]({article_dict['online_link']})' for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
         embed.add_field(name=topic_dict['topic'], value="\n".join(paper_list), inline=False)
     await ctx.send(embed = embed)
 
