@@ -166,7 +166,7 @@ time = datetime.time(hour = 5, minute = 0)
 @tasks.loop(time=time) #TODO: change to 24 hours
 async def schedule_find_papers():
     topics_json = await open_json("topics.json")
-    authors = [author in topics_json.keys() if author['search_schedule'] != None] #get all users with a search schedule
+    authors = [author for author in topics_json.keys() if author['search_schedule'] != None] #get all users with a search schedule
     for author in authors:
         user = author['id']
         await user.send('Hello')
