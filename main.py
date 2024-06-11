@@ -34,6 +34,7 @@ async def not_a_repeat_article(title, found_articles):
 async def getArticles(topics_list, num_papers, author):
     topics_json = await open_json("topics.json")
     found_articles = topics_json[str(author)]["found_articles"]
+    new_articles = []
 
     for topic_dict in topics_list:
         params = {
@@ -54,17 +55,17 @@ async def getArticles(topics_list, num_papers, author):
                     doc_type = search1['organic_results'][i]['resources'][0]['file_format'] #get the doc type for the first resource
                     doc_link = search1['organic_results'][i]['resources'][0]['link'] #get the link for the first resource
                 else: #if there are no attached docs
-                    print(search1['organic_results'][i]['snippet'])
                     doc_type = None
                     doc_link = None
 
                 article_dict = {'title': title, 'online_link': online_link, 'topic': topic_dict['topic'], 'doc_type': doc_type, 'doc_link': doc_link}
                 found_articles.append(article_dict)
+                new_articles.append(article_dict)
     
             if n == num_papers:
                 break
     await write_json(topics_json, "topics.json") #save new articles to json
-    return found_articles
+    return new_articles
 
 @bot.event
 async def on_ready():
