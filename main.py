@@ -119,10 +119,7 @@ async def _find_papers(ctx, num_papers):
     for topic_dict in topics_list:
         paper_list = [f"[{article_dict['title']}]({article_dict['online_link']})" for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
         embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value="\n".join(paper_list), inline=False)
-    try:
-        await ctx.send(embed = embed)
-    except:
-        time.sleep(2) #sometimes discord appears to time out and throw an error, if this happens try again after a few seconds
-        await ctx.send(embed = embed)
+    await ctx.send(embed = embed)
+
 
 bot.run(discord_token)
