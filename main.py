@@ -52,7 +52,7 @@ async def getArticles(topics_list, num_papers):
 async def on_ready():
     print("Ready!")
 
-@slash.slash(name="clear_history", description="Clear all Paper Bot topic settings and found articles. Note that clearing your history may result in Paper Bot sending you papers you have already seen.")
+@slash.slash(name="clear_history", description="Clear all Paper Bot topic settings and articles (remove all previously found papers from history).")
 async def _clear_history(ctx):
     author = ctx.author.id
     topics_json = await open_json("topics.json")
@@ -79,7 +79,7 @@ async def _view_topics(ctx):
             mes += " (recent papers only)"
     await ctx.send(mes)
     
-@slash.slash(name="add_topic", description='Add a topics of papers you want Paper Bot to find for you. To search for an author, place "author:" before the author name', 
+@slash.slash(name="add_topic", description='Add a topic of papers you want Paper Bot to find for you. Use "author: name" to search for authors.', 
              options=[
                  discord_slash.manage_commands.create_option(name = 'topic', option_type = 3, required = True, description = "The topic you are interested in"),
                  discord_slash.manage_commands.create_option(name = 'recent', option_type = 3, required = True, description = "Do you want to restrict the search to papers published in the last year? (y/n)"),
