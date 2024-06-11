@@ -46,8 +46,9 @@ async def getArticles(topics_list, num_papers):
         allArticles.append(topicArticles)
     return(allArticles)
 
-#TODO: add DM functionality
 #TODO: add embeds to view topics (make it pretty)
+#TODO: find different way to get PHD or HTML (link is not it, maybe its resources?)
+#TODO: return each article with a link to the website to start, so I can test multiple ppl
 
 @bot.event
 async def on_ready():
@@ -74,12 +75,11 @@ async def _view_topics(ctx):
     author = ctx.author.id
     topics_json = await open_json("topics.json")
     topics_list = topics_json[str(author)]['topic_settings']
-    mes = 'Here are your current topics:'
+
+    embed = discord.Embed(title="Your Topics", description="Here are your current topic settings:")
     for topic_dict in topics_list:
-        mes += f"\n{topic_dict['topic']}"
-        if topic_dict['recent'] == 1:
-            mes += " (recent papers only)"
-    await ctx.send(mes)
+        embed.add_field(name=topic_dict['topic'], value=f"Recent papers only?: {['No, Yes'][topic_dict['recent']]}", inline=False)
+    await ctx.send(embed = embed)
     
 @slash.slash(name="add_topic", description='Add a topic of papers you want Paper Bot to find for you. Use "author: name" to search for authors.', 
              options=[
