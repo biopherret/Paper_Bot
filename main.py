@@ -45,7 +45,9 @@ async def getArticles(topics_list, num_papers):
     return found_articles
 
 #TODO: find different way to get PDF or HTML (link is not it, maybe its resources?)
-#TODO: add links to each article name
+#TODO: add doc_type and doc_link to article_dict
+#TODO: save list of article_dicts to json file
+#TODO: check for repeat articles
 
 @bot.event
 async def on_ready():
