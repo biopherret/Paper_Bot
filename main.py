@@ -113,7 +113,7 @@ async def _find_papers(ctx, num_papers):
 
     embed = discord.Embed(title="Papers I Found For You", description="For now, these can repeat, in a future update I will keep track of what I send you and avoid repeats.")
     for topic_dict in topics_list:
-        paper_list = [f'[{article_dict['title']}]({article_dict['online_link']})' for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
+        paper_list = [f"[{article_dict['title']}]({article_dict['online_link']})" for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
         embed.add_field(name=topic_dict['topic'], value="\n".join(paper_list), inline=False)
     await ctx.send(embed = embed)
 
