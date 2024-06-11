@@ -63,24 +63,41 @@ async def getArticles(listofTopics, num_papers, recents):
 async def on_ready():
     print("Ready!")
 
-@slash.slash(name="set_topic_interests", description="Set the topics of papers you want Paper Bot to find for you", 
-             options=[
-                 discord_slash.manage_commands.create_option(name = 'topic1', option_type = 3, required = True, description = "The first topic you are interested in"),
-                    discord_slash.manage_commands.create_option(name = 'topic2', option_type = 3, required = False, description = "The second topic you are interested in"),
-                    discord_slash.manage_commands.create_option(name = 'topic3', option_type = 3, required = False, description = "The third topic you are interested in"),
-                    discord_slash.manage_commands.create_option(name = 'topic4', option_type = 3, required = False, description = "The fourth topic you are interested in"),
-                    discord_slash.manage_commands.create_option(name = 'topic5', option_type = 3, required = False, description = "The fifth topic you are interested in"),
-             ])
-async def _set_topic_interests(ctx, topic1, topic2 = None, topic3 = None, topic4 = None, topic5 = None): # Defines a new "context" (ctx) command called "ping."
-    topic_list = [topic1, topic2, topic3, topic4, topic5]
-    while None in topic_list:
-        topic_list.remove(None) #remove empty topics from list
+@slash.slash(name="clear_topics", description="Clear your saved topic settings.")
+async def _clear_topics(ctx):
+    author = ctx.author.id
+    topics_json = await open_json("topics.json")
+    topics_json.pop(str(author))
+    await write_json(topics_json, "topics.json")
+    await ctx.send("Topics have been cleared!")
 
+@slash.slash(name="view_topics", description="View your saved topic settings.")
+async def _view_topics(ctx):
+    author = ctx.author.id
+    topics_json = await open_json("topics.json")
+    topics_list = topics_json[str(author)]
+    mes = 'Here are your current topics:'
+    for topic_dict in topics_list:
+        mes += f"\n{topic_dict['topic']}"
+        if topic_dict['recent'] == 'y':
+            mes += " (recent papers only)"
+    await ctx.send(mes)
+    
+@slash.slash(name="add_topic", description="Add a topics of papers you want Paper Bot to find for you", 
+             options=[
+                 discord_slash.manage_commands.create_option(name = 'topic', option_type = 3, required = True, description = "The topic you are interested in"),
+                 discord_slash.manage_commands.create_option(name = 'recent', option_type = 3, required = True, description = "Do you want to restrict the search to papers published in the last year? (y/n)"),
+             ])
+async def _add_topic(ctx, topic, recent):
     author = ctx.author.id #save topic preferences in json
     topics_json = await open_json("topics.json")
-    topics_json[str(author)] = topic_list
+    if str(author) not in topics_json.keys(): #if this user dosn't have set topics already
+        topics_json[str(author)] = [] #create a topic list for them
+
+    topics_json[str(author)].append({"topic": topic, "recent": recent}) #add the new topic
     await write_json(topics_json, "topics.json")
-    await ctx.send("Topics have been set!")
+
+    await ctx.send("Your new topic has been added!")
 
 @slash.slash(name="find_papers", description="Find papers based on your topic interests",
              options=[
