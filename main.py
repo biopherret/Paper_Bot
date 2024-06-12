@@ -13,9 +13,7 @@ import pandas as pd
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.all())
 slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
 
-#TODO: check length of paper titels in find paper and truncate to 1024/5 with a ... if too long (only in the message embed)
 #TODO: make about page
-#TODO: logic for when to start further in the search results
 #TODO: add warning on on_ready that the frequency got reset
 #TODO: scrap the paper text from the doc link
 #TODO: put an LM on the pi
@@ -88,35 +86,38 @@ async def getArticles(topics_list, num_papers, user):
     new_articles = []
 
     for topic_dict in topics_list:
-        params = {
-            "engine": "google_scholar",
-            "q": topic_dict['topic'],
-            "api_key": serpapi_token,
-            "scisbd": topic_dict['recent'],
-            "hl": "en",
-            'num': 20,
-            'start': 0
-            }
-        search1=serpapi.search(params)
-        n = 0
-        for i in range(len(search1['organic_results'])): #for each article found in the search
-            title = search1['organic_results'][i]['title']
-            if await not_a_repeat_article(title, found_articles): 
-                online_link = search1['organic_results'][i]['link']
-                n += 1
-                if 'resources' in search1['organic_results'][i].keys(): #if the search has attached docs
-                    doc_type = search1['organic_results'][i]['resources'][0]['file_format'] #get the doc type for the first resource
-                    doc_link = search1['organic_results'][i]['resources'][0]['link'] #get the link for the first resource
-                else: #if there are no attached docs
-                    doc_type = None
-                    doc_link = None
+        n = 0 #keep track of the number of papers found
+        i = 0 #keep track of th number of searches done
+        while n < num_papers: #while we haven't found the desired number of papers yet
+            params = {
+                "engine": "google_scholar",
+                "q": topic_dict['topic'],
+                "api_key": serpapi_token,
+                "scisbd": topic_dict['recent'],
+                "hl": "en",
+                'num': 20,
+                'start': i*20
+                }
+            search=serpapi.search(params)
+            for i in range(len(search['organic_results'])): #for each article found in the search
+                title = search['organic_results'][i]['title']
+                if await not_a_repeat_article(title, found_articles): 
+                    online_link = search['organic_results'][i]['link']
+                    n += 1
+                    if 'resources' in search['organic_results'][i].keys(): #if the search has attached docs
+                        doc_type = search['organic_results'][i]['resources'][0]['file_format'] #get the doc type for the first resource
+                        doc_link = search['organic_results'][i]['resources'][0]['link'] #get the link for the first resource
+                    else: #if there are no attached docs
+                        doc_type = None
+                        doc_link = None
 
-                article_dict = {'title': title, 'online_link': online_link, 'topic': topic_dict['topic'], 'doc_type': doc_type, 'doc_link': doc_link}
-                found_articles.append(article_dict)
-                new_articles.append(article_dict)
-    
-            if n == num_papers:
-                break
+                    article_dict = {'title': title, 'online_link': online_link, 'topic': topic_dict['topic'], 'doc_type': doc_type, 'doc_link': doc_link}
+                    found_articles.append(article_dict)
+                    new_articles.append(article_dict)
+        
+                if n == num_papers:
+                    break
+
     await write_json(topics_json, "topics.json") #save new articles to json
     return new_articles
 
