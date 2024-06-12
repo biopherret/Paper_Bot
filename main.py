@@ -52,11 +52,20 @@ def uptime_days_rounded_down():
         return 0
     else:
         return str(delta).split()[0]
-    
-async def is_server_message(ctx):
-    if not isinstance(ctx.channel, discord.channel.DMChannel):
-        await ctx.send("Sending you a DM to keep things organized. To avoid spamming the server, please use Paper Bot in DMs.")
-        return True
+
+async def send_command_response(ctx, author, message, is_embed=False):
+    if isinstance(ctx.channel, discord.channel.DMChannel): #if the slash command was used in a server
+        await ctx.send("Sending you a DM to keep things organized. To avoid spamming the server, please use Paper Bot in DMs.") #sending a message in response to the slash command to only use DMs in the future
+        user = await bot.fetch_user(author)
+        if is_embed:
+            await user.send(embed=message)
+        else:
+            await user.send(message) #send the message as a DM
+    else: #if the slash command was used in a DM
+        if is_embed:
+            await ctx.send(embed=message)
+        else:
+            await ctx.send(message) #send the message as a DM, in response to the slash command
 
 async def getArticles(topics_list, num_papers, author):
     topics_json = await open_json("topics.json")
@@ -117,31 +126,25 @@ async def on_ready():
     print("Ready!")
 
 @slash.slash(name="clear_history", description="Clear all Paper Bot topic settings and articles (remove all previously found papers from history).")
-async def _clear_history(ctx):
-    await is_server_message(ctx)
-        
+async def _clear_history(ctx):  
     author = ctx.author.id
     topics_json = await open_json("topics.json")
     topics_json.pop(str(author)) #remove the user from the json
     await write_json(topics_json, "topics.json")
-    user = await bot.fetch_user(author)
-    await user.send("Your history has been cleared! All topic settings and found articles have been removed.")
+
+    await send_command_response(ctx, author, "Your history has been cleared! All topic settings and found articles have been removed.")
 
 @slash.slash(name="clear_topics", description="Clear your saved topic settings.")
 async def _clear_topics(ctx):
-    await is_server_message(ctx)
-
     author = ctx.author.id
     topics_json = await open_json("topics.json")
     topics_json[str(author)]['topic_settings'] = [] #empty the topic settings list
     await write_json(topics_json, "topics.json")
-    user = await bot.fetch_user(author)
-    await user.send("Topics have been cleared!")
+
+    await send_command_response(ctx, author, "Your topic settings have been cleared!")    
 
 @slash.slash(name="view_topics", description="View your saved topic settings.")
 async def _view_topics(ctx):
-    await is_server_message(ctx)
-
     author = ctx.author.id
     topics_json = await open_json("topics.json")
     topics_list = topics_json[str(author)]['topic_settings']
@@ -149,8 +152,8 @@ async def _view_topics(ctx):
     embed = discord.Embed(title="Your Topics", description="Here are your current topic settings:")
     for topic_dict in topics_list:
         embed.add_field(name=topic_dict['topic'], value=f"Recent papers only?: {['No', 'Yes'][topic_dict['recent']]}", inline=False)
-    user = await bot.fetch_user(author)
-    await user.send(embed = embed)
+
+    await send_command_response(ctx, author, embed)
     
 @slash.slash(name="add_topic", description='Add a topic of papers you want Paper Bot to find for you. Use "author: name" to search for authors.', 
              options=[
@@ -158,8 +161,6 @@ async def _view_topics(ctx):
                  discord_slash.manage_commands.create_option(name = 'recent', option_type = 3, required = True, description = "Do you want to restrict the search to papers published in the last year? (y/n)"),
              ])
 async def _add_topic(ctx, topic, recent):
-    await is_server_message(ctx)
-
     author = ctx.author.id #save topic preferences in json
     topics_json = await open_json("topics.json")
     if str(author) not in topics_json.keys(): #if this user dosn't exist yet
@@ -174,8 +175,8 @@ async def _add_topic(ctx, topic, recent):
 
     topics_json[str(author)]['topic_settings'].append({"topic": topic, "recent": recent}) #add the new topic
     await write_json(topics_json, "topics.json")
-    user = await bot.fetch_user(author)
-    await user.send("Your new topic has been added!")
+    
+    await send_command_response(ctx, author, "Your new topic has been added!")
 
 @slash.slash(name="find_papers_now", description="Find papers based on your topic interests",
              options=[
@@ -183,27 +184,22 @@ async def _add_topic(ctx, topic, recent):
              ])
 async def _find_papers_now(ctx, num_papers):
     author = ctx.author.id
-    if not await is_server_message(ctx):
-        user = await bot.fetch_user(author)
-        await user.send("Finding papers for you...") #sending an initial message b/c if the initial response from the bot takes too long, discord will send a no-response error message
+    await send_command_response(ctx, author, "Finding papers for you...") #sending an initial message b/c if the initial response from the bot takes too long, discord will send a no-response error message
     await find_papers(author, num_papers)
     
-
 @slash.slash(name="schedule", description="Set the frequency Paper Bot will automatically find papers and send them to your DM.",
              options=[
                  discord_slash.manage_commands.create_option(name = 'days', option_type = 4, required = True, description = "Find papers every x days."),
                  discord_slash.manage_commands.create_option(name = 'number_of_papers', option_type = 4, required = True, description = "Number of papers to find per search per topic.")
              ])
 async def _schedule(ctx, days, number_of_papers):
-    await is_server_message(ctx)
-
     author = ctx.author.id
     topics_json = await open_json("topics.json")
     topics_json[str(author)]['search_schedule'] = days
     topics_json[str(author)]['auto_num'] = number_of_papers
     await write_json(topics_json, "topics.json")
-    user = await bot.fetch_user(author)
-    await user.send(f"Paper Bot will now find {number_of_papers} papers per topic every {days} days.")
+
+    await send_command_response(ctx, author, f"Paper Bot will now find {number_of_papers} papers per topic every {days} days.")
 
 @tasks.loop(minutes=5)  #TODO: change to 24 hours
 async def schedule_find_papers():
