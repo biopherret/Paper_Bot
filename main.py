@@ -55,7 +55,7 @@ def uptime_days_rounded_down():
 def truncate_hyperlinked_title(title, link):
     max_title_length = 200 - len(link) - 6 #[title](link)\n
     if len(title) >= max_title_length:
-        return title[:max_title_length] + "..."
+        return f'[{title[:max_title_length] + "..."}]({link})'
     else:
         return f'[{title}]({link})'
 
