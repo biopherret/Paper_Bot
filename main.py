@@ -59,10 +59,8 @@ async def truncate_hyperlinked_title(user, title, link):
         await discord_user.send(f"The hyperlink for [{title}]({link}) was too long to include in the main message.")
         return f"{title[:200]}..."
     if len(title) >= max_title_length:
-        print(f"Truncating: {len(f'[{title[:max_title_length]}]({link})') + 3}")
         return f'[{title[:max_title_length] + "..."}]({link})'
     else:
-        print(f"Not Truncating: {len(f'[{title}]({link})')}")
         return f'[{title}]({link})'
 
 async def send_command_response(ctx, user, message, is_embed=False):
@@ -137,7 +135,6 @@ async def find_papers(user, num_papers):
     embed = discord.Embed(title="Papers I Found For You")
     for topic_dict in topics_list:
         hyperlinked_papers_list = [await truncate_hyperlinked_title(user, article_dict['title'], article_dict['online_link']) for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
-        print(len("\n".join(hyperlinked_papers_list)))
         embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value="\n".join(hyperlinked_papers_list), inline=False)
     discord_user = await bot.fetch_user(user)
     await discord_user.send(embed = embed)
