@@ -13,7 +13,6 @@ from datetime import date
 
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.all())
 slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
-day_count = 0
 
 #TODO: add if no user send message saying to add a topic to create a user profile
 #TODO: scrap the paper text from the doc link
@@ -45,6 +44,9 @@ def get_next_run_time(target_time):
     if next_run < now:
         next_run += timedelta(days=1)
     return (next_run - now).total_seconds()
+
+def uptime_days_rounded_down():
+    return int((time.time() - start_time) / 86400)
 
 async def getArticles(topics_list, num_papers, author):
     topics_json = await open_json("topics.json")
@@ -97,6 +99,8 @@ async def find_papers(author, num_papers):
 
 @bot.event
 async def on_ready():
+    global start_time
+    start_time = time.time()
     schedule_find_papers.start()
     print("Ready!")
 
@@ -180,8 +184,8 @@ async def _schedule(ctx, days, number_of_papers):
 
 @tasks.loop(minutes=5)  #TODO: change to 24 hours
 async def schedule_find_papers():
-    print(day_count)
-    day_count += 1
+    print(uptime_days_rounded_down())
+    day_count = uptime_days_rounded_down()
     topics_json = await open_json("topics.json")
     authors = [author for author in topics_json.keys() if topics_json[author]['search_schedule'] != None] #get all users with a search schedule
     for author in authors:
@@ -193,7 +197,7 @@ async def schedule_find_papers():
 
 @schedule_find_papers.before_loop #this executes before the above loop starts
 async def before_schedule_find_papers():
-    target_time = time(hour=22, minute=10)
+    target_time = time(hour=22, minute=30)
     next_run_in_seconds = get_next_run_time(target_time)
     await asyncio.sleep(next_run_in_seconds)
 
