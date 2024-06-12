@@ -13,6 +13,7 @@ import pandas as pd
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.all())
 slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
 
+#TODO: make about page
 #TODO: logic for when to start further in the search results
 #TODO: add warning on on_ready that the frequency got reset
 #TODO: add if no user send message saying to add a topic to create a user profile
@@ -84,7 +85,7 @@ async def getArticles(topics_list, num_papers, user):
             }
         search1=serpapi.search(params)
         n = 0
-        for i in range(len(search1)): #for each article found in the search
+        for i in range(len(search1['organic_results'])): #for each article found in the search
             title = search1['organic_results'][i]['title']
             if await not_a_repeat_article(title, found_articles): 
                 online_link = search1['organic_results'][i]['link']
