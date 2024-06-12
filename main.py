@@ -118,7 +118,7 @@ async def on_ready():
 
 @slash.slash(name="clear_history", description="Clear all Paper Bot topic settings and articles (remove all previously found papers from history).")
 async def _clear_history(ctx):
-    await is_server_message(ctx):
+    await is_server_message(ctx)
         
     author = ctx.author.id
     topics_json = await open_json("topics.json")
