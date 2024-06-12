@@ -53,6 +53,12 @@ def uptime_days_rounded_down():
         return 0
     else:
         return str(delta).split()[0]
+    
+def truncate_title(title):
+    if len(title) > 200:
+        return title[:200] + "..."
+    else:
+        return title
 
 async def send_command_response(ctx, user, message, is_embed=False):
     if not isinstance(ctx.channel, discord.channel.DMChannel): #if the slash command was used in a server
@@ -123,7 +129,8 @@ async def find_papers(user, num_papers):
     embed = discord.Embed(title="Papers I Found For You")
     for topic_dict in topics_list:
         paper_list = [f"[{article_dict['title']}]({article_dict['online_link']})" for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
-        embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value="\n".join(paper_list), inline=False)
+        truncated_paper_list = [truncate_title(paper) for paper in paper_list]
+        embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value="\n".join(truncated_paper_list), inline=False)
     discord_user = await bot.fetch_user(user)
     await discord_user.send(embed = embed)
 
