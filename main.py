@@ -171,17 +171,23 @@ async def _schedule(ctx, days):
 
 @tasks.loop(minutes=5)  #TODO: change to 24 hours
 async def schedule_find_papers():
+    print('actual loop has started')
     topics_json = await open_json("topics.json")
     authors = [author for author in topics_json.keys() if author['search_schedule'] != None] #get all users with a search schedule
     for author in authors:
         user = author['id']
         await user.send('Hello')
+    print('actuall loop has ended')
 
 @schedule_find_papers.before_loop #this executes before the above loop starts
 async def before_schedule_find_papers():
-    target_time = time(hour=6, minute=0)
+    print('before loop has started')
+    print(f'current time is {datetime.now()}')
+    target_time = time(hour=6, minute=45)
     next_run_in_seconds = get_next_run_time(target_time)
+    print(f'Next run in {next_run_in_seconds} seconds')
     await asyncio.sleep(next_run_in_seconds)
+    print('done sleeping')
         
 
 bot.run(discord_token)
