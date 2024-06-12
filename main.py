@@ -52,12 +52,12 @@ def uptime_days_rounded_down():
     else:
         return str(delta).split()[0]
     
-def truncate_title(title):
-    print(len(title))
-    if len(title) >= 199:
-        return title[:199] + "..."
+def truncate_hyperlinked_title(title, link):
+    max_title_length = 200 - len(link) - 6 #[title](link)\n
+    if len(title) >= max_title_length:
+        return title[:max_title_length] + "..."
     else:
-        return title
+        return f'[{title}]({link})'
 
 async def send_command_response(ctx, user, message, is_embed=False):
     if not isinstance(ctx.channel, discord.channel.DMChannel): #if the slash command was used in a server
@@ -130,9 +130,7 @@ async def find_papers(user, num_papers):
 
     embed = discord.Embed(title="Papers I Found For You")
     for topic_dict in topics_list:
-        truncated_title_list = [truncate_title(article_dict['title']) for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
-        links = [article_dict['online_link'] for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
-        hyperlinked_papers_list = [f"[{truncated_title_list[i]}]({links[i]})" for i in range(len(truncated_title_list))]
+        hyperlinked_papers_list = [truncate_hyperlinked_title(article_dict['title'], article_dict['online_link']) for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
         print(len("\n".join(hyperlinked_papers_list)))
         embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value="\n".join(hyperlinked_papers_list), inline=False)
     discord_user = await bot.fetch_user(user)
