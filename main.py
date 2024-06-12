@@ -45,7 +45,8 @@ def get_next_run_time(target_time):
     return (next_run - now).total_seconds()
 
 def uptime_days_rounded_down():
-    return int(datetime.now() - start_time.days)
+    delta = datetime.now().date() - start_time.date()
+    return int(delta.days())
 
 async def getArticles(topics_list, num_papers, author):
     topics_json = await open_json("topics.json")
@@ -196,7 +197,7 @@ async def schedule_find_papers():
 
 @schedule_find_papers.before_loop #this executes before the above loop starts
 async def before_schedule_find_papers():
-    target_time = time(hour=22, minute=30)
+    target_time = time(hour=22, minute=40)
     next_run_in_seconds = get_next_run_time(target_time)
     await asyncio.sleep(next_run_in_seconds)
 
