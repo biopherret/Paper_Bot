@@ -187,20 +187,18 @@ async def _schedule(ctx, days, number_of_papers):
 
 @tasks.loop(minutes=5)  #TODO: change to 24 hours
 async def schedule_find_papers():
-    print(uptime_days_rounded_down())
     day_count = uptime_days_rounded_down()
     topics_json = await open_json("topics.json")
     authors = [author for author in topics_json.keys() if topics_json[author]['search_schedule'] != None] #get all users with a search schedule
     for author in authors:
         frequency = topics_json[author]['search_schedule']
         num = topics_json[author]['auto_num']
-        print(frequency, day_count % frequency)
         if day_count % frequency == 0:
             await find_papers(author, num)
 
 @schedule_find_papers.before_loop #this executes before the above loop starts
 async def before_schedule_find_papers():
-    target_time = time(hour=23, minute=00)
+    target_time = time(hour=9, minute=00)
     next_run_in_seconds = get_next_run_time(target_time)
     await asyncio.sleep(next_run_in_seconds)
 
