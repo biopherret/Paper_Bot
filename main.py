@@ -190,7 +190,7 @@ async def schedule_find_papers():
 
 @schedule_find_papers.before_loop #this executes before the above loop starts
 async def before_schedule_find_papers():
-    target_time = time(hour=20, minute=00)
+    target_time = time(hour=21, minute=00)
     next_run_in_seconds = get_next_run_time(target_time)
     print(f'Next run in {next_run_in_seconds} seconds')
     await asyncio.sleep(next_run_in_seconds)
