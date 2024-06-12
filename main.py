@@ -14,7 +14,6 @@ from datetime import date
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.all())
 slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
 
-#TODO: Made a loop set to run every day at a fixed time
 #TODO: loop looks at user setting to decide which user it is finding papers for on that day
 #TODO: call get_papers as needed
 #TODO: send papers to user DM
@@ -28,6 +27,7 @@ slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash com
 
 discord_token = open("discord_token.txt", "r").read()
 serpapi_token = open("serpapi_token.txt", "r").read()
+day_count = 0
 
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
@@ -86,6 +86,19 @@ async def getArticles(topics_list, num_papers, author):
     await write_json(topics_json, "topics.json") #save new articles to json
     return new_articles
 
+async def find_papers(author, num_papers):
+    topics_json = await open_json("topics.json")
+    topics_list = topics_json[str(author)]["topic_settings"]
+
+    found_articles = await getArticles(topics_list, num_papers, author)
+
+    embed = discord.Embed(title="Papers I Found For You")
+    for topic_dict in topics_list:
+        paper_list = [f"[{article_dict['title']}]({article_dict['online_link']})" for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
+        embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value="\n".join(paper_list), inline=False)
+    user = await bot.fetch_user(author)
+    await user.send(embed = embed)
+
 @bot.event
 async def on_ready():
     schedule_find_papers.start()
@@ -127,7 +140,7 @@ async def _add_topic(ctx, topic, recent):
     author = ctx.author.id #save topic preferences in json
     topics_json = await open_json("topics.json")
     if str(author) not in topics_json.keys(): #if this user dosn't exist yet
-        topics_json[str(author)] = {'topic_settings': [], 'found_articles': [], 'search_schedule' : 'None'} #create a dictionary object for the new user
+        topics_json[str(author)] = {'topic_settings': [], 'found_articles': [], 'search_schedule' : None, 'auto_num' : 0} #create a dictionary object for the new user
         await ctx.send("Welcome to Paper Bot! I've created a new user profile for you.")
 
     if recent == 'y':
@@ -140,49 +153,41 @@ async def _add_topic(ctx, topic, recent):
 
     await ctx.send("Your new topic has been added!")
 
-@slash.slash(name="find_papers", description="Find papers based on your topic interests",
+@slash.slash(name="find_papers_now", description="Find papers based on your topic interests",
              options=[
                  discord_slash.manage_commands.create_option(name = 'num_papers', option_type = 4, required = True, description = "The number of papers you want to find for each topic"),
              ])
-async def _find_papers(ctx, num_papers):
+async def _find_papers_now(ctx, num_papers):
     await ctx.send("Finding papers for you...") #sending an initial message b/c if the initial response from the bot takes too long, discord will send a no-response error message
     author = ctx.author.id
-    topics_json = await open_json("topics.json")
-    topics_list = topics_json[str(author)]["topic_settings"]
-
-    found_articles = await getArticles(topics_list, num_papers, author)
-
-    embed = discord.Embed(title="Papers I Found For You")
-    for topic_dict in topics_list:
-        paper_list = [f"[{article_dict['title']}]({article_dict['online_link']})" for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
-        embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value="\n".join(paper_list), inline=False)
-    await ctx.send(embed = embed)
+    
 
 @slash.slash(name="schedule", description="Set the frequency Paper Bot will automatically find papers and send them to your DM.",
              options=[
-                 discord_slash.manage_commands.create_option(name = 'days', option_type = 4, required = True, description = "Find papers every x days.")
+                 discord_slash.manage_commands.create_option(name = 'days', option_type = 4, required = True, description = "Find papers every x days."),
+                 discord_slash.manage_commands.create_option(name = 'number_of_papers', option_type = 4, required = True, description = "Number of papers to find per search per topic.")
              ])
-async def _schedule(ctx, days):
+async def _schedule(ctx, days, number_of_papers):
     author = ctx.author.id
     topics_json = await open_json("topics.json")
     topics_json[str(author)]['search_schedule'] = days
+    topics_json[str(author)]['auto_num'] = number_of_papers
     await write_json(topics_json, "topics.json")
-    await ctx.send(f"Your paper finding schedule has been set to every {days} days.")
+    await ctx.send(f"Paper Bot will now find {number_of_papers} papers per topic every {days} days.")
 
 @tasks.loop(minutes=5)  #TODO: change to 24 hours
 async def schedule_find_papers():
-    print('actual loop has started')
+    day_count =+ 1
     topics_json = await open_json("topics.json")
     authors = [author for author in topics_json.keys() if topics_json[author]['search_schedule'] != None] #get all users with a search schedule
     for author in authors:
-        user = await bot.fetch_user(int(author))
-        await user.send('Hello')
-    print('actuall loop has ended')
+        frequency = topics_json[author]['search_schedule']
+        num = topics_json[author]['auto_num']
+        if day_count % frequency == 0:
+            await find_papers(author, num)
 
 @schedule_find_papers.before_loop #this executes before the above loop starts
 async def before_schedule_find_papers():
-    print('before loop has started')
-    print(f'current time is {datetime.now()}')
     target_time = time(hour=20, minute=00)
     next_run_in_seconds = get_next_run_time(target_time)
     print(f'Next run in {next_run_in_seconds} seconds')
