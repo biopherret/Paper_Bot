@@ -14,10 +14,6 @@ from datetime import date
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.all())
 slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
 
-#TODO: loop looks at user setting to decide which user it is finding papers for on that day
-#TODO: call get_papers as needed
-#TODO: send papers to user DM
-
 #TODO: add if no user send message saying to add a topic to create a user profile
 #TODO: scrap the paper text from the doc link
 #TODO: put an LM on the pi
@@ -27,7 +23,6 @@ slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash com
 
 discord_token = open("discord_token.txt", "r").read()
 serpapi_token = open("serpapi_token.txt", "r").read()
-day_count = 0
 
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
@@ -184,21 +179,23 @@ async def _schedule(ctx, days, number_of_papers):
 
 @tasks.loop(minutes=5)  #TODO: change to 24 hours
 async def schedule_find_papers():
+    print(day_count)
     day_count =+ 1
     topics_json = await open_json("topics.json")
     authors = [author for author in topics_json.keys() if topics_json[author]['search_schedule'] != None] #get all users with a search schedule
     for author in authors:
         frequency = topics_json[author]['search_schedule']
         num = topics_json[author]['auto_num']
+        print(frequency, day_count % frequency)
         if day_count % frequency == 0:
             await find_papers(author, num)
 
 @schedule_find_papers.before_loop #this executes before the above loop starts
 async def before_schedule_find_papers():
-    target_time = time(hour=21, minute=00)
+    target_time = time(hour=21, minute=45)
     next_run_in_seconds = get_next_run_time(target_time)
     await asyncio.sleep(next_run_in_seconds)
+    day_count = 0
     print('done sleeping')
-        
 
 bot.run(discord_token)
