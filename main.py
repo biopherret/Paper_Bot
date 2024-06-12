@@ -183,7 +183,7 @@ async def schedule_find_papers():
 async def before_schedule_find_papers():
     print('before loop has started')
     print(f'current time is {datetime.now()}')
-    target_time = time(hour=19, minute=45)
+    target_time = time(hour=20, minute=00)
     next_run_in_seconds = get_next_run_time(target_time)
     print(f'Next run in {next_run_in_seconds} seconds')
     await asyncio.sleep(next_run_in_seconds)
