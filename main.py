@@ -173,7 +173,7 @@ async def _schedule(ctx, days):
 async def schedule_find_papers():
     print('actual loop has started')
     topics_json = await open_json("topics.json")
-    authors = [author for author in topics_json.keys() if author['search_schedule'] != None] #get all users with a search schedule
+    authors = [author for author in topics_json.keys() if topics_json[author]['search_schedule'] != None] #get all users with a search schedule
     for author in authors:
         user = author['id']
         await user.send('Hello')
@@ -183,7 +183,7 @@ async def schedule_find_papers():
 async def before_schedule_find_papers():
     print('before loop has started')
     print(f'current time is {datetime.now()}')
-    target_time = time(hour=19, minute=00)
+    target_time = time(hour=19, minute=30)
     next_run_in_seconds = get_next_run_time(target_time)
     print(f'Next run in {next_run_in_seconds} seconds')
     await asyncio.sleep(next_run_in_seconds)
