@@ -162,14 +162,15 @@ async def _schedule(ctx, days):
     await write_json(topics_json, "topics.json")
     await ctx.send(f"Your paper finding schedule has been set to every {days} days.")
 
-time = datetime.time(hour = 5, minute = 0)
-@tasks.loop(time=time) #TODO: change to 24 hours
-async def schedule_find_papers():
-    topics_json = await open_json("topics.json")
-    authors = [author for author in topics_json.keys() if author['search_schedule'] != None] #get all users with a search schedule
-    for author in authors:
-        user = author['id']
-        await user.send('Hello')
+#TODO: error im getting: TypeError: loop() got an unexpected keyword argument 'time' despite internet saying it is a keyword argument https://discordpy.readthedocs.io/en/stable/ext/tasks/index.html
+#time = datetime.time(hour = 5, minute = 0)
+#@tasks.loop(time=time) 
+#async def schedule_find_papers():
+#    topics_json = await open_json("topics.json")
+#    authors = [author for author in topics_json.keys() if author['search_schedule'] != None] #get all users with a search schedule
+#    for author in authors:
+#        user = author['id']
+#        await user.send('Hello')
         
 
 
