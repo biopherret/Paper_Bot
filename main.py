@@ -151,7 +151,7 @@ async def _find_papers(ctx, num_papers):
         embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value="\n".join(paper_list), inline=False)
     await ctx.send(embed = embed)
 
-@slash.slash(name="schedule", description="Set the frequency Paper Bot will automatically find papers for you. Papers will be sent to you via DM.",
+@slash.slash(name="schedule", description="Set the frequency Paper Bot will automatically find papers and send them to your DM.",
              options=[
                  discord_slash.manage_commands.create_option(name = 'days', option_type = 4, required = True, description = "Find papers every x days.")
              ])
