@@ -13,7 +13,6 @@ import pandas as pd
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.all())
 slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
 
-#TODO: prevent no responce meassage in DMs
 #TODO: logic for when to start further in the search results
 #TODO: add warning on on_ready that the frequency got reset
 #TODO: add if no user send message saying to add a topic to create a user profile
@@ -54,9 +53,10 @@ def uptime_days_rounded_down():
     else:
         return str(delta).split()[0]
     
-async def check_if_server_message(ctx):
+async def is_server_message(ctx):
     if not isinstance(ctx.channel, discord.channel.DMChannel):
         await ctx.send("Sending you a DM to keep things organized. To avoid spamming the server, please use Paper Bot in DMs.")
+        return True
 
 async def getArticles(topics_list, num_papers, author):
     topics_json = await open_json("topics.json")
@@ -118,8 +118,8 @@ async def on_ready():
 
 @slash.slash(name="clear_history", description="Clear all Paper Bot topic settings and articles (remove all previously found papers from history).")
 async def _clear_history(ctx):
-    await check_if_server_message(ctx)
-
+    await is_server_message(ctx):
+        
     author = ctx.author.id
     topics_json = await open_json("topics.json")
     topics_json.pop(str(author)) #remove the user from the json
@@ -129,7 +129,7 @@ async def _clear_history(ctx):
 
 @slash.slash(name="clear_topics", description="Clear your saved topic settings.")
 async def _clear_topics(ctx):
-    await check_if_server_message(ctx)
+    await is_server_message(ctx)
 
     author = ctx.author.id
     topics_json = await open_json("topics.json")
@@ -140,7 +140,7 @@ async def _clear_topics(ctx):
 
 @slash.slash(name="view_topics", description="View your saved topic settings.")
 async def _view_topics(ctx):
-    await check_if_server_message(ctx)
+    await is_server_message(ctx)
 
     author = ctx.author.id
     topics_json = await open_json("topics.json")
@@ -158,7 +158,7 @@ async def _view_topics(ctx):
                  discord_slash.manage_commands.create_option(name = 'recent', option_type = 3, required = True, description = "Do you want to restrict the search to papers published in the last year? (y/n)"),
              ])
 async def _add_topic(ctx, topic, recent):
-    await check_if_server_message(ctx)
+    await is_server_message(ctx)
 
     author = ctx.author.id #save topic preferences in json
     topics_json = await open_json("topics.json")
@@ -182,11 +182,10 @@ async def _add_topic(ctx, topic, recent):
                  discord_slash.manage_commands.create_option(name = 'num_papers', option_type = 4, required = True, description = "The number of papers you want to find for each topic"),
              ])
 async def _find_papers_now(ctx, num_papers):
-    await check_if_server_message(ctx)
-
     author = ctx.author.id
-    user = await bot.fetch_user(author)
-    await user.send("Finding papers for you...") #sending an initial message b/c if the initial response from the bot takes too long, discord will send a no-response error message
+    if not await is_server_message(ctx):
+        user = await bot.fetch_user(author)
+        await user.send("Finding papers for you...") #sending an initial message b/c if the initial response from the bot takes too long, discord will send a no-response error message
     await find_papers(author, num_papers)
     
 
@@ -196,7 +195,7 @@ async def _find_papers_now(ctx, num_papers):
                  discord_slash.manage_commands.create_option(name = 'number_of_papers', option_type = 4, required = True, description = "Number of papers to find per search per topic.")
              ])
 async def _schedule(ctx, days, number_of_papers):
-    await check_if_server_message(ctx)
+    await is_server_message(ctx)
 
     author = ctx.author.id
     topics_json = await open_json("topics.json")
