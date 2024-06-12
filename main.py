@@ -54,7 +54,7 @@ def uptime_days_rounded_down():
         return str(delta).split()[0]
 
 async def send_command_response(ctx, user, message, is_embed=False):
-    if isinstance(ctx.channel, discord.channel.DMChannel): #if the slash command was used in a server
+    if not isinstance(ctx.channel, discord.channel.DMChannel): #if the slash command was used in a server
         await ctx.send("Sending you a DM to keep things organized. To avoid spamming the server, please use Paper Bot in DMs.") #sending a message in response to the slash command to only use DMs in the future
         discord_user = await bot.fetch_user(user)
         if is_embed:
