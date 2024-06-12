@@ -2,14 +2,13 @@ import discord
 import discord_slash
 from discord.ext import commands, tasks
 
-import json, asyncio
+import json, asyncio, math
 from datetime import datetime, time, timedelta
 
 import serpapi
 import itertools
 import os
 import pandas as pd
-from datetime import date
 
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.all())
 slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
@@ -46,7 +45,7 @@ def get_next_run_time(target_time):
     return (next_run - now).total_seconds()
 
 def uptime_days_rounded_down():
-    return int((time.time() - start_time) / 86400)
+    return int(datetime.now() - start_time.days)
 
 async def getArticles(topics_list, num_papers, author):
     topics_json = await open_json("topics.json")
@@ -100,7 +99,7 @@ async def find_papers(author, num_papers):
 @bot.event
 async def on_ready():
     global start_time
-    start_time = time.time()
+    start_time = datetime.now()
     schedule_find_papers.start()
     print("Ready!")
 
