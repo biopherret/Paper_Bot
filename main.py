@@ -13,6 +13,8 @@ import pandas as pd
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.all())
 slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
 
+#TODO: prevent no responce meassage in DMs
+#TODO: logic for when to start further in the search results
 #TODO: add warning on on_ready that the frequency got reset
 #TODO: add if no user send message saying to add a topic to create a user profile
 #TODO: scrap the paper text from the doc link
@@ -67,7 +69,9 @@ async def getArticles(topics_list, num_papers, author):
             "q": topic_dict['topic'],
             "api_key": serpapi_token,
             "scisbd": topic_dict['recent'],
-            "hl": "en"
+            "hl": "en",
+            'num': 20,
+            'start': 0
             }
         search1=serpapi.search(params)
         n = 0
