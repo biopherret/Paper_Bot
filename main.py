@@ -55,8 +55,10 @@ def uptime_days_rounded_down():
 def truncate_hyperlinked_title(title, link):
     max_title_length = 200 - len(link) - 6 #[title](link)\n
     if len(title) >= max_title_length:
+        print(f"Truncating: {len(f'[{title[:max_title_length] + "..."}]({link})')}")
         return f'[{title[:max_title_length] + "..."}]({link})'
     else:
+        print(f"Not Truncating: {len(f'[{title}]({link})')}")
         return f'[{title}]({link})'
 
 async def send_command_response(ctx, user, message, is_embed=False):
