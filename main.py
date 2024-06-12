@@ -110,7 +110,8 @@ async def _clear_history(ctx):
     topics_json = await open_json("topics.json")
     topics_json.pop(str(author)) #remove the user from the json
     await write_json(topics_json, "topics.json")
-    await ctx.send("Your history has been cleared! All topic settings and found articles have been removed.")
+    user = await bot.fetch_user(author)
+    await user.send("Your history has been cleared! All topic settings and found articles have been removed.")
 
 @slash.slash(name="clear_topics", description="Clear your saved topic settings.")
 async def _clear_topics(ctx):
@@ -118,7 +119,8 @@ async def _clear_topics(ctx):
     topics_json = await open_json("topics.json")
     topics_json[str(author)]['topic_settings'] = [] #empty the topic settings list
     await write_json(topics_json, "topics.json")
-    await ctx.send("Topics have been cleared!")
+    user = await bot.fetch_user(author)
+    await user.send("Topics have been cleared!")
 
 @slash.slash(name="view_topics", description="View your saved topic settings.")
 async def _view_topics(ctx):
@@ -129,7 +131,8 @@ async def _view_topics(ctx):
     embed = discord.Embed(title="Your Topics", description="Here are your current topic settings:")
     for topic_dict in topics_list:
         embed.add_field(name=topic_dict['topic'], value=f"Recent papers only?: {['No', 'Yes'][topic_dict['recent']]}", inline=False)
-    await ctx.send(embed = embed)
+    user = await bot.fetch_user(author)
+    await user.send(embed = embed)
     
 @slash.slash(name="add_topic", description='Add a topic of papers you want Paper Bot to find for you. Use "author: name" to search for authors.', 
              options=[
@@ -141,7 +144,8 @@ async def _add_topic(ctx, topic, recent):
     topics_json = await open_json("topics.json")
     if str(author) not in topics_json.keys(): #if this user dosn't exist yet
         topics_json[str(author)] = {'topic_settings': [], 'found_articles': [], 'search_schedule' : None, 'auto_num' : 0} #create a dictionary object for the new user
-        await ctx.send("Welcome to Paper Bot! I've created a new user profile for you.")
+        user = await bot.fetch_user(author)
+        await user.send("Welcome to Paper Bot! I've created a new user profile for you.")
 
     if recent == 'y':
         recent = 1
@@ -150,8 +154,8 @@ async def _add_topic(ctx, topic, recent):
 
     topics_json[str(author)]['topic_settings'].append({"topic": topic, "recent": recent}) #add the new topic
     await write_json(topics_json, "topics.json")
-
-    await ctx.send("Your new topic has been added!")
+    user = await bot.fetch_user(author)
+    await user.send("Your new topic has been added!")
 
 @slash.slash(name="find_papers_now", description="Find papers based on your topic interests",
              options=[
@@ -175,7 +179,8 @@ async def _schedule(ctx, days, number_of_papers):
     topics_json[str(author)]['search_schedule'] = days
     topics_json[str(author)]['auto_num'] = number_of_papers
     await write_json(topics_json, "topics.json")
-    await ctx.send(f"Paper Bot will now find {number_of_papers} papers per topic every {days} days.")
+    user = await bot.fetch_user(author)
+    await user.send(f"Paper Bot will now find {number_of_papers} papers per topic every {days} days.")
 
 @tasks.loop(minutes=5)  #TODO: change to 24 hours
 async def schedule_find_papers():
@@ -192,7 +197,6 @@ async def schedule_find_papers():
 async def before_schedule_find_papers():
     target_time = time(hour=21, minute=00)
     next_run_in_seconds = get_next_run_time(target_time)
-    print(f'Next run in {next_run_in_seconds} seconds')
     await asyncio.sleep(next_run_in_seconds)
     print('done sleeping')
         
