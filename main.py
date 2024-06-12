@@ -97,6 +97,7 @@ async def find_papers(author, num_papers):
 @bot.event
 async def on_ready():
     schedule_find_papers.start()
+    day_count = 0
     print("Ready!")
 
 @slash.slash(name="clear_history", description="Clear all Paper Bot topic settings and articles (remove all previously found papers from history).")
@@ -192,10 +193,9 @@ async def schedule_find_papers():
 
 @schedule_find_papers.before_loop #this executes before the above loop starts
 async def before_schedule_find_papers():
-    target_time = time(hour=21, minute=45)
+    target_time = time(hour=21, minute=50)
     next_run_in_seconds = get_next_run_time(target_time)
     await asyncio.sleep(next_run_in_seconds)
-    day_count = 0
     print('done sleeping')
 
 bot.run(discord_token)
