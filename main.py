@@ -127,7 +127,7 @@ async def _add_topic(ctx, topic, recent):
     author = ctx.author.id #save topic preferences in json
     topics_json = await open_json("topics.json")
     if str(author) not in topics_json.keys(): #if this user dosn't exist yet
-        topics_json[str(author)] = {'topic_settings': [], 'found_articles': [], 'search_schedule' : None} #create a dictionary object for the new user
+        topics_json[str(author)] = {'topic_settings': [], 'found_articles': [], 'search_schedule' : 'None'} #create a dictionary object for the new user
         await ctx.send("Welcome to Paper Bot! I've created a new user profile for you.")
 
     if recent == 'y':
@@ -173,9 +173,11 @@ async def _schedule(ctx, days):
 async def schedule_find_papers():
     print('actual loop has started')
     topics_json = await open_json("topics.json")
+    print(topics_json[author])
+    print(topics_json[author]['search_schedule'])
     authors = [author for author in topics_json.keys() if topics_json[author]['search_schedule'] != None] #get all users with a search schedule
     for author in authors:
-        user = author['id']
+        user = await bot.fetch_user(int(author))
         await user.send('Hello')
     print('actuall loop has ended')
 
@@ -183,7 +185,7 @@ async def schedule_find_papers():
 async def before_schedule_find_papers():
     print('before loop has started')
     print(f'current time is {datetime.now()}')
-    target_time = time(hour=19, minute=30)
+    target_time = time(hour=19, minute=45)
     next_run_in_seconds = get_next_run_time(target_time)
     print(f'Next run in {next_run_in_seconds} seconds')
     await asyncio.sleep(next_run_in_seconds)
