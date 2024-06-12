@@ -2,8 +2,8 @@ import discord
 import discord_slash
 from discord.ext import commands, tasks
 
-import json
-import datetime
+import json, asyncio
+from datetime import datetime, time, timedelta
 
 import serpapi
 import itertools
@@ -14,13 +14,12 @@ from datetime import date
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.all())
 slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
 
-#TODO: Made a loop at an interval of 24 hours (5 min to start to troubleshoot)
-#TODO: add a user setting of frequency (in days) of paper finding
-#TODO: make slash command to edit the setting
+#TODO: Made a loop set to run every day at a fixed time
 #TODO: loop looks at user setting to decide which user it is finding papers for on that day
 #TODO: call get_papers as needed
 #TODO: send papers to user DM
 
+#TODO: add if no user send message saying to add a topic to create a user profile
 #TODO: scrap the paper text from the doc link
 #TODO: put an LM on the pi
 #TODO: have the LM generate summaries with context
@@ -43,6 +42,13 @@ async def not_a_repeat_article(title, found_articles):
         if title == article_dict['title']:
             return False
     return True
+
+def get_next_run_time(target_time):
+    now = datetime.now()
+    next_run = datetime.combine(now.date(), target_time)
+    if next_run < now:
+        next_run += timedelta(days=1)
+    return (next_run - now).total_seconds()
 
 async def getArticles(topics_list, num_papers, author):
     topics_json = await open_json("topics.json")
@@ -82,6 +88,7 @@ async def getArticles(topics_list, num_papers, author):
 
 @bot.event
 async def on_ready():
+    schedule_find_papers.start()
     print("Ready!")
 
 @slash.slash(name="clear_history", description="Clear all Paper Bot topic settings and articles (remove all previously found papers from history).")
@@ -162,16 +169,19 @@ async def _schedule(ctx, days):
     await write_json(topics_json, "topics.json")
     await ctx.send(f"Your paper finding schedule has been set to every {days} days.")
 
-#TODO: error im getting: TypeError: loop() got an unexpected keyword argument 'time' despite internet saying it is a keyword argument https://discordpy.readthedocs.io/en/stable/ext/tasks/index.html
-#time = datetime.time(hour = 5, minute = 0)
-#@tasks.loop(time=time) 
-#async def schedule_find_papers():
-#    topics_json = await open_json("topics.json")
-#    authors = [author for author in topics_json.keys() if author['search_schedule'] != None] #get all users with a search schedule
-#    for author in authors:
-#        user = author['id']
-#        await user.send('Hello')
-        
+@tasks.loop(minutes=5)  #TODO: change to 24 hours
+async def schedule_find_papers():
+    topics_json = await open_json("topics.json")
+    authors = [author for author in topics_json.keys() if author['search_schedule'] != None] #get all users with a search schedule
+    for author in authors:
+        user = author['id']
+        await user.send('Hello')
 
+@schedule_find_papers.before_loop #this executes before the above loop starts
+async def before_schedule_find_papers():
+    target_time = time(hour=6, minute=0)
+    next_run_in_seconds = get_next_run_time(target_time)
+    await asyncio.sleep(next_run_in_seconds)
+        
 
 bot.run(discord_token)
