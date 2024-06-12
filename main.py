@@ -52,9 +52,12 @@ def uptime_days_rounded_down():
     else:
         return str(delta).split()[0]
     
-def truncate_hyperlinked_title(title, link):
+async def truncate_hyperlinked_title(user, title, link):
     max_title_length = 200 - len(link) - 6 #[title](link)\n
-    print('max', max_title_length)
+    if max_title_length < 30:
+        discord_user = await bot.fetch_user(user)
+        await discord_user.send(f"The hyperlink for [{title}]({link}) was too long to include in the main message.")
+        return f"{title[:200]}..."
     if len(title) >= max_title_length:
         print(f"Truncating: {len(f'[{title[:max_title_length]}]({link})') + 3}")
         return f'[{title[:max_title_length] + "..."}]({link})'
