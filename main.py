@@ -193,7 +193,7 @@ async def _find_papers_now(ctx, num_papers):
              ])
 async def _schedule(ctx, days, number_of_papers):
     await check_if_server_message(ctx)
-    
+
     author = ctx.author.id
     topics_json = await open_json("topics.json")
     topics_json[str(author)]['search_schedule'] = days
@@ -210,12 +210,12 @@ async def schedule_find_papers():
     for author in authors:
         frequency = topics_json[author]['search_schedule']
         num = topics_json[author]['auto_num']
-        if day_count % frequency == 0:
+        if int(day_count) % int(frequency) == 0:
             await find_papers(author, num)
 
 @schedule_find_papers.before_loop #this executes before the above loop starts
 async def before_schedule_find_papers():
-    target_time = time(hour=9, minute=00)
+    target_time = time(hour=10, minute=20)
     next_run_in_seconds = get_next_run_time(target_time)
     await asyncio.sleep(next_run_in_seconds)
 
