@@ -158,8 +158,10 @@ async def _add_topic(ctx, topic, recent):
                  discord_slash.manage_commands.create_option(name = 'num_papers', option_type = 4, required = True, description = "The number of papers you want to find for each topic"),
              ])
 async def _find_papers_now(ctx, num_papers):
-    await ctx.send("Finding papers for you...") #sending an initial message b/c if the initial response from the bot takes too long, discord will send a no-response error message
     author = ctx.author.id
+    user = await bot.fetch_user(author)
+    await user.send("Finding papers for you...") #sending an initial message b/c if the initial response from the bot takes too long, discord will send a no-response error message
+    await find_papers(author, num_papers)
     
 
 @slash.slash(name="schedule", description="Set the frequency Paper Bot will automatically find papers and send them to your DM.",
