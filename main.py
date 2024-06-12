@@ -13,6 +13,7 @@ from datetime import date
 
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.all())
 slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
+day_count = 0
 
 #TODO: add if no user send message saying to add a topic to create a user profile
 #TODO: scrap the paper text from the doc link
@@ -177,7 +178,6 @@ async def _schedule(ctx, days, number_of_papers):
     user = await bot.fetch_user(author)
     await user.send(f"Paper Bot will now find {number_of_papers} papers per topic every {days} days.")
 
-day_count = 0
 @tasks.loop(minutes=5)  #TODO: change to 24 hours
 async def schedule_find_papers():
     print(day_count)
@@ -193,7 +193,7 @@ async def schedule_find_papers():
 
 @schedule_find_papers.before_loop #this executes before the above loop starts
 async def before_schedule_find_papers():
-    target_time = time(hour=22, minute=00)
+    target_time = time(hour=22, minute=10)
     next_run_in_seconds = get_next_run_time(target_time)
     await asyncio.sleep(next_run_in_seconds)
 
