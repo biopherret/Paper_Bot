@@ -232,7 +232,7 @@ async def _schedule(ctx, days, number_of_papers):
     else: #if they are trying to find more than 5 papers per topic
         await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
 
-@tasks.loop(minutes=5)  #TODO: change to 24 hours
+@tasks.loop(hours = 24)
 async def schedule_find_papers():
     day_count = uptime_days_rounded_down()
     topics_json = await open_json("topics.json")
@@ -245,7 +245,7 @@ async def schedule_find_papers():
 
 @schedule_find_papers.before_loop #this executes before the above loop starts
 async def before_schedule_find_papers():
-    target_time = time(hour=9, minute=10)
+    target_time = time(hour=9, minute=00)
     next_run_in_seconds = get_next_run_time(target_time)
     await asyncio.sleep(next_run_in_seconds)
 
