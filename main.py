@@ -133,7 +133,7 @@ async def find_papers(user, num_papers):
         truncated_title_list = [truncate_title(article_dict['title']) for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
         links = [article_dict['online_link'] for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
         hyperlinked_papers_list = [f"[{truncated_title_list[i]}]({links[i]})" for i in range(len(truncated_title_list))]
-        print(f'total length: {len("\n".join(hyperlinked_papers_list))}')
+        print(len("\n".join(hyperlinked_papers_list)))
         embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value="\n".join(hyperlinked_papers_list), inline=False)
     discord_user = await bot.fetch_user(user)
     await discord_user.send(embed = embed)
