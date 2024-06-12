@@ -136,7 +136,7 @@ async def find_papers(user, num_papers):
 
     embed = discord.Embed(title="Papers I Found For You")
     for topic_dict in topics_list:
-        hyperlinked_papers_list = [truncate_hyperlinked_title(article_dict['title'], article_dict['online_link']) for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
+        hyperlinked_papers_list = [truncate_hyperlinked_title(user, article_dict['title'], article_dict['online_link']) for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
         print(len("\n".join(hyperlinked_papers_list)))
         embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value="\n".join(hyperlinked_papers_list), inline=False)
     discord_user = await bot.fetch_user(user)
