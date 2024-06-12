@@ -53,8 +53,8 @@ def uptime_days_rounded_down():
         return str(delta).split()[0]
     
 def truncate_title(title):
-    if len(title) > 200:
-        return title[:200] + "..."
+    if len(title) >= 199:
+        return title[:199] + "..."
     else:
         return title
 
