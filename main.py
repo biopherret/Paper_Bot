@@ -13,6 +13,7 @@ import pandas as pd
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.all())
 slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
 
+#TODO: check length of paper titels in find paper and truncate to 1024/5 with a ... if too long (only in the message embed)
 #TODO: make about page
 #TODO: logic for when to start further in the search results
 #TODO: add warning on on_ready that the frequency got reset
@@ -190,13 +191,16 @@ async def _add_topic(ctx, topic, recent):
 
 @slash.slash(name="find_papers_now", description="Find papers based on your topic interests",
              options=[
-                 discord_slash.manage_commands.create_option(name = 'num_papers', option_type = 4, required = True, description = "The number of papers you want to find for each topic"),
+                 discord_slash.manage_commands.create_option(name = 'num_papers', option_type = 4, required = True, description = "The number of papers you want to find for each topic (Max 5)"),
              ])
 async def _find_papers_now(ctx, num_papers):
     user = ctx.author.id
-    if await user_exists(ctx, user):
-        await send_command_response(ctx, user, "Finding papers for you...") #sending an initial message b/c if the initial response from the bot takes too long, discord will send a no-response error message
-        await find_papers(user, num_papers)
+    if num_papers < 6:
+        if await user_exists(ctx, user):
+            await send_command_response(ctx, user, "Finding papers for you...") #sending an initial message b/c if the initial response from the bot takes too long, discord will send a no-response error message
+            await find_papers(user, num_papers)
+    else: #if they are trying to find more than 5 papers per topic
+        await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
     
 @slash.slash(name="schedule", description="Set the frequency Paper Bot will automatically find papers and send them to your DM.",
              options=[
@@ -205,13 +209,16 @@ async def _find_papers_now(ctx, num_papers):
              ])
 async def _schedule(ctx, days, number_of_papers):
     user = ctx.author.id
-    if await user_exists(ctx, user):
-        topics_json = await open_json("topics.json")
-        topics_json[str(user)]['search_schedule'] = days
-        topics_json[str(user)]['auto_num'] = number_of_papers
-        await write_json(topics_json, "topics.json")
+    if number_of_papers < 6:
+        if await user_exists(ctx, user):
+            topics_json = await open_json("topics.json")
+            topics_json[str(user)]['search_schedule'] = days
+            topics_json[str(user)]['auto_num'] = number_of_papers
+            await write_json(topics_json, "topics.json")
 
-        await send_command_response(ctx, user, f"Paper Bot will now find {number_of_papers} papers per topic every {days} days.")
+            await send_command_response(ctx, user, f"Paper Bot will now find {number_of_papers} papers per topic every {days} days.")
+    else: #if they are trying to find more than 5 papers per topic
+        await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
 
 @tasks.loop(minutes=5)  #TODO: change to 24 hours
 async def schedule_find_papers():
