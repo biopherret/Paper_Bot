@@ -153,7 +153,7 @@ async def _view_topics(ctx):
     for topic_dict in topics_list:
         embed.add_field(name=topic_dict['topic'], value=f"Recent papers only?: {['No', 'Yes'][topic_dict['recent']]}", inline=False)
 
-    await send_command_response(ctx, author, embed)
+    await send_command_response(ctx, author, embed, is_embed=True)
     
 @slash.slash(name="add_topic", description='Add a topic of papers you want Paper Bot to find for you. Use "author: name" to search for authors.', 
              options=[
