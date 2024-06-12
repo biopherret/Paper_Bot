@@ -173,8 +173,6 @@ async def _schedule(ctx, days):
 async def schedule_find_papers():
     print('actual loop has started')
     topics_json = await open_json("topics.json")
-    print(topics_json[author])
-    print(topics_json[author]['search_schedule'])
     authors = [author for author in topics_json.keys() if topics_json[author]['search_schedule'] != None] #get all users with a search schedule
     for author in authors:
         user = await bot.fetch_user(int(author))
