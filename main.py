@@ -14,7 +14,6 @@ bot = commands.Bot(command_prefix = '.', intents=discord.Intents.all())
 slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
 
 #TODO: make about page
-#TODO: add warning on on_ready that the frequency got reset
 #TODO: scrap the paper text from the doc link
 #TODO: put an LM on the pi
 #TODO: have the LM generate summaries with context
@@ -84,6 +83,13 @@ async def user_exists(ctx, user):
     else:
         await send_command_response(ctx, user, "You don't have any topics saved! Use the /add_topic command to add a topic.")
         return False
+    
+async def send_warning_to_schedule_users():
+    topics_json = await open_json("topics.json")
+    users = [user for user in topics_json.keys() if topics_json[user]['search_schedule'] != None] #get all users with a search schedule
+    for user in users:
+        discord_user = await bot.fetch_user(user)
+        await discord_user.send("Warning: I just woke up from a nap, this means I have lost track of how many days its been since I last sent you papers. I will send you papers at 9AM, and after your paper frequency will return to normal.")
 
 async def getArticles(topics_list, num_papers, user):
     topics_json = await open_json("topics.json")
@@ -143,6 +149,7 @@ async def find_papers(user, num_papers):
 async def on_ready():
     global start_time
     start_time = datetime.now()
+    await send_warning_to_schedule_users()
     schedule_find_papers.start()
     print("Ready!")
 
