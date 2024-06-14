@@ -102,7 +102,7 @@ async def getArticles(topics_list, num_papers, user):
     for topic_dict in topics_list:
         n = 0 #keep track of the number of papers found
         i = 0 #keep track of th number of searches done
-        print(n,i)
+        
         while n < num_papers: #while we haven't found the desired number of papers yet
             params = {
                 "engine": "google_scholar",
@@ -115,6 +115,7 @@ async def getArticles(topics_list, num_papers, user):
                 }
             search=serpapi.search(params)
             for i in range(len(search['organic_results'])): #for each article found in the search
+                print(n,i)
                 title = search['organic_results'][i]['title']
                 if await not_a_repeat_article(title, found_articles): 
                     online_link = search['organic_results'][i]['link']
