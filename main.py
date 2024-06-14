@@ -2,6 +2,7 @@ import discord
 import discord_slash
 from discord.ext import commands, tasks
 from pypdf import PdfReader
+from bs4 import BeautifulSoup
 
 import json, asyncio, math, urllib.request, os
 from datetime import datetime, time, timedelta
@@ -66,6 +67,12 @@ async def read_pdf(doc_link, title):
         context_txt += page.extract_text()
     os.remove(title) 
     return context_txt
+
+async def read_web(link):
+    page = urllib.request.urlopen(link)
+    html = page.read().decode("utf-8")
+    soup = BeautifulSoup(html, "html.parser")
+    return soup.get_text()
     
 async def truncate_hyperlinked_title(user, title, link):
     max_title_length = 200 - len(link) - 6 #[title](link)\n
@@ -156,13 +163,22 @@ async def get_text_for_LM(paper_title, doc_type, doc_link, online_link, user):
             context_text = await read_pdf(doc_link, paper_title)
             return context_text
         except:
-            return None  
-        
-    else:
-        discord_user = await bot.fetch_user(user)
-        await discord_user.send(f"Sorry, I can only summarize PDFs at the moment and wasn't able to find one for {paper_title}.")
-        return None
+            pass
 
+    if doc_type == 'HTML':
+        try:
+            context_text = await read_web(doc_link)
+            return context_text
+        except:
+            pass
+    
+    try:
+        context_text = await read_web(online_link)
+        return context_text
+    except:
+        discord_user = await bot.fetch_user(user)
+        await discord_user.send(f"Paper Bot was unable to read the text from the paper [{paper_title}]({online_link}).")
+        return None
 
 async def find_papers(user, num_papers):
     topics_json = await open_json("topics.json")
