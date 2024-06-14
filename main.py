@@ -114,15 +114,16 @@ async def getArticles(topics_list, num_papers, user):
                 'start': i*20
                 }
             search=serpapi.search(params)
-            for i in range(len(search['organic_results'])): #for each article found in the search
+            i += 1
+            for r in range(len(search['organic_results'])): #for each article found in the search
                 print(n,i)
-                title = search['organic_results'][i]['title']
+                title = search['organic_results'][r]['title']
                 if await not_a_repeat_article(title, found_articles): 
-                    online_link = search['organic_results'][i]['link']
+                    online_link = search['organic_results'][r]['link']
                     n += 1
-                    if 'resources' in search['organic_results'][i].keys(): #if the search has attached docs
-                        doc_type = search['organic_results'][i]['resources'][0]['file_format'] #get the doc type for the first resource
-                        doc_link = search['organic_results'][i]['resources'][0]['link'] #get the link for the first resource
+                    if 'resources' in search['organic_results'][r].keys(): #if the search has attached docs
+                        doc_type = search['organic_results'][r]['resources'][0]['file_format'] #get the doc type for the first resource
+                        doc_link = search['organic_results'][r]['resources'][0]['link'] #get the link for the first resource
                     else: #if there are no attached docs
                         doc_type = None
                         doc_link = None
