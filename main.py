@@ -138,7 +138,7 @@ async def getArticles(topics_list, num_papers, user):
     return new_articles
 
 async def get_text_for_LM(paper_title, doc_type, doc_link, online_link, user):
-    if doc_type == 'pdf':  
+    if doc_type == 'PDF':  
         print('fonud a pdf')  
         response = urllib.request.urlopen(doc_link)
         file = open("paper_to_summarize.pdf", 'wb')
