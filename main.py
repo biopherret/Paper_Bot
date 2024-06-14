@@ -102,6 +102,7 @@ async def getArticles(topics_list, num_papers, user):
     for topic_dict in topics_list:
         n = 0 #keep track of the number of papers found
         i = 0 #keep track of th number of searches done
+        print(n,i)
         while n < num_papers: #while we haven't found the desired number of papers yet
             params = {
                 "engine": "google_scholar",
