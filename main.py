@@ -140,8 +140,14 @@ async def getArticles(topics_list, num_papers, user):
 
 async def get_text_for_LM(paper_title, doc_type, doc_link, online_link, user):
     if doc_type == 'PDF':  
-        print('fonud a pdf')  
-        response = urllib.request.urlopen(doc_link)
+        print('fonud a pdf')
+        try:  
+            response = urllib.request.urlopen(doc_link)
+        except:
+            discord_user = await bot.fetch_user(user)
+            await discord_user.send(f"Sorry, the website containing {paper_title} won't allow me to access the paper.")
+            return None
+        
         file = open("paper_to_summarize.pdf", 'wb')
         file.write(response.read())
         file.close()
@@ -156,7 +162,8 @@ async def get_text_for_LM(paper_title, doc_type, doc_link, online_link, user):
     else:
         discord_user = await bot.fetch_user(user)
         await discord_user.send(f"Sorry, I can only summarize PDFs at the moment and wasn't able to find one for {paper_title}.")
-    pass
+        return None
+
 
 async def find_papers(user, num_papers):
     topics_json = await open_json("topics.json")
