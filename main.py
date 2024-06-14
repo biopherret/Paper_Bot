@@ -136,7 +136,8 @@ async def getArticles(topics_list, num_papers, user):
     return new_articles
 
 async def get_text_for_LM(paper_title, doc_type, doc_link, online_link, user):
-    if doc_type == 'pdf':    
+    if doc_type == 'pdf':  
+        print('fonud a pdf')  
         response = urllib.request.urlopen(doc_link)
         file = open("paper_to_summarize.pdf", 'wb')
         file.write(response.read())
@@ -144,8 +145,10 @@ async def get_text_for_LM(paper_title, doc_type, doc_link, online_link, user):
 
         reader = PdfReader('paper_to_summarize.pdf')
         context_txt = ""
+        print(len(reader.pages))
         for page in reader.pages:
             context_txt += page.extract_text()
+            print('extracted a page worth of text')
         return context_txt
     else:
         discord_user = await bot.fetch_user(user)
@@ -157,8 +160,6 @@ async def find_papers(user, num_papers):
     topics_list = topics_json[str(user)]["topic_settings"]
 
     found_articles = await getArticles(topics_list, num_papers, user)
-    context_txts = [await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'], user) for article_dict in found_articles]
-    print(context_txts)
 
     embed = discord.Embed(title="Papers I Found For You")
     for topic_dict in topics_list:
@@ -166,6 +167,9 @@ async def find_papers(user, num_papers):
         embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value="\n".join(hyperlinked_papers_list), inline=False)
     discord_user = await bot.fetch_user(user)
     await discord_user.send(embed = embed)
+
+    context_txts = [await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'], user) for article_dict in found_articles]
+    print(context_txts)
 
 @bot.event
 async def on_ready():
