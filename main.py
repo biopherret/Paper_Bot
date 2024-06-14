@@ -16,9 +16,6 @@ bot = commands.Bot(command_prefix = '.', intents=discord.Intents.all())
 slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
 
 #TODO: make about page
-#TODO: scrap the paper text from pdf
-#TODO: scrap paper text from html link
-#TODO: scrap paper text from normal link with disclaimer
 #TODO: call the huggingface lm to summarize the text
 #TODO: convert text to mp4
 #TODO: add mp4 files to the find papers message
@@ -194,8 +191,10 @@ async def find_papers(user, num_papers):
     await discord_user.send(embed = embed)
 
     await discord_user.send("I will now attempt to summarize the papers for you. This may take a while, please be patient and don't send any new commands until I'm done.")
-    context_txts = [await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'], user) for article_dict in found_articles]
-    print(context_txts)
+    for article_dict in found_articles:
+        context_txt = await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'], user)
+        print(context_txt)
+    await discord_user.send("Done!")
 
 @bot.event
 async def on_ready():
