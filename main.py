@@ -40,14 +40,14 @@ async def not_a_repeat_article(title, found_articles):
             return False
     return True
 
-def get_next_run_time(target_time):
+async def get_next_run_time(target_time):
     now = datetime.now()
     next_run = datetime.combine(now.date(), target_time)
     if next_run < now:
         next_run += timedelta(days=1)
     return (next_run - now).total_seconds()
 
-def uptime_days_rounded_down():
+async def uptime_days_rounded_down():
     delta = datetime.now().date() - start_time.date()
     if str(delta) == "0:00:00":
         return 0
@@ -129,7 +129,6 @@ async def getArticles(topics_list, num_papers, user):
             search=serpapi.search(params)
             i += 1
             for r in range(len(search['organic_results'])): #for each article found in the search
-                print(n,i)
                 title = search['organic_results'][r]['title']
                 if await not_a_repeat_article(title, found_articles): 
                     online_link = search['organic_results'][r]['link']
@@ -178,6 +177,7 @@ async def find_papers(user, num_papers):
     discord_user = await bot.fetch_user(user)
     await discord_user.send(embed = embed)
 
+    await discord_user.send("I will now attempt to summarize the papers for you. This may take a while, please be patient and don't send any new commands until I'm done.")
     context_txts = [await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'], user) for article_dict in found_articles]
     print(context_txts)
 
@@ -277,7 +277,7 @@ async def _schedule(ctx, days, number_of_papers):
 
 @tasks.loop(hours = 24)
 async def schedule_find_papers():
-    day_count = uptime_days_rounded_down()
+    day_count = await uptime_days_rounded_down()
     topics_json = await open_json("topics.json")
     users = [user for user in topics_json.keys() if topics_json[user]['search_schedule'] != None] #get all users with a search schedule
     for user in users:
@@ -289,7 +289,7 @@ async def schedule_find_papers():
 @schedule_find_papers.before_loop #this executes before the above loop starts
 async def before_schedule_find_papers():
     target_time = time(hour=9, minute=00)
-    next_run_in_seconds = get_next_run_time(target_time)
+    next_run_in_seconds = await get_next_run_time(target_time)
     await asyncio.sleep(next_run_in_seconds)
 
 bot.run(discord_token)
