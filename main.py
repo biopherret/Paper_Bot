@@ -148,7 +148,8 @@ async def get_text_for_LM(paper_title, doc_type, doc_link, online_link, user):
             context_txt += page.extract_text()
         return context_txt
     else:
-        await user.send(f"Sorry, I can only summarize PDFs at the moment and wasn't able to find one for {paper_title}.")
+        discord_user = await bot.fetch_user(user)
+        await discord_user.send(f"Sorry, I can only summarize PDFs at the moment and wasn't able to find one for {paper_title}.")
     pass
 
 async def find_papers(user, num_papers):
