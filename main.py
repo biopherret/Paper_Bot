@@ -1,8 +1,9 @@
 import discord
 import discord_slash
 from discord.ext import commands, tasks
+from pypdf import PdfReader
 
-import json, asyncio, math
+import json, asyncio, math, urllib.request
 from datetime import datetime, time, timedelta
 
 import serpapi
@@ -14,11 +15,13 @@ bot = commands.Bot(command_prefix = '.', intents=discord.Intents.all())
 slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
 
 #TODO: make about page
-#TODO: scrap the paper text from the doc link
-#TODO: put an LM on the pi
-#TODO: have the LM generate summaries with context
+#TODO: scrap the paper text from pdf
+#TODO: scrap paper text from html link
+#TODO: scrap paper text from normal link with disclaimer
+#TODO: call the huggingface lm to summarize the text
 #TODO: convert text to mp4
 #TODO: add mp4 files to the find papers message
+#TODO: summarizing progress bar
 
 discord_token = open("discord_token.txt", "r").read()
 serpapi_token = open("serpapi_token.txt", "r").read()
@@ -132,11 +135,29 @@ async def getArticles(topics_list, num_papers, user):
     await write_json(topics_json, "topics.json") #save new articles to json
     return new_articles
 
+async def get_text_for_LM(paper_title, doc_type, doc_link, online_link, user):
+    if doc_type == 'pdf':    
+        response = urllib.request.urlopen(doc_link)
+        file = open("paper_to_summarize.pdf", 'wb')
+        file.write(response.read())
+        file.close()
+
+        reader = PdfReader('paper_to_summarize.pdf')
+        context_txt = ""
+        for page in reader.pages:
+            context_txt += page.extract_text()
+        return context_txt
+    else:
+        await user.send(f"Sorry, I can only summarize PDFs at the moment and wasn't able to find one for {paper_title}.")
+    pass
+
 async def find_papers(user, num_papers):
     topics_json = await open_json("topics.json")
     topics_list = topics_json[str(user)]["topic_settings"]
 
     found_articles = await getArticles(topics_list, num_papers, user)
+    context_txts = [await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'], user) for article_dict in found_articles]
+    print(context_txts)
 
     embed = discord.Embed(title="Papers I Found For You")
     for topic_dict in topics_list:
