@@ -3,7 +3,7 @@ import discord_slash
 from discord.ext import commands, tasks
 from pypdf import PdfReader
 
-import json, asyncio, math, urllib.request
+import json, asyncio, math, urllib.request, os
 from datetime import datetime, time, timedelta
 
 import serpapi
@@ -54,16 +54,17 @@ def uptime_days_rounded_down():
     else:
         return str(delta).split()[0]
     
-async def read_pdf(doc_link):
+async def read_pdf(doc_link, title):
     response = urllib.request.urlopen(doc_link)
-    file = open("paper_to_summarize.pdf", 'wb')
+    file = open(title, 'wb')
     file.write(response.read())
     file.close()
 
-    reader = PdfReader('paper_to_summarize.pdf')
+    reader = PdfReader(title)
     context_txt = ""
     for page in reader.pages:
         context_txt += page.extract_text()
+    os.remove(title) 
     return context_txt
     
 async def truncate_hyperlinked_title(user, title, link):
@@ -153,7 +154,7 @@ async def getArticles(topics_list, num_papers, user):
 async def get_text_for_LM(paper_title, doc_type, doc_link, online_link, user):
     if doc_type == 'PDF':  
         try:
-            context_text = await read_pdf(doc_link)
+            context_text = await read_pdf(doc_link, paper_title)
             return context_text
         except:
             return None  
