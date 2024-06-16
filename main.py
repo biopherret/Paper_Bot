@@ -3,6 +3,7 @@ import discord_slash
 from discord.ext import commands, tasks
 from pypdf import PdfReader
 from bs4 import BeautifulSoup
+from gtts import gTTS
 
 import json, asyncio, math, urllib.request, os
 from datetime import datetime, time, timedelta
@@ -17,7 +18,7 @@ slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash com
 
 #TODO: make about page
 #TODO: call the huggingface lm to summarize the text
-#TODO: convert text to mp4
+#TODO: convert text to mp3
 #TODO: add mp4 files to the find papers message
 #TODO: summarizing progress bar
 
@@ -174,8 +175,12 @@ async def get_text_for_LM(paper_title, doc_type, doc_link, online_link, user):
         return context_text
     except:
         discord_user = await bot.fetch_user(user)
-        await discord_user.send(f"Paper Bot was unable to read the text from the paper [{paper_title}]({online_link}).")
         return None
+    
+async def text_to_mp3(text, title):
+    tts = gTTS(text, lang='en', slow = False)
+    tts.save(f"{title}.mp3")
+    return discord.File(f"{title}.mp3")
 
 async def find_papers(user, num_papers):
     topics_json = await open_json("topics.json")
@@ -193,7 +198,12 @@ async def find_papers(user, num_papers):
     await discord_user.send("I will now attempt to summarize the papers for you. This may take a while, please be patient and don't send any new commands until I'm done.")
     for article_dict in found_articles:
         context_txt = await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'], user)
-        print(context_txt)
+        if context_txt != None:
+            #get summary text from LM and pass that instead into the text to speech
+            summary_txt = "This is a summary of the paper."
+            file = text_to_mp3(summary_txt, article_dict['title'])
+            await user.send(file=file, content = f"Here is a summary of the paper [{article_dict['title']}]({article_dict['online_link']}).")
+            
     await discord_user.send("Done!")
 
 @bot.event
