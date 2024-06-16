@@ -4,6 +4,7 @@ from discord.ext import commands, tasks
 from pypdf import PdfReader
 from bs4 import BeautifulSoup
 from gtts import gTTS
+from StringProgressBar import progressBar
 
 import json, asyncio, math, urllib.request, os
 from datetime import datetime, time, timedelta
@@ -18,9 +19,6 @@ slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash com
 
 #TODO: make about page
 #TODO: call the huggingface lm to summarize the text
-#TODO: convert text to mp3
-#TODO: add mp4 files to the find papers message
-#TODO: summarizing progress bar
 
 discord_token = open("discord_token.txt", "r").read()
 serpapi_token = open("serpapi_token.txt", "r").read()
@@ -195,15 +193,17 @@ async def find_papers(user, num_papers):
     discord_user = await bot.fetch_user(user)
     await discord_user.send(embed = embed)
 
-    await discord_user.send("I will now attempt to summarize the papers for you. This may take a while, please be patient and don't send any new commands until I'm done.")
+    i = 0
+    progress_mes = await discord_user.send(f"I will now attempt to summarize the papers for you. This may take a while {progressBar.filledBar(len(found_articles), i)}")
     for article_dict in found_articles:
+        i += 1
         context_txt = await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'], user)
         if context_txt != None:
             #get summary text from LM and pass that instead into the text to speech
             summary_txt = "This is a summary of the paper."
             file = text_to_mp3(summary_txt, article_dict['title'])
             await user.send(file=file, content = f"Here is a summary of the paper [{article_dict['title']}]({article_dict['online_link']}).")
-            
+        progress_mes.edit(content = f"I will now attempt to summarize the papers for you. This may take a while {progressBar.filledBar(len(found_articles), i)}")   
     await discord_user.send("Done!")
 
 @bot.event
