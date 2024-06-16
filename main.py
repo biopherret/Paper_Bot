@@ -194,7 +194,7 @@ async def find_papers(user, num_papers):
     await discord_user.send(embed = embed)
 
     i = 0
-    progress_mes = await discord_user.send(f"I will now attempt to summarize the papers for you. This may take a while {progressBar.filledBar(len(found_articles), i)}")
+    progress_mes = await discord_user.send("I will now attempt to summarize the papers for you. This may take a while {}".format(progressBar.filledBar(len(found_articles), i)))
     for article_dict in found_articles:
         i += 1
         context_txt = await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'], user)
@@ -203,7 +203,7 @@ async def find_papers(user, num_papers):
             summary_txt = "This is a summary of the paper."
             file = text_to_mp3(summary_txt, article_dict['title'])
             await user.send(file=file, content = f"Here is a summary of the paper [{article_dict['title']}]({article_dict['online_link']}).")
-        progress_mes.edit(content = f"I will now attempt to summarize the papers for you. This may take a while {progressBar.filledBar(len(found_articles), i)}")   
+        await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while {}".format(progressBar.filledBar(len(found_articles), i)))   
     await discord_user.send("Done!")
 
 @bot.event
