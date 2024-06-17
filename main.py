@@ -202,7 +202,7 @@ async def find_papers(user, num_papers):
         if context_txt != None:
             #get summary text from LM and pass that instead into the text to speech
             summary_txt = "This is a summary of the paper."
-            file = await (summary_txt, article_dict['title'])
+            file = await text_to_mp3(summary_txt, article_dict['title'])
             await discord_user.send(file=file, content = f"Here is a summary of the paper [{article_dict['title']}]({article_dict['online_link']}).")
         await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while {}: {}/{}".format(progressBar.filledBar(num_found, i)[0], i, num_found))   
     await discord_user.send("Done!")
