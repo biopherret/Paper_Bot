@@ -185,7 +185,7 @@ async def get_summary_from_LM(context_text):
 		512,
 		0.7,
 		0.95,
-		api_name="/chat"
+		"/chat"
 )
     print(result)
     return result
