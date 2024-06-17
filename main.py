@@ -178,7 +178,9 @@ async def get_text_for_LM(paper_title, doc_type, doc_link, online_link, user):
 async def text_to_mp3(text, title):
     tts = gTTS(text, lang='en', slow = False)
     tts.save(f"{title}.mp3")
-    return discord.File(f"{title}.mp3")
+    file_to_send = discord.File(f"{title}.mp3")
+    os.remove(f"{title}.mp3")
+    return file_to_send
 
 async def find_papers(user, num_papers):
     topics_json = await open_json("topics.json")
