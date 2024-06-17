@@ -178,8 +178,9 @@ async def get_text_for_LM(paper_title, doc_type, doc_link, online_link, user):
 
 async def get_summary_from_LM(context_text):
     client = Client("biopherret/Paper_Summarizer")
+    prompt = f'The following text is extracted from a PDF file of an academic paper. Ignoring the formatting text and the works cited, can you summarize the paper for a PhD student so I can decided if I want to read the paper? Thank you! Here is the paper text: "{context_text}"'
     result = client.predict(
-		message=f'The following text is extracted from a PDF file of an academic paper. Ignoring the formatting text and the works cited, can you summarize the paper for a PhD student so I can decided if I want to read the paper? Thank you! Here is the paper text: "{context_text}"',
+		message='Hello!!',
 		system_message="You are a friendly Chatbot.",
 		max_tokens=512,
 		temperature=0.7,
