@@ -1,6 +1,6 @@
 #import discord
-import interactions
-from interactions import slash_command, SlashContext
+#import interactions
+#from interactions import slash_command, SlashContext
 #import discord_slash
 #from discord.ext import commands, tasks
 #from pypdf import PdfReader
@@ -30,7 +30,22 @@ import json
 discord_token = open("discord_token.txt", "r").read()
 #serpapi_token = open("serpapi_token.txt", "r").read()
 
-bot = interactions.Client(token=discord_token)
+from interactions import Client, Intents, listen
+
+bot = Client(intents=Intents.DEFAULT)
+# intents are what events we want to receive from discord, `DEFAULT` is usually fine
+
+@listen()  # this decorator tells snek that it needs to listen for the corresponding event, and run this coroutine
+async def on_ready():
+    # This event is called when the bot is ready to respond to commands
+    print("Ready")
+    print(f"This bot is owned by {bot.owner}")
+
+
+@listen()
+async def on_message_create(event):
+    # This event is called when a message is sent in a channel the bot can see
+    print(f"message received: {event.message.content}")
 
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
@@ -229,18 +244,6 @@ async def open_json(file_name):
 #             await discord_user.send(file=file, content = "")
 #         await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper.\n {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))   
 #     await discord_user.send("Done!")
-
-@interactions.listen()
-async def on_startup():
-    print("Bot is ready!")
-
-    #start_time = datetime.now()
-    #await send_warning_to_schedule_users()
-    #schedule_find_papers.start()
-
-@slash_command(name="my_command", description="My first command :)")
-async def my_command_function(ctx: SlashContext):
-    await ctx.send("Hello World")
 
 # @slash.slash(name="clear_history", description="Clear all Paper Bot topic settings and articles (remove all previously found papers from history).")
 # async def _clear_history(ctx):  
