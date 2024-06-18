@@ -20,20 +20,10 @@ from gradio_client import Client #to access a huggingface language model
 from datetime import datetime, time, timedelta #for managing scheduler
 import asyncio
 
-
-#import asyncio, math, urllib.request, os
-
-
-
-#import itertools
-
-#import pandas as pd
-
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
 hf_client = Client("biopherret/Paper_Summarizer")
 
 #TODO: make about page
-#TODO: call the huggingface lm to summarize the text
 #TODO: make a command to give a pdf to summarrize
 
 discord_token = open("discord_token.txt", "r").read()
