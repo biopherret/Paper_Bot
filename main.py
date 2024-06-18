@@ -271,7 +271,14 @@ async def _clear_topics(ctx):
 
 @bot.tree.command(name="add_topic", description='Add a topic of papers you want Paper Bot to find for you. Use "author: name" to search for authors.')
 async def _add_topic(ctx, topic : str, recent : str):
-    user = ctx.author.id #save topic preferences in json
+    '''Add a topic of papers you are interested in
+
+    Args:
+        ctx (Interaction): The context of the command
+        topic (str): The topic you're interested in
+        recent (str): Do you want to restrict the search to papers published in the last year? (y/n)
+    '''
+    user = ctx.user.id #save topic preferences in json
     topics_json = await open_json("topics.json")
     if str(user) not in topics_json.keys(): #if this user dosn't exist yet
         topics_json[str(user)] = {'topic_settings': [], 'found_articles': [], 'search_schedule' : None, 'auto_num' : 0} #create a dictionary object for the new user
