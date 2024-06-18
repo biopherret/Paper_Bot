@@ -324,7 +324,7 @@ async def on_ready():
 async def _summarize_pdf(ctx, pdf : discord.Attachment):
     user = ctx.user.id
     print(pdf, type(pdf))
-    await ctx.send("I got your pdf")
+    await ctx.responce.send_message("I got your pdf")
     #await send_command_response(ctx, user, "I got your pdf")
 
 # @tasks.loop(hours = 24)
