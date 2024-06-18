@@ -1,6 +1,7 @@
-import discord
+#import discord
+import interactions
 #import discord_slash
-from discord.ext import commands, tasks
+#from discord.ext import commands, tasks
 #from pypdf import PdfReader
 #from bs4 import BeautifulSoup
 #from gtts import gTTS
@@ -16,7 +17,9 @@ import json
 #import os
 #import pandas as pd
 
-bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
+
+
+#bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
 #slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
 
 #TODO: make about page
@@ -25,6 +28,8 @@ bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
 
 discord_token = open("discord_token.txt", "r").read()
 #serpapi_token = open("serpapi_token.txt", "r").read()
+
+bot = interactions.Client(token=discord_token)
 
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
@@ -227,7 +232,7 @@ async def open_json(file_name):
 @bot.event
 async def on_ready():
     #bot.tree.copy_global_to(guild=None)
-    await bot.tree.sync(guild=None)
+    await bot.tree.sync()
 
     #start_time = datetime.now()
     #await send_warning_to_schedule_users()
@@ -321,12 +326,12 @@ async def on_ready():
 #         await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
 
 
-@bot.tree.command(name="summarize_pdf", description="Summarize a PDF file")
-async def _summarize_pdf(ctx, pdf : discord.Attachment):
-    user = ctx.author.id
-    print(pdf, type(pdf))
-    await ctx.send("I got your pdf")
-    #await send_command_response(ctx, user, "I got your pdf")
+# @bot.tree.command(name="summarize_pdf", description="Summarize a PDF file")
+# async def _summarize_pdf(ctx, pdf : discord.Attachment):
+#     user = ctx.author.id
+#     print(pdf, type(pdf))
+#     await ctx.send("I got your pdf")
+#     #await send_command_response(ctx, user, "I got your pdf")
 
 # @tasks.loop(hours = 24)
 # async def schedule_find_papers():
@@ -345,4 +350,4 @@ async def _summarize_pdf(ctx, pdf : discord.Attachment):
 #     next_run_in_seconds = await get_next_run_time(target_time)
 #     await asyncio.sleep(next_run_in_seconds)
 
-bot.run(discord_token)
+bot.start()
