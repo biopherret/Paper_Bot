@@ -1,8 +1,8 @@
-#import discord
+import discord
 #import interactions
 #from interactions import slash_command, SlashContext
 #import discord_slash
-#from discord.ext import commands, tasks
+from discord.ext import commands, tasks
 #from pypdf import PdfReader
 #from bs4 import BeautifulSoup
 #from gtts import gTTS
@@ -30,26 +30,9 @@ import json
 discord_token = open("discord_token.txt", "r").read()
 #serpapi_token = open("serpapi_token.txt", "r").read()
 
-from interactions import Client, Intents, listen, slash_command, SlashContext
 
-bot = Client(intents=Intents.DEFAULT)
+bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
 # intents are what events we want to receive from discord, `DEFAULT` is usually fine
-
-@listen()  # this decorator tells snek that it needs to listen for the corresponding event, and run this coroutine
-async def on_ready():
-    # This event is called when the bot is ready to respond to commands
-    print("Ready")
-    print(f"This bot is owned by {bot.owner}")
-
-
-@listen()
-async def on_message_create(event):
-    # This event is called when a message is sent in a channel the bot can see
-    print(f"message received: {event.message.content}")
-
-@slash_command(name="my_command", description="My first command :)")
-async def my_command_function(ctx: SlashContext):
-    await ctx.send("Hello World")
 
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
@@ -58,6 +41,10 @@ async def write_json(data, file_name):
 async def open_json(file_name):
     with open (file_name) as file:
         return json.load(file)
+    
+@bot.event
+async def on_ready():
+    print('Ready')
     
 # async def not_a_repeat_article(title, found_articles):
 #     for article_dict in found_articles:
@@ -336,7 +323,7 @@ async def open_json(file_name):
 #         await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
 
 
-# @bot.tree.command(name="summarize_pdf", description="Summarize a PDF file")
+# @bot.tree.command(name="summarize_pdf", description="Summarize a PDF file", dm_permission=True)
 # async def _summarize_pdf(ctx, pdf : discord.Attachment):
 #     user = ctx.author.id
 #     print(pdf, type(pdf))
