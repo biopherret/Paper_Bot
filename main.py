@@ -226,7 +226,7 @@ async def find_papers(user, num_papers):
         i += 1
         context_txt = await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'], user)
         if context_txt != None:
-            summary_txt = get_summary_from_LM(context_txt)
+            summary_txt = await get_summary_from_LM(context_txt)
             file = await text_to_mp3(summary_txt, article_dict['title'])
             await discord_user.send(file=file, content = "")
         await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper.\n {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))   
