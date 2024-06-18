@@ -226,7 +226,7 @@ async def open_json(file_name):
 
 @bot.event
 async def on_ready():
-    bot.tree.sync()
+    await bot.tree.sync()
     global start_time
     #start_time = datetime.now()
     #await send_warning_to_schedule_users()
