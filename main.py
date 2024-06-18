@@ -322,7 +322,7 @@ async def on_ready():
 
 @bot.tree.command(name="summarize_pdf", description="Summarize a PDF file")
 async def _summarize_pdf(ctx, pdf : discord.Attachment):
-    user = ctx.author.id
+    user = ctx.user.id
     print(pdf, type(pdf))
     await ctx.send("I got your pdf")
     #await send_command_response(ctx, user, "I got your pdf")
