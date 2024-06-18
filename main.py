@@ -16,7 +16,7 @@ import json
 #import os
 #import pandas as pd
 
-bot = commands.Bot(command_prefix = '.', intents=discord.Intents.all())
+bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
 #slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
 
 #TODO: make about page
@@ -226,12 +226,7 @@ async def open_json(file_name):
 
 @bot.event
 async def on_ready():
-    #bot.tree.clear_commands(guild=None)
-    #await bot.tree.sync()
-    #print("Commands cleared")
-    ui = discord.UI(slash_options={"delete_unused": True}) 
     for guild in bot.guilds:
-        print(guild.name)
         bot.tree.copy_global_to(guild=guild)
         await bot.tree.sync(guild=guild)
     #global start_time
