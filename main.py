@@ -226,7 +226,7 @@ async def open_json(file_name):
 
 @bot.event
 async def on_ready():
-    bot.tree.copy_global_to(guild=None)
+    #bot.tree.copy_global_to(guild=None)
     await bot.tree.sync(guild=None)
 
     #start_time = datetime.now()
