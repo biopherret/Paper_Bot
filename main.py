@@ -30,7 +30,7 @@ import json
 discord_token = open("discord_token.txt", "r").read()
 #serpapi_token = open("serpapi_token.txt", "r").read()
 
-from interactions import Client, Intents, listen
+from interactions import Client, Intents, listen, slash_command, SlashContext
 
 bot = Client(intents=Intents.DEFAULT)
 # intents are what events we want to receive from discord, `DEFAULT` is usually fine
@@ -46,6 +46,10 @@ async def on_ready():
 async def on_message_create(event):
     # This event is called when a message is sent in a channel the bot can see
     print(f"message received: {event.message.content}")
+
+@slash_command(name="my_command", description="My first command :)")
+async def my_command_function(ctx: SlashContext):
+    await ctx.send("Hello World")
 
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
