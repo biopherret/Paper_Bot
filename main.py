@@ -15,7 +15,7 @@ from StringProgressBar import progressBar #to report progress of long tasks
 
 from gtts import gTTS #for making the mp3 files
 
-#from gradio_client import Client
+from gradio_client import Client #to access a huggingface language model
 
 
 #import asyncio, math, urllib.request, os
@@ -186,18 +186,18 @@ async def get_text_for_LM(paper_title, doc_type, doc_link, online_link, user):
     except:
         return None
 
-# async def get_summary_from_LM(context_text):
-#     client = Client("biopherret/Paper_Summarizer")
-#     prompt = f'The following text is extracted from a PDF file of an academic paper. Ignoring the formatting text and the works cited, can you summarize the paper for a PhD student so I can decided if I want to read the paper? Thank you! Here is the paper text: "{context_text}"'
-#     result = client.predict("Hello!!",
-# 		"You are a friendly Chatbot.",
-# 		512,
-# 		0.7,
-# 		0.95,
-# 		api_name="/chat"
-# )
-#     print(result)
-#     return result
+async def get_summary_from_LM(context_text):
+    client = Client("biopherret/Paper_Summarizer")
+    prompt = f'The following text is extracted from a PDF file of an academic paper. Ignoring the formatting text and the works cited, can you summarize the paper for a PhD student so I can decided if I want to read the paper? Thank you! Here is the paper text: "{context_text}"'
+    result = client.predict("Hello!!",
+		"You are a friendly Chatbot.",
+		512,
+		0.7,
+		0.95,
+		api_name="/chat"
+)
+    print(result)
+    return result
     
 async def text_to_mp3(text, title):
     tts = gTTS(text, lang='en', slow = False)
@@ -226,7 +226,7 @@ async def find_papers(user, num_papers):
         i += 1
         context_txt = await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'], user)
         if context_txt != None:
-            summary_txt = 'this is a summary of the paper' #TODO: get summary from the LM
+            summary_txt = get_summary_from_LM(context_txt)
             file = await text_to_mp3(summary_txt, article_dict['title'])
             await discord_user.send(file=file, content = "")
         await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper.\n {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))   
