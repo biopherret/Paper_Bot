@@ -250,32 +250,26 @@ async def _clear_topics(ctx):
 
         await send_command_response(ctx, user, "Your topic settings have been cleared!")    
 
-# @slash.slash(name="view_topics", description="View your saved topic settings.")
-# async def _view_topics(ctx):
-#     user = ctx.author.id
-#     if await user_exists(ctx, user):
-#         topics_json = await open_json("topics.json")
-#         topics_list = topics_json[str(user)]['topic_settings']
+@bot.tree.command(name="view_topics", description="View your saved topic settings.")
+async def _view_topics(ctx):
+    user = ctx.user.id
+    if await user_exists(ctx, user):
+        topics_json = await open_json("topics.json")
+        topics_list = topics_json[str(user)]['topic_settings']
 
-#         embed = discord.Embed(title="Your Topics", description="Here are your current topic settings:")
-#         for topic_dict in topics_list:
-#             embed.add_field(name=topic_dict['topic'], value=f"Recent papers only?: {['No', 'Yes'][topic_dict['recent']]}", inline=False)
+        embed = discord.Embed(title="Your Topics", description="Here are your current topic settings:")
+        for topic_dict in topics_list:
+            embed.add_field(name=topic_dict['topic'], value=f"Recent papers only?: {['No', 'Yes'][topic_dict['recent']]}", inline=False)
 
-#         await send_command_response(ctx, user, embed, is_embed=True)
-    
-# @slash.slash(name="add_topic", description='Add a topic of papers you want Paper Bot to find for you. Use "author: name" to search for authors.', 
-#              options=[
-#                  discord_slash.manage_commands.create_option(name = 'topic', option_type = 3, required = True, description = "The topic you are interested in"),
-#                  discord_slash.manage_commands.create_option(name = 'recent', option_type = 3, required = True, description = "Do you want to restrict the search to papers published in the last year? (y/n)"),
-#              ])
+        await send_command_response(ctx, user, embed, is_embed=True)
 
-@bot.tree.command(name="add_topic", description='Add a topic of papers you want Paper Bot to find for you. Use "author: name" to search for authors.')
+@bot.tree.command(name="add_topic", description='Add a topic of papers you want Paper Bot to find for you.')
 async def _add_topic(ctx, topic : str, recent : str):
     '''Add a topic of papers you are interested in
 
     Args:
         ctx (Interaction): The context of the command
-        topic (str): The topic you're interested in
+        topic (str): Use "author: name" to search for authors.
         recent (str): Do you want to restrict the search to papers published in the last year? (y/n)
     '''
     user = ctx.user.id #save topic preferences in json
