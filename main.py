@@ -1,5 +1,4 @@
 import discord
-#import discord_slash
 from discord.ext import commands, tasks
 #from pypdf import PdfReader
 #from bs4 import BeautifulSoup
@@ -17,7 +16,6 @@ import json
 #import pandas as pd
 
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
-#slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
 
 #TODO: make about page
 #TODO: call the huggingface lm to summarize the text
@@ -84,27 +82,27 @@ async def open_json(file_name):
 #     else:
 #         return f'[{title}]({link})'
 
-# async def send_command_response(ctx, user, message, is_embed=False):
-#     if not isinstance(ctx.channel, discord.channel.DMChannel): #if the slash command was used in a server
-#         await ctx.send("Sending you a DM to keep things organized. To avoid spamming the server, please use Paper Bot in DMs.") #sending a message in response to the slash command to only use DMs in the future
-#         discord_user = await bot.fetch_user(user)
-#         if is_embed:
-#             await discord_user.send(embed=message)
-#         else:
-#             await discord_user.send(message) #send the message as a DM
-#     else: #if the slash command was used in a DM
-#         if is_embed:
-#             await ctx.send(embed=message)
-#         else:
-#             await ctx.send(message) #send the message as a DM, in response to the slash command
+async def send_command_response(ctx, user, message, is_embed=False):
+    if not isinstance(ctx.channel, discord.channel.DMChannel): #if the slash command was used in a server
+        await ctx.response.send_message("Sending you a DM to keep things organized. To avoid spamming the server, please use Paper Bot in DMs.") #sending a message in response to the slash command to only use DMs in the future
+        discord_user = await bot.fetch_user(user)
+        if is_embed:
+            await discord_user.send(embed=message)
+        else:
+            await discord_user.send(message) #send the message as a DM
+    else: #if the slash command was used in a DM
+        if is_embed:
+            await ctx.response.send_message(embed=message)
+        else:
+            await ctx.response.send_message(message) #send the message as a DM, in response to the slash command
 
-# async def user_exists(ctx, user):
-#     topics_json = await open_json("topics.json")
-#     if str(user) in topics_json.keys():
-#         return True
-#     else:
-#         await send_command_response(ctx, user, "You don't have any topics saved! Use the /add_topic command to add a topic.")
-#         return False
+async def user_exists(ctx, user):
+    topics_json = await open_json("topics.json")
+    if str(user) in topics_json.keys():
+        return True
+    else:
+        await send_command_response(ctx, user, "You don't have any topics saved! Use the /add_topic command to add a topic.")
+        return False
     
 # async def send_warning_to_schedule_users():
 #     topics_json = await open_json("topics.json")
@@ -242,15 +240,15 @@ async def on_ready():
 
 #     await send_command_response(ctx, user, "Your history has been cleared! All topic settings and found articles have been removed.")
 
-# @slash.slash(name="clear_topics", description="Clear your saved topic settings.")
-# async def _clear_topics(ctx):
-#     user = ctx.author.id
-#     if await user_exists(ctx, user):
-#         topics_json = await open_json("topics.json")
-#         topics_json[str(user)]['topic_settings'] = [] #empty the topic settings list
-#         await write_json(topics_json, "topics.json")
+@bot.tree.command(name="clear_topics", description="Clear your saved topic settings")
+async def _clear_topics(ctx):
+    user = ctx.user.id
+    if await user_exists(ctx, user):
+        topics_json = await open_json("topics.json")
+        topics_json[str(user)]['topic_settings'] = [] #empty the topic settings list
+        await write_json(topics_json, "topics.json")
 
-#         await send_command_response(ctx, user, "Your topic settings have been cleared!")    
+        await send_command_response(ctx, user, "Your topic settings have been cleared!")    
 
 # @slash.slash(name="view_topics", description="View your saved topic settings.")
 # async def _view_topics(ctx):
@@ -325,7 +323,8 @@ async def _summarize_pdf(ctx, pdf : discord.Attachment):
     user = ctx.user.id
     print(pdf, type(pdf))
     await ctx.response.send_message("I got your pdf")
-    #await send_command_response(ctx, user, "I got your pdf")
+    #TODO: get the text from the pdf
+    #TODO: push to LM to summarize
 
 # @tasks.loop(hours = 24)
 # async def schedule_find_papers():
