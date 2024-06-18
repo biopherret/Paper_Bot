@@ -1,18 +1,29 @@
 import discord
 from discord.ext import commands, tasks
-#from pypdf import PdfReader
-#from bs4 import BeautifulSoup
-#from gtts import gTTS
-#from StringProgressBar import progressBar
+import os
+
+import json #for managing tokens and user data
+
+import serpapi #for searching google scholar
+
+import urllib.request #for reading pdfs from the web
+from pypdf import PdfReader
+
+from bs4 import BeautifulSoup #for reading text from web pages
+
+from StringProgressBar import progressBar #to report progress of long tasks
+
+from gtts import gTTS #for making the mp3 files
+
 #from gradio_client import Client
 
-import json
+
 #import asyncio, math, urllib.request, os
 #from datetime import datetime, time, timedelta
 
-#import serpapi
+
 #import itertools
-#import os
+
 #import pandas as pd
 
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
@@ -22,7 +33,7 @@ bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
 #TODO: make a command to give a pdf to summarrize
 
 discord_token = open("discord_token.txt", "r").read()
-#serpapi_token = open("serpapi_token.txt", "r").read()
+serpapi_token = open("serpapi_token.txt", "r").read()
 
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
@@ -32,11 +43,11 @@ async def open_json(file_name):
     with open (file_name) as file:
         return json.load(file)
     
-# async def not_a_repeat_article(title, found_articles):
-#     for article_dict in found_articles:
-#         if title == article_dict['title']:
-#             return False
-#     return True
+async def not_a_repeat_article(title, found_articles):
+    for article_dict in found_articles:
+        if title == article_dict['title']:
+            return False
+    return True
 
 # async def get_next_run_time(target_time):
 #     now = datetime.now()
@@ -52,35 +63,35 @@ async def open_json(file_name):
 #     else:
 #         return str(delta).split()[0]
     
-# async def read_pdf(doc_link, title):
-#     response = urllib.request.urlopen(doc_link)
-#     file = open(title, 'wb')
-#     file.write(response.read())
-#     file.close()
+async def read_pdf(doc_link, title):
+    response = urllib.request.urlopen(doc_link)
+    file = open(title, 'wb')
+    file.write(response.read())
+    file.close()
 
-#     reader = PdfReader(title)
-#     context_txt = ""
-#     for page in reader.pages:
-#         context_txt += page.extract_text()
-#     os.remove(title) 
-#     return context_txt
+    reader = PdfReader(title)
+    context_txt = ""
+    for page in reader.pages:
+        context_txt += page.extract_text()
+    os.remove(title) 
+    return context_txt
 
-# async def read_web(link):
-#     page = urllib.request.urlopen(link)
-#     html = page.read().decode("utf-8")
-#     soup = BeautifulSoup(html, "html.parser")
-#     return soup.get_text()
+async def read_web(link):
+    page = urllib.request.urlopen(link)
+    html = page.read().decode("utf-8")
+    soup = BeautifulSoup(html, "html.parser")
+    return soup.get_text()
     
-# async def truncate_hyperlinked_title(user, title, link):
-#     max_title_length = 200 - len(link) - 6 #[title](link)\n
-#     if max_title_length < 30:
-#         discord_user = await bot.fetch_user(user)
-#         await discord_user.send(f"The hyperlink for [{title}]({link}) was too long to include in the main message.")
-#         return f"{title[:200]}..."
-#     if len(title) >= max_title_length:
-#         return f'[{title[:max_title_length] + "..."}]({link})'
-#     else:
-#         return f'[{title}]({link})'
+async def truncate_hyperlinked_title(user, title, link):
+    max_title_length = 200 - len(link) - 6 #[title](link)\n
+    if max_title_length < 30:
+        discord_user = await bot.fetch_user(user)
+        await discord_user.send(f"The hyperlink for [{title}]({link}) was too long to include in the main message.")
+        return f"{title[:200]}..."
+    if len(title) >= max_title_length:
+        return f'[{title[:max_title_length] + "..."}]({link})'
+    else:
+        return f'[{title}]({link})'
 
 async def send_command_response(ctx, user, message, is_embed=False):
     if not isinstance(ctx.channel, discord.channel.DMChannel): #if the slash command was used in a server
@@ -111,70 +122,69 @@ async def user_exists(ctx, user):
 #         discord_user = await bot.fetch_user(user)
 #         await discord_user.send("Warning: I just woke up from a nap, this means I have lost track of how many days its been since I last sent you papers. I will send you papers at 9AM, and after your paper frequency will return to normal.")
 
-# async def getArticles(topics_list, num_papers, user):
-#     topics_json = await open_json("topics.json")
-#     found_articles = topics_json[str(user)]["found_articles"]
-#     new_articles = []
+async def getArticles(topics_list, num_papers, user):
+    topics_json = await open_json("topics.json")
+    found_articles = topics_json[str(user)]["found_articles"]
+    new_articles = []
 
-#     for topic_dict in topics_list:
-#         n = 0 #keep track of the number of papers found
-#         i = 0 #keep track of th number of searches done
+    for topic_dict in topics_list:
+        n = 0 #keep track of the number of papers found
+        i = 0 #keep track of th number of searches done
         
-#         while n < num_papers: #while we haven't found the desired number of papers yet
-#             params = {
-#                 "engine": "google_scholar",
-#                 "q": topic_dict['topic'],
-#                 "api_key": serpapi_token,
-#                 "scisbd": topic_dict['recent'],
-#                 "hl": "en",
-#                 'num': 20,
-#                 'start': i*20
-#                 }
-#             search=serpapi.search(params)
-#             i += 1
-#             for r in range(len(search['organic_results'])): #for each article found in the search
-#                 title = search['organic_results'][r]['title']
-#                 if await not_a_repeat_article(title, found_articles): 
-#                     online_link = search['organic_results'][r]['link']
-#                     n += 1
-#                     if 'resources' in search['organic_results'][r].keys(): #if the search has attached docs
-#                         doc_type = search['organic_results'][r]['resources'][0]['file_format'] #get the doc type for the first resource
-#                         doc_link = search['organic_results'][r]['resources'][0]['link'] #get the link for the first resource
-#                     else: #if there are no attached docs
-#                         doc_type = None
-#                         doc_link = None
+        while n < num_papers: #while we haven't found the desired number of papers yet
+            params = {
+                "engine": "google_scholar",
+                "q": topic_dict['topic'],
+                "api_key": serpapi_token,
+                "scisbd": topic_dict['recent'],
+                "hl": "en",
+                'num': 20,
+                'start': i*20
+                }
+            search=serpapi.search(params)
+            i += 1
+            for r in range(len(search['organic_results'])): #for each article found in the search
+                title = search['organic_results'][r]['title']
+                if await not_a_repeat_article(title, found_articles): 
+                    online_link = search['organic_results'][r]['link']
+                    n += 1
+                    if 'resources' in search['organic_results'][r].keys(): #if the search has attached docs
+                        doc_type = search['organic_results'][r]['resources'][0]['file_format'] #get the doc type for the first resource
+                        doc_link = search['organic_results'][r]['resources'][0]['link'] #get the link for the first resource
+                    else: #if there are no attached docs
+                        doc_type = None
+                        doc_link = None
 
-#                     article_dict = {'title': title, 'online_link': online_link, 'topic': topic_dict['topic'], 'doc_type': doc_type, 'doc_link': doc_link}
-#                     found_articles.append(article_dict)
-#                     new_articles.append(article_dict)
+                    article_dict = {'title': title, 'online_link': online_link, 'topic': topic_dict['topic'], 'doc_type': doc_type, 'doc_link': doc_link}
+                    found_articles.append(article_dict)
+                    new_articles.append(article_dict)
         
-#                 if n == num_papers:
-#                     break
+                if n == num_papers:
+                    break
 
-#     await write_json(topics_json, "topics.json") #save new articles to json
-#     return new_articles
+    await write_json(topics_json, "topics.json") #save new articles to json
+    return new_articles
 
-# async def get_text_for_LM(paper_title, doc_type, doc_link, online_link, user):
-#     if doc_type == 'PDF':  
-#         try:
-#             context_text = await read_pdf(doc_link, paper_title)
-#             return context_text
-#         except:
-#             pass
+async def get_text_for_LM(paper_title, doc_type, doc_link, online_link, user):
+    if doc_type == 'PDF':  
+        try:
+            context_text = await read_pdf(doc_link, paper_title)
+            return context_text
+        except:
+            pass
 
-#     if doc_type == 'HTML':
-#         try:
-#             context_text = await read_web(doc_link)
-#             return context_text
-#         except:
-#             pass
+    if doc_type == 'HTML':
+        try:
+            context_text = await read_web(doc_link)
+            return context_text
+        except:
+            pass
     
-#     try:
-#         context_text = await read_web(online_link)
-#         return context_text
-#     except:
-#         discord_user = await bot.fetch_user(user)
-#         return None
+    try:
+        context_text = await read_web(online_link)
+        return context_text
+    except:
+        return None
 
 # async def get_summary_from_LM(context_text):
 #     client = Client("biopherret/Paper_Summarizer")
@@ -189,38 +199,38 @@ async def user_exists(ctx, user):
 #     print(result)
 #     return result
     
-# async def text_to_mp3(text, title):
-#     tts = gTTS(text, lang='en', slow = False)
-#     tts.save(f"{title}.mp3")
-#     file_to_send = discord.File(f"{title}.mp3")
-#     os.remove(f"{title}.mp3")
-#     return file_to_send
+async def text_to_mp3(text, title):
+    tts = gTTS(text, lang='en', slow = False)
+    tts.save(f"{title}.mp3")
+    file_to_send = discord.File(f"{title}.mp3")
+    os.remove(f"{title}.mp3")
+    return file_to_send
 
-# async def find_papers(user, num_papers):
-#     topics_json = await open_json("topics.json")
-#     topics_list = topics_json[str(user)]["topic_settings"]
+async def find_papers(user, num_papers):
+    topics_json = await open_json("topics.json")
+    topics_list = topics_json[str(user)]["topic_settings"]
 
-#     found_articles = await getArticles(topics_list, num_papers, user)
-#     num_found = int(len(found_articles))
+    found_articles = await getArticles(topics_list, num_papers, user)
+    num_found = int(len(found_articles))
 
-#     embed = discord.Embed(title="Papers I Found For You")
-#     for topic_dict in topics_list:
-#         hyperlinked_papers_list = [await truncate_hyperlinked_title(user, article_dict['title'], article_dict['online_link']) for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
-#         embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value="\n".join(hyperlinked_papers_list), inline=False)
-#     discord_user = await bot.fetch_user(user)
-#     await discord_user.send(embed = embed)
+    embed = discord.Embed(title="Papers I Found For You")
+    for topic_dict in topics_list:
+        hyperlinked_papers_list = [await truncate_hyperlinked_title(user, article_dict['title'], article_dict['online_link']) for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
+        embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value="\n".join(hyperlinked_papers_list), inline=False)
+    discord_user = await bot.fetch_user(user)
+    await discord_user.send(embed = embed)
 
-#     i = 0
-#     progress_mes = await discord_user.send("I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper\n {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))
-#     for article_dict in found_articles:
-#         i += 1
-#         context_txt = await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'], user)
-#         if context_txt != None:
-#             summary_txt = await get_summary_from_LM(context_txt)
-#             file = await text_to_mp3(summary_txt, article_dict['title'])
-#             await discord_user.send(file=file, content = "")
-#         await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper.\n {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))   
-#     await discord_user.send("Done!")
+    i = 0
+    progress_mes = await discord_user.send("I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper\n {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))
+    for article_dict in found_articles:
+        i += 1
+        context_txt = await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'], user)
+        if context_txt != None:
+            summary_txt = 'this is a summary of the paper' #TODO: get summary from the LM
+            file = await text_to_mp3(summary_txt, article_dict['title'])
+            await discord_user.send(file=file, content = "")
+        await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper.\n {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))   
+    await discord_user.send("Done!")
 
 @bot.event
 async def on_ready():
@@ -289,18 +299,22 @@ async def _add_topic(ctx, topic : str, recent : str):
     
     await send_command_response(ctx, user, "Your new topic has been added!")
 
-# @slash.slash(name="find_papers_now", description="Find papers based on your topic interests",
-#              options=[
-#                  discord_slash.manage_commands.create_option(name = 'num_papers', option_type = 4, required = True, description = "The number of papers you want to find for each topic (Max 5)"),
-#              ])
-# async def _find_papers_now(ctx, num_papers):
-#     user = ctx.author.id
-#     if num_papers < 6:
-#         if await user_exists(ctx, user):
-#             await send_command_response(ctx, user, "Finding papers for you...") #sending an initial message b/c if the initial response from the bot takes too long, discord will send a no-response error message
-#             await find_papers(user, num_papers)
-#     else: #if they are trying to find more than 5 papers per topic
-#         await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
+
+@bot.tree.command(name="find_papers_now", description="Find papers based on your topic interests")
+async def _find_papers_now(ctx, num_papers : int):
+    '''Find papers based on your topic instrests
+
+    Args:
+        ctx (Interaction): The context of the command
+        num_papers (int): The number of papers you want to find for each topic (Max 5)
+    '''
+    user = ctx.user.id
+    if num_papers < 6:
+        if await user_exists(ctx, user):
+            await send_command_response(ctx, user, "Finding papers for you...") #sending an initial message b/c if the initial response from the bot takes too long, discord will send a no-response error message
+            await find_papers(user, num_papers)
+    else: #if they are trying to find more than 5 papers per topic
+        await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
     
 # @slash.slash(name="schedule", description="Set the frequency Paper Bot will automatically find papers and send them to your DM.",
 #              options=[
