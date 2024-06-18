@@ -226,9 +226,10 @@ async def open_json(file_name):
 
 @bot.event
 async def on_ready():
-    bot.tree.clear_commands(guild=None)
-    await bot.tree.sync()
-    print("Commands cleared")
+    #bot.tree.clear_commands(guild=None)
+    #await bot.tree.sync()
+    #print("Commands cleared")
+    ui = discord.UI(slash_options={"delete_unused": True}) 
     for guild in bot.guilds:
         print(guild.name)
         bot.tree.copy_global_to(guild=guild)
