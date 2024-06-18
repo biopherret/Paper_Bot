@@ -319,8 +319,7 @@ async def on_ready():
 #         await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
 
 
-commandTree = discord.app_commands.CommandTree(bot)
-@commandTree.command(name="summarize_pdf", description="Summarize a PDF file")
+@bot.tree.command(name="summarize_pdf", description="Summarize a PDF file")
 async def summarize_pdf(ctx, pdf : discord.Attachment):
     user = ctx.author.id
     print(pdf, type(pdf))
