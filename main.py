@@ -20,6 +20,7 @@ slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash com
 
 #TODO: make about page
 #TODO: call the huggingface lm to summarize the text
+#TODO: make a command to give a pdf to summarrize
 
 discord_token = open("discord_token.txt", "r").read()
 serpapi_token = open("serpapi_token.txt", "r").read()
@@ -315,6 +316,15 @@ async def _schedule(ctx, days, number_of_papers):
             await send_command_response(ctx, user, f"Paper Bot will now find {number_of_papers} papers per topic every {days} days.")
     else: #if they are trying to find more than 5 papers per topic
         await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
+
+@slash.slash(name = "sumarize_pdf", description = "Summarize a PDF file",
+             options=[
+                 discord_slash.manage_commands.create_option(name = 'pdf', option_type = 3, required = True, description = "The link to the PDF file you want to summarize.")
+             ])
+async def _summarize_pdf(ctx, pdf : discord.Attachment):
+    user = ctx.author.id
+    print(pdf, type(pdf))
+    await send_command_response(ctx, user, "I got your pdf")
 
 @tasks.loop(hours = 24)
 async def schedule_find_papers():
