@@ -232,6 +232,18 @@ async def open_json(file_name):
 @interactions.listen()
 async def on_startup():
     print("Bot is ready!")
+
+    #start_time = datetime.now()
+    #await send_warning_to_schedule_users()
+    #schedule_find_papers.start()
+
+@bot.command(
+    name="my_first_command",
+    description="This is the first command I made!"
+)
+async def my_first_command(ctx: interactions.CommandContext):
+    await ctx.send("Hi there!")
+
 # @slash.slash(name="clear_history", description="Clear all Paper Bot topic settings and articles (remove all previously found papers from history).")
 # async def _clear_history(ctx):  
 #     user = ctx.author.id
