@@ -193,7 +193,7 @@ async def get_text_for_LM(paper_title, doc_type, doc_link, online_link, user):
 async def get_summary_from_LM(context_text):
     prompt = f'The following text is extracted from a PDF file of an academic paper. Ignoring the formatting text and the works cited, please summarize this paper. Thank you! Here is the paper text: "{context_text}"'
     result = hf_client.predict(prompt,
-		"You are a friendly Chatbot here to help PhD students decide if they want to read a paper, by summarizing it for them.",
+		"You are a friendly Chatbot here to help PhD students by summarizing it for them.",
 		512,
 		0.7,
 		0.95,
