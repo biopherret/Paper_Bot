@@ -30,6 +30,7 @@ import asyncio
 #import pandas as pd
 
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
+hf_client = Client("biopherret/Paper_Summarizer")
 
 #TODO: make about page
 #TODO: call the huggingface lm to summarize the text
@@ -190,10 +191,9 @@ async def get_text_for_LM(paper_title, doc_type, doc_link, online_link, user):
         return None
 
 async def get_summary_from_LM(context_text):
-    client = Client("biopherret/Paper_Summarizer")
-    prompt = f'The following text is extracted from a PDF file of an academic paper. Ignoring the formatting text and the works cited, can you first tell me if the content contains just the abstract or the entire paper. Then, summarize the paper for a PhD student so I can decided if I want to read the paper? Thank you! Here is the paper text: "{context_text}"'
-    result = client.predict(prompt,
-		"You are a friendly Chatbot.",
+    prompt = f'The following text is extracted from a PDF file of an academic paper. Ignoring the formatting text and the works cited, please summarize this paper. Thank you! Here is the paper text: "{context_text}"'
+    result = hf_client.predict(prompt,
+		"You are a friendly Chatbot here to help PhD students decide if they want to read a paper, by summarizing it for them.",
 		512,
 		0.7,
 		0.95,
