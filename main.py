@@ -226,6 +226,7 @@ async def open_json(file_name):
 
 @bot.event
 async def on_ready():
+    bot.tree.sync()
     global start_time
     #start_time = datetime.now()
     #await send_warning_to_schedule_users()
@@ -319,7 +320,7 @@ async def on_ready():
 #         await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
 
 
-@bot.tree.command(name="summarize_pdf", description="Summarize a PDF file", dm_permission=True)
+@bot.tree.command(name="summarize_pdf", description="Summarize a PDF file")
 async def _summarize_pdf(ctx, pdf : discord.Attachment):
     user = ctx.author.id
     print(pdf, type(pdf))
