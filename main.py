@@ -231,14 +231,14 @@ async def on_ready():
     #schedule_find_papers.start()
     print("Ready!")
 
-# @slash.slash(name="clear_history", description="Clear all Paper Bot topic settings and articles (remove all previously found papers from history).")
-# async def _clear_history(ctx):  
-#     user = ctx.author.id
-#     topics_json = await open_json("topics.json")
-#     topics_json.pop(str(user)) #remove the user from the json
-#     await write_json(topics_json, "topics.json")
+@bot.tree.command(name="clear_history", description="Clear all Paper Bot topic settings and articles (remove all previously found papers from history).")
+async def _clear_history(ctx):  
+    user = ctx.user.id
+    topics_json = await open_json("topics.json")
+    topics_json.pop(str(user)) #remove the user from the json
+    await write_json(topics_json, "topics.json")
 
-#     await send_command_response(ctx, user, "Your history has been cleared! All topic settings and found articles have been removed.")
+    await send_command_response(ctx, user, "Your history has been cleared! All topic settings and found articles have been removed.")
 
 @bot.tree.command(name="clear_topics", description="Clear your saved topic settings")
 async def _clear_topics(ctx):
