@@ -1,5 +1,6 @@
 #import discord
 import interactions
+from interactions import slash_command, SlashContext
 #import discord_slash
 #from discord.ext import commands, tasks
 #from pypdf import PdfReader
@@ -237,12 +238,9 @@ async def on_startup():
     #await send_warning_to_schedule_users()
     #schedule_find_papers.start()
 
-@bot.command(
-    name="my_first_command",
-    description="This is the first command I made!"
-)
-async def my_first_command(ctx: interactions.CommandContext):
-    await ctx.send("Hi there!")
+@slash_command(name="my_command", description="My first command :)")
+async def my_command_function(ctx: SlashContext):
+    await ctx.send("Hello World")
 
 # @slash.slash(name="clear_history", description="Clear all Paper Bot topic settings and articles (remove all previously found papers from history).")
 # async def _clear_history(ctx):  
