@@ -229,16 +229,9 @@ async def open_json(file_name):
 #         await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper.\n {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))   
 #     await discord_user.send("Done!")
 
-@bot.event
-async def on_ready():
-    #bot.tree.copy_global_to(guild=None)
-    await bot.tree.sync()
-
-    #start_time = datetime.now()
-    #await send_warning_to_schedule_users()
-    #schedule_find_papers.start()
-    print("Ready!")
-
+@interactions.listen()
+async def on_startup():
+    print("Bot is ready!")
 # @slash.slash(name="clear_history", description="Clear all Paper Bot topic settings and articles (remove all previously found papers from history).")
 # async def _clear_history(ctx):  
 #     user = ctx.author.id
