@@ -317,11 +317,10 @@ async def _schedule(ctx, days, number_of_papers):
     else: #if they are trying to find more than 5 papers per topic
         await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
 
-@slash.slash(name = "sumarize_pdf", description = "Summarize a PDF file",
-             options=[
-                 discord_slash.manage_commands.create_option(name = 'pdf', option_type = 3, required = True, description = "The link to the PDF file you want to summarize.")
-             ])
-async def _summarize_pdf(ctx, pdf : discord.Attachment):
+
+commandTree = discord.app_commands.CommandTree(bot)
+@commandTree.command(name="summarize_pdf", description="Summarize a PDF file")
+async def summarize_pdf(ctx, pdf : discord.Attachment):
     user = ctx.author.id
     print(pdf, type(pdf))
     await send_command_response(ctx, user, "I got your pdf")
