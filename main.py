@@ -347,4 +347,4 @@ async def on_ready():
 #     next_run_in_seconds = await get_next_run_time(target_time)
 #     await asyncio.sleep(next_run_in_seconds)
 
-bot.start(discord_token)
+await bot.start(discord_token)
