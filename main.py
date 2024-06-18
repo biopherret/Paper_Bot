@@ -356,4 +356,4 @@ async def open_json(file_name):
 #     next_run_in_seconds = await get_next_run_time(target_time)
 #     await asyncio.sleep(next_run_in_seconds)
 
-bot.start()
+bot.start(discord_token)
