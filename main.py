@@ -226,7 +226,10 @@ async def open_json(file_name):
 
 @bot.event
 async def on_ready():
-    global start_time
+    for guild in bot.guilds:
+        bot.tree.copy_global_to(guild=guild.id)
+        await bot.tree.sync(guild=guild.id)
+    #global start_time
     #start_time = datetime.now()
     #await send_warning_to_schedule_users()
     #schedule_find_papers.start()
