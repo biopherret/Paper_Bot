@@ -268,23 +268,25 @@ async def _clear_topics(ctx):
 #                  discord_slash.manage_commands.create_option(name = 'topic', option_type = 3, required = True, description = "The topic you are interested in"),
 #                  discord_slash.manage_commands.create_option(name = 'recent', option_type = 3, required = True, description = "Do you want to restrict the search to papers published in the last year? (y/n)"),
 #              ])
-# async def _add_topic(ctx, topic, recent):
-#     user = ctx.author.id #save topic preferences in json
-#     topics_json = await open_json("topics.json")
-#     if str(user) not in topics_json.keys(): #if this user dosn't exist yet
-#         topics_json[str(user)] = {'topic_settings': [], 'found_articles': [], 'search_schedule' : None, 'auto_num' : 0} #create a dictionary object for the new user
-#         discord_user = await bot.fetch_user(user)
-#         await discord_user.send("Welcome to Paper Bot! I've created a new user profile for you.")
 
-#     if recent == 'y':
-#         recent = 1
-#     else:
-#         recent = 0
+@bot.tree.command(name="add_topic", description='Add a topic of papers you want Paper Bot to find for you. Use "author: name" to search for authors.')
+async def _add_topic(ctx, topic : str, recent : str):
+    user = ctx.author.id #save topic preferences in json
+    topics_json = await open_json("topics.json")
+    if str(user) not in topics_json.keys(): #if this user dosn't exist yet
+        topics_json[str(user)] = {'topic_settings': [], 'found_articles': [], 'search_schedule' : None, 'auto_num' : 0} #create a dictionary object for the new user
+        discord_user = await bot.fetch_user(user)
+        await discord_user.send("Welcome to Paper Bot! I've created a new user profile for you.")
 
-#     topics_json[str(user)]['topic_settings'].append({"topic": topic, "recent": recent}) #add the new topic
-#     await write_json(topics_json, "topics.json")
+    if recent == 'y':
+        recent = 1
+    else:
+        recent = 0
+
+    topics_json[str(user)]['topic_settings'].append({"topic": topic, "recent": recent}) #add the new topic
+    await write_json(topics_json, "topics.json")
     
-#     await send_command_response(ctx, user, "Your new topic has been added!")
+    await send_command_response(ctx, user, "Your new topic has been added!")
 
 # @slash.slash(name="find_papers_now", description="Find papers based on your topic interests",
 #              options=[
