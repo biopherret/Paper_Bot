@@ -17,9 +17,12 @@ from gtts import gTTS #for making the mp3 files
 
 from gradio_client import Client #to access a huggingface language model
 
+from datetime import datetime, time, timedelta #for managing scheduler
+import asyncio
+
 
 #import asyncio, math, urllib.request, os
-#from datetime import datetime, time, timedelta
+
 
 
 #import itertools
@@ -49,19 +52,19 @@ async def not_a_repeat_article(title, found_articles):
             return False
     return True
 
-# async def get_next_run_time(target_time):
-#     now = datetime.now()
-#     next_run = datetime.combine(now.date(), target_time)
-#     if next_run < now:
-#         next_run += timedelta(days=1)
-#     return (next_run - now).total_seconds()
+async def get_next_run_time(target_time):
+    now = datetime.now()
+    next_run = datetime.combine(now.date(), target_time)
+    if next_run < now:
+        next_run += timedelta(days=1)
+    return (next_run - now).total_seconds()
 
-# async def uptime_days_rounded_down():
-#     delta = datetime.now().date() - start_time.date()
-#     if str(delta) == "0:00:00":
-#         return 0
-#     else:
-#         return str(delta).split()[0]
+async def uptime_days_rounded_down():
+    delta = datetime.now().date() - start_time.date()
+    if str(delta) == "0:00:00":
+        return 0
+    else:
+        return str(delta).split()[0]
     
 async def read_pdf(doc_link, title):
     response = urllib.request.urlopen(doc_link)
@@ -115,12 +118,12 @@ async def user_exists(ctx, user):
         await send_command_response(ctx, user, "You don't have any topics saved! Use the /add_topic command to add a topic.")
         return False
     
-# async def send_warning_to_schedule_users():
-#     topics_json = await open_json("topics.json")
-#     users = [user for user in topics_json.keys() if topics_json[user]['search_schedule'] != None] #get all users with a search schedule
-#     for user in users:
-#         discord_user = await bot.fetch_user(user)
-#         await discord_user.send("Warning: I just woke up from a nap, this means I have lost track of how many days its been since I last sent you papers. I will send you papers at 9AM, and after your paper frequency will return to normal.")
+async def send_warning_to_schedule_users():
+    topics_json = await open_json("topics.json")
+    users = [user for user in topics_json.keys() if topics_json[user]['search_schedule'] != None] #get all users with a search schedule
+    for user in users:
+        discord_user = await bot.fetch_user(user)
+        await discord_user.send("Warning: I just woke up from a nap, this means I have lost track of how many days its been since I last sent you papers. I will send you papers at 9AM, and after your paper frequency will return to normal.")
 
 async def getArticles(topics_list, num_papers, user):
     topics_json = await open_json("topics.json")
@@ -196,7 +199,6 @@ async def get_summary_from_LM(context_text):
 		0.95,
 		api_name="/chat"
 )
-    print(result)
     return result
     
 async def text_to_mp3(text, title):
@@ -236,9 +238,9 @@ async def find_papers(user, num_papers):
 async def on_ready():
     await bot.tree.sync()
     global start_time
-    #start_time = datetime.now()
-    #await send_warning_to_schedule_users()
-    #schedule_find_papers.start()
+    start_time = datetime.now()
+    await send_warning_to_schedule_users()
+    schedule_find_papers.start()
     print("Ready!")
 
 @bot.tree.command(name="clear_history", description="Clear all Paper Bot topic settings and articles (remove all previously found papers from history).")
@@ -316,23 +318,27 @@ async def _find_papers_now(ctx, num_papers : int):
     else: #if they are trying to find more than 5 papers per topic
         await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
     
-# @slash.slash(name="schedule", description="Set the frequency Paper Bot will automatically find papers and send them to your DM.",
-#              options=[
-#                  discord_slash.manage_commands.create_option(name = 'days', option_type = 4, required = True, description = "Find papers every x days."),
-#                  discord_slash.manage_commands.create_option(name = 'number_of_papers', option_type = 4, required = True, description = "Number of papers to find per search per topic.")
-#              ])
-# async def _schedule(ctx, days, number_of_papers):
-#     user = ctx.author.id
-#     if number_of_papers < 6:
-#         if await user_exists(ctx, user):
-#             topics_json = await open_json("topics.json")
-#             topics_json[str(user)]['search_schedule'] = days
-#             topics_json[str(user)]['auto_num'] = number_of_papers
-#             await write_json(topics_json, "topics.json")
 
-#             await send_command_response(ctx, user, f"Paper Bot will now find {number_of_papers} papers per topic every {days} days.")
-#     else: #if they are trying to find more than 5 papers per topic
-#         await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
+@bot.tree.command(name="schedule", description="Set the frequency Paper Bot will automatically find papers and send them to your DM.")
+async def _schedule(ctx, days : int, number_of_papers : int):
+    '''Set the frequency Paper Bot will automatically find papers and send them to your DM.
+
+    Args:
+        ctx (Interaction): The context of the command
+        days (int): Find papers every x days.
+        number_of_papers (int): Number of papers to find per search per topic.
+    '''
+    user = ctx.author.id
+    if number_of_papers < 6:
+        if await user_exists(ctx, user):
+            topics_json = await open_json("topics.json")
+            topics_json[str(user)]['search_schedule'] = days
+            topics_json[str(user)]['auto_num'] = number_of_papers
+            await write_json(topics_json, "topics.json")
+
+            await send_command_response(ctx, user, f"Paper Bot will now find {number_of_papers} papers per topic every {days} days.")
+    else: #if they are trying to find more than 5 papers per topic
+        await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
 
 
 @bot.tree.command(name="summarize_pdf", description="Summarize a PDF file")
@@ -343,21 +349,21 @@ async def _summarize_pdf(ctx, pdf : discord.Attachment):
     #TODO: get the text from the pdf
     #TODO: push to LM to summarize
 
-# @tasks.loop(hours = 24)
-# async def schedule_find_papers():
-#     day_count = await uptime_days_rounded_down()
-#     topics_json = await open_json("topics.json")
-#     users = [user for user in topics_json.keys() if topics_json[user]['search_schedule'] != None] #get all users with a search schedule
-#     for user in users:
-#         frequency = topics_json[user]['search_schedule']
-#         num = topics_json[user]['auto_num']
-#         if int(day_count) % int(frequency) == 0:
-#             await find_papers(user, num)
+@tasks.loop(hours = 24)
+async def schedule_find_papers():
+    day_count = await uptime_days_rounded_down()
+    topics_json = await open_json("topics.json")
+    users = [user for user in topics_json.keys() if topics_json[user]['search_schedule'] != None] #get all users with a search schedule
+    for user in users:
+        frequency = topics_json[user]['search_schedule']
+        num = topics_json[user]['auto_num']
+        if int(day_count) % int(frequency) == 0:
+            await find_papers(user, num)
 
-# @schedule_find_papers.before_loop #this executes before the above loop starts
-# async def before_schedule_find_papers():
-#     target_time = time(hour=9, minute=00)
-#     next_run_in_seconds = await get_next_run_time(target_time)
-#     await asyncio.sleep(next_run_in_seconds)
+@schedule_find_papers.before_loop #this executes before the above loop starts
+async def before_schedule_find_papers():
+    target_time = time(hour=9, minute=00)
+    next_run_in_seconds = await get_next_run_time(target_time)
+    await asyncio.sleep(next_run_in_seconds)
 
 bot.run(discord_token)
