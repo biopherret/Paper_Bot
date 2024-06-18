@@ -227,8 +227,9 @@ async def open_json(file_name):
 @bot.event
 async def on_ready():
     bot.tree.clear_commands(guild=None)
-    bot.tree.copy_global_to()
-    await bot.tree.sync()
+    for guild in bot.guilds:
+        bot.tree.copy_global_to(guild=guild)
+        await bot.tree.sync(guild=guild)
     #global start_time
     #start_time = datetime.now()
     #await send_warning_to_schedule_users()
