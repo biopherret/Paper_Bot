@@ -1,6 +1,4 @@
 import discord
-#import interactions
-#from interactions import slash_command, SlashContext
 #import discord_slash
 from discord.ext import commands, tasks
 #from pypdf import PdfReader
@@ -18,9 +16,7 @@ import json
 #import os
 #import pandas as pd
 
-
-
-#bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
+bot = commands.Bot(command_prefix = '.', intents=discord.Intents.all())
 #slash = discord_slash.SlashCommand(bot, sync_commands=True) # Declares slash commands through the bot.
 
 #TODO: make about page
@@ -30,10 +26,6 @@ import json
 discord_token = open("discord_token.txt", "r").read()
 #serpapi_token = open("serpapi_token.txt", "r").read()
 
-
-bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
-# intents are what events we want to receive from discord, `DEFAULT` is usually fine
-
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
         json.dump(data, file, indent = 4)
@@ -41,10 +33,6 @@ async def write_json(data, file_name):
 async def open_json(file_name):
     with open (file_name) as file:
         return json.load(file)
-    
-@bot.event
-async def on_ready():
-    print('Ready')
     
 # async def not_a_repeat_article(title, found_articles):
 #     for article_dict in found_articles:
@@ -236,6 +224,14 @@ async def on_ready():
 #         await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper.\n {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))   
 #     await discord_user.send("Done!")
 
+@bot.event
+async def on_ready():
+    global start_time
+    #start_time = datetime.now()
+    #await send_warning_to_schedule_users()
+    #schedule_find_papers.start()
+    print("Ready!")
+
 # @slash.slash(name="clear_history", description="Clear all Paper Bot topic settings and articles (remove all previously found papers from history).")
 # async def _clear_history(ctx):  
 #     user = ctx.author.id
@@ -323,12 +319,12 @@ async def on_ready():
 #         await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
 
 
-# @bot.tree.command(name="summarize_pdf", description="Summarize a PDF file", dm_permission=True)
-# async def _summarize_pdf(ctx, pdf : discord.Attachment):
-#     user = ctx.author.id
-#     print(pdf, type(pdf))
-#     await ctx.send("I got your pdf")
-#     #await send_command_response(ctx, user, "I got your pdf")
+@bot.tree.command(name="summarize_pdf", description="Summarize a PDF file")
+async def _summarize_pdf(ctx, pdf : discord.Attachment):
+    user = ctx.author.id
+    print(pdf, type(pdf))
+    await ctx.send("I got your pdf")
+    #await send_command_response(ctx, user, "I got your pdf")
 
 # @tasks.loop(hours = 24)
 # async def schedule_find_papers():
@@ -347,4 +343,4 @@ async def on_ready():
 #     next_run_in_seconds = await get_next_run_time(target_time)
 #     await asyncio.sleep(next_run_in_seconds)
 
-await bot.start(discord_token)
+bot.run(discord_token)
