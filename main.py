@@ -188,9 +188,19 @@ async def get_summary_from_LM(context_text):
 		api_name="/chat"
 )
     return result
-    
-async def text_to_mp3(text, title):
-    filepath = await hf_tts_client.predict(
+
+import typing, functools
+def to_thread(func: typing.Callable) -> typing.Coroutine:
+    @functools.wraps(func)
+    async def wrapper(*args, **kwargs):
+        loop = asyncio.get_event_loop()
+        wrapper = functools.partial(func, *args, **kwargs)
+        return await loop.run_in_executor(None, wrapper)
+    return wrapper
+
+@to_thread
+def text_to_mp3(text, title):
+    filepath = hf_tts_client.predict(
 		text,
 		"en",
 		fn_index=0
