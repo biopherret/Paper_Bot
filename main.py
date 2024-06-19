@@ -387,6 +387,16 @@ async def _about(ctx):
     embed.add_field(name="Why does Paper Bot not send me a summary for every paper?", value="Paper Bot requires access to the paper to be able to summarize it. Paper Bot uses both Goggle Scholar and web scraping to try to access the paper content, but some journal websites block these methods. For papers that paper bot wasn't able to summarize, you can retrieve the pdf from the provided links and use /summarize_pdf to retrieve the summary.", inline=False)
     await ctx.response.send_message(embed=embed)
 
+button = discord.Button(label="Click me!", style=discord.ButtonStyle.grey)
+async def button_callback(interaction:discord.Interaction):
+    await interaction.response.send_message("workie!",ephemeral=True)
+view = discord.View()
+view.add_item(button)
+
+@bot.tree.command(name="tester", description="tester")
+async def _hello(ctx: discord.Interaction):
+    await ctx.response.send_message("tester", view=view)
+
 @tasks.loop(hours = 24)
 async def schedule_find_papers():
     day_count = await uptime_days_rounded_down()
