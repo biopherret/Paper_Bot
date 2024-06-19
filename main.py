@@ -190,7 +190,7 @@ async def get_summary_from_LM(context_text):
     return result
     
 async def text_to_mp3(text, title):
-    filepath = hf_tts_client.predict(
+    filepath = await hf_tts_client.predict(
 		text,
 		"en",
 		fn_index=0
