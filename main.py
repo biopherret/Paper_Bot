@@ -369,9 +369,9 @@ async def _summarize_pdf(ctx, pdf : discord.Attachment):
 
     prompt = f'The following text is extracted from a PDF file of an academic paper. Ignoring the formatting text and the works cited, please summarize this paper. Thank you! Here is the paper text: "{context_txt}"'
     summary_txt = await get_summary_from_LM(prompt)
+    discord_user = await bot.fetch_user(user)
     if summary_txt != None:
         file = await text_to_mp3(summary_txt, pdf.filename)
-        discord_user = await bot.fetch_user(user)
         if file != None:
             await discord_user.send(file=file, content = "")
         else:
