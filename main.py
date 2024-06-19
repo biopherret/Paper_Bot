@@ -20,6 +20,8 @@ from gradio_client import Client #to access a huggingface language model
 from datetime import datetime, time, timedelta #for managing scheduler
 import asyncio
 
+import typing, functools #to prevent hf from blocking the main thread
+
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
 hf_chat_client = Client("biopherret/Paper_Summarizer")
 hf_tts_client = Client("https://neongeckocom-neon-tts-plugin-coqui.hf.space/")
@@ -34,7 +36,16 @@ async def write_json(data, file_name):
 async def open_json(file_name):
     with open (file_name) as file:
         return json.load(file)
-    
+
+#calling hugging face blocks the thread (even if in a async function) this decorator will run the function in a separate thread
+def to_thread(func: typing.Callable) -> typing.Coroutine:
+    @functools.wraps(func)
+    async def wrapper(*args, **kwargs):
+        loop = asyncio.get_event_loop()
+        wrapper = functools.partial(func, *args, **kwargs)
+        return await loop.run_in_executor(None, wrapper)
+    return wrapper
+
 async def not_a_repeat_article(title, found_articles):
     for article_dict in found_articles:
         if title == article_dict['title']:
@@ -178,7 +189,8 @@ async def get_text_for_LM(paper_title, doc_type, doc_link, online_link):
     except:
         return None
 
-async def get_summary_from_LM(context_text):
+@to_thread
+def get_summary_from_LM(context_text):
     prompt = f'The following text is extracted from a PDF file of an academic paper. Ignoring the formatting text and the works cited, please summarize this paper. Thank you! Here is the paper text: "{context_text}"'
     result = hf_chat_client.predict(prompt,
 		"You are a friendly Chatbot here to help PhD students by summarizing it for them.",
@@ -188,15 +200,6 @@ async def get_summary_from_LM(context_text):
 		api_name="/chat"
 )
     return result
-
-import typing, functools
-def to_thread(func: typing.Callable) -> typing.Coroutine:
-    @functools.wraps(func)
-    async def wrapper(*args, **kwargs):
-        loop = asyncio.get_event_loop()
-        wrapper = functools.partial(func, *args, **kwargs)
-        return await loop.run_in_executor(None, wrapper)
-    return wrapper
 
 @to_thread
 def text_to_mp3(text, title):
