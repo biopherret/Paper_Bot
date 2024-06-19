@@ -22,7 +22,7 @@ import asyncio
 
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
 hf_chat_client = Client("biopherret/Paper_Summarizer")
-hf_tts_client = Client("parler-tts/parler_tts_mini")
+hf_tts_client = Client("https://neongeckocom-neon-tts-plugin-coqui.hf.space/")
 
 #TODO: make about page
 
@@ -193,9 +193,9 @@ async def get_summary_from_LM(context_text):
     
 async def text_to_mp3(text, title):
     filepath = hf_tts_client.predict(
-		text=text,
-		description="A female speaker with a slightly low-pitched, quite monotone voice delivers her words at a slightly faster-than-average pace in a confined space with very clear audio.",
-		api_name="/gen_tts"
+		text,
+		"en",
+		fn_index=0
 )
     dir_path = os.path.dirname(filepath)
     new_path = os.path.join(dir_path, f"{title}.wav")
