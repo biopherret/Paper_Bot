@@ -334,10 +334,21 @@ async def _schedule(ctx, days : int, number_of_papers : int):
 @bot.tree.command(name="summarize_pdf", description="Summarize a PDF file")
 async def _summarize_pdf(ctx, pdf : discord.Attachment):
     user = ctx.user.id
-    print(pdf, type(pdf))
-    await ctx.response.send_message("I got your pdf")
-    #TODO: get the text from the pdf
-    #TODO: push to LM to summarize
+    await send_command_response(ctx, user, "I'm working on summarizing your PDF. This may take a while...")
+
+    pdf.save(pdf.filename)
+    reader = PdfReader(pdf.filename)
+    context_txt = ""
+    for page in reader.pages:
+        context_txt += page.extract_text()
+    os.remove(pdf.filename)
+
+    prompt = f'The following text is extracted from a PDF file of an academic paper. Ignoring the formatting text and the works cited, please summarize this paper. Thank you! Here is the paper text: "{context_txt}"'
+    summary_txt = await get_summary_from_LM(prompt)
+    file = await text_to_mp3(summary_txt, pdf.filename)
+   
+    discord_user = await bot.fetch_user(user)
+    await discord_user.send(file=file, content = "")
 
 @tasks.loop(hours = 24)
 async def schedule_find_papers():
