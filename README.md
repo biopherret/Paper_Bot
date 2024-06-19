@@ -15,5 +15,5 @@ In both cases Paper Bot will find related papers and send you links to them. And
 You'll notice that Paper Bot was not able to summarize every paper, this is often because the journal website blocks web scraping, so Paper Bot isn't able to get the paper content. 
 
 When this happens, you can use the links provided in the first message to find a pdf of the paper directly ask for a summary using /summarize_pdf
-<img src="https://github.com/biopherret/Paper_Bot/assets/59324379/7cf12a64-e309-4b42-b6a5-071dd1d0ce96">
-<img src="https://github.com/biopherret/Paper_Bot/assets/59324379/15ee03fd-b5bf-48fe-ad98-43b6bd8f2e4f">
+<img src="https://github.com/biopherret/Paper_Bot/assets/59324379/789cac54-9c33-4762-9672-943ca08f229a">
+<img src="https://github.com/biopherret/Paper_Bot/assets/59324379/12b0d8ed-da6a-4b8e-8eab-0b19cbf3970d">
