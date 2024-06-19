@@ -336,7 +336,7 @@ async def _summarize_pdf(ctx, pdf : discord.Attachment):
     user = ctx.user.id
     await send_command_response(ctx, user, "I'm working on summarizing your PDF. This may take a while...")
 
-    pdf.save(pdf.filename)
+    await pdf.save(pdf.filename)
     reader = PdfReader(pdf.filename)
     context_txt = ""
     for page in reader.pages:
