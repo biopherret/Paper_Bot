@@ -21,10 +21,10 @@ from datetime import datetime, time, timedelta #for managing scheduler
 import asyncio
 
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
-hf_client = Client("biopherret/Paper_Summarizer")
+hf_chat_client = Client("biopherret/Paper_Summarizer")
+hf_tts_client = Client("parler-tts/parler_tts_mini")
 
 #TODO: make about page
-#TODO: make a command to give a pdf to summarrize
 
 discord_token = open("discord_token.txt", "r").read()
 serpapi_token = open("serpapi_token.txt", "r").read()
@@ -182,7 +182,7 @@ async def get_text_for_LM(paper_title, doc_type, doc_link, online_link):
 
 async def get_summary_from_LM(context_text):
     prompt = f'The following text is extracted from a PDF file of an academic paper. Ignoring the formatting text and the works cited, please summarize this paper. Thank you! Here is the paper text: "{context_text}"'
-    result = hf_client.predict(prompt,
+    result = hf_chat_client.predict(prompt,
 		"You are a friendly Chatbot here to help PhD students by summarizing it for them.",
 		512,
 		0.7,
@@ -192,11 +192,18 @@ async def get_summary_from_LM(context_text):
     return result
     
 async def text_to_mp3(text, title):
-    tts = gTTS(text, lang='en', slow = False)
-    tts.save(f"{title}.mp3")
-    file_to_send = discord.File(f"{title}.mp3")
-    os.remove(f"{title}.mp3")
-    return file_to_send
+    result = hf_tts_client.predict(
+		text=text,
+		description="A female speaker with a slightly low-pitched, quite monotone voice delivers her words at a slightly faster-than-average pace in a confined space with very clear audio.",
+		api_name="/gen_tts"
+)
+    print(result)
+
+    #tts = gTTS(text, lang='en', slow = False)
+    #tts.save(f"{title}.mp3")
+    #file_to_send = discord.File(f"{title}.mp3")
+    #os.remove(f"{title}.mp3")
+    #return file_to_send
 
 async def find_papers(user, num_papers):
     topics_json = await open_json("topics.json")
