@@ -390,7 +390,7 @@ async def _about(ctx):
 button = discord.ui.Button(label = "Click me!", style=discord.ButtonStyle.grey)
 async def button_callback(interaction:discord.Interaction):
     await interaction.response.send_message("workie!",ephemeral=True)
-view = discord.ui.View()
+view = discord.ui.View(timeout = None)
 view.add_item(button)
 
 @bot.tree.command(name="tester", description="tester")
