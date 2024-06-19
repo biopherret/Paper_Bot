@@ -13,8 +13,6 @@ from bs4 import BeautifulSoup #for reading text from web pages
 
 from StringProgressBar import progressBar #to report progress of long tasks
 
-from gtts import gTTS #for making the mp3 files
-
 from gradio_client import Client #to access a huggingface language model
 
 from datetime import datetime, time, timedelta #for managing scheduler
@@ -28,6 +26,8 @@ hf_tts_client = Client("https://neongeckocom-neon-tts-plugin-coqui.hf.space/")
 
 discord_token = open("discord_token.txt", "r").read()
 serpapi_token = open("serpapi_token.txt", "r").read()
+
+#TODO: add command to remove only one topic
 
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
@@ -203,11 +203,13 @@ def get_summary_from_LM(context_text):
 
 @to_thread
 def text_to_mp3(text, title):
-    filepath = hf_tts_client.predict(
-		text,
-		"en",
-		fn_index=0
-)
+    try:
+        filepath = hf_tts_client.predict(
+            text,
+            "en",
+            fn_index=0)
+    except:
+        return None
     dir_path = os.path.dirname(filepath)
     new_path = os.path.join(dir_path, f"{title}.wav")
     os.rename(filepath, new_path) #rename the file to the title
@@ -238,7 +240,8 @@ async def find_papers(user, num_papers):
         if context_txt != None:
             summary_txt = await get_summary_from_LM(context_txt)
             file = await text_to_mp3(summary_txt, article_dict['title'])
-            await discord_user.send(file=file, content = "")
+            if file != None:
+                await discord_user.send(file=file, content = "")
         await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper.\n {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))   
     await discord_user.send("Done!")
 
@@ -364,9 +367,11 @@ async def _summarize_pdf(ctx, pdf : discord.Attachment):
     prompt = f'The following text is extracted from a PDF file of an academic paper. Ignoring the formatting text and the works cited, please summarize this paper. Thank you! Here is the paper text: "{context_txt}"'
     summary_txt = await get_summary_from_LM(prompt)
     file = await text_to_mp3(summary_txt, pdf.filename)
-   
     discord_user = await bot.fetch_user(user)
-    await discord_user.send(file=file, content = "")
+    if file != None:
+        await discord_user.send(file=file, content = "")
+    else:
+        await discord_user.send("I'm sorry, I was unable to summarize this paper. Please try again later.")
 
 @bot.tree.command(name="about", description="Learn more about Paper Bot")
 async def _about(ctx):
