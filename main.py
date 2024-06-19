@@ -192,12 +192,18 @@ async def get_summary_from_LM(context_text):
     return result
     
 async def text_to_mp3(text, title):
-    result = hf_tts_client.predict(
+    filepath = hf_tts_client.predict(
 		text=text,
 		description="A female speaker with a slightly low-pitched, quite monotone voice delivers her words at a slightly faster-than-average pace in a confined space with very clear audio.",
 		api_name="/gen_tts"
 )
-    print(result)
+    dir_path = os.path.dirname(filepath)
+    new_path = os.path.join(dir_path, f"{title}.wav")
+    os.rename(filepath, new_path) #rename the file to the title
+
+    file_to_send = discord.File(new_path)
+    os.remove(new_path)
+    return file_to_send
 
     #tts = gTTS(text, lang='en', slow = False)
     #tts.save(f"{title}.mp3")
