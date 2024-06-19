@@ -24,8 +24,6 @@ bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
 hf_chat_client = Client("biopherret/Paper_Summarizer")
 hf_tts_client = Client("https://neongeckocom-neon-tts-plugin-coqui.hf.space/")
 
-#TODO: make about page
-
 discord_token = open("discord_token.txt", "r").read()
 serpapi_token = open("serpapi_token.txt", "r").read()
 
@@ -205,12 +203,6 @@ async def text_to_mp3(text, title):
     os.remove(new_path)
     return file_to_send
 
-    #tts = gTTS(text, lang='en', slow = False)
-    #tts.save(f"{title}.mp3")
-    #file_to_send = discord.File(f"{title}.mp3")
-    #os.remove(f"{title}.mp3")
-    #return file_to_send
-
 async def find_papers(user, num_papers):
     topics_json = await open_json("topics.json")
     topics_list = topics_json[str(user)]["topic_settings"]
@@ -362,6 +354,14 @@ async def _summarize_pdf(ctx, pdf : discord.Attachment):
    
     discord_user = await bot.fetch_user(user)
     await discord_user.send(file=file, content = "")
+
+@bot.tree.command(name="about", description="Learn more about Paper Bot")
+async def _about(ctx):
+    user = ctx.user.id
+    embed = discord.Embed(title="About Paper Bot", description="Paper Bot is a Discord bot that helps you find and summarize academic papers. You can add topics of interest, schedule automatic paper searches, and more!")
+    embed.add_field(name="Commands", value="/add_topic lets you add new topics to your user profile\n/view_topics will show you your current topic settings\n/clear_topics resets your topic settings\n/clear_history will completely remove your user profile (topics, found articles, and schedule)\n/find_papers_now will find papers from each of your topics, and summarize them for you\n/schedule allows you to set a schedule for how often you want Paper Bot to automatically send you papers\n/summarize_pdf lets you send Paper Bot a pdf of a particular paper for it to summarize", inline=False)
+    embed.add_field(name="Why does Paper Bot not send me a summary for every paper?", value="Paper Bot requires access to the paper to be able to summarize it. Paper Bot uses both Goggle Scholar and web scraping to try to access the paper content, but some journal websites block these methods. For papers that paper bot wasn't able to summarize, you can retrieve the pdf from the provided links and use /summarize_pdf to retrieve the summary.", inline=False)
+    await send_command_response(ctx, user, embed, is_embed=True)
 
 @tasks.loop(hours = 24)
 async def schedule_find_papers():
