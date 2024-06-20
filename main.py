@@ -353,7 +353,7 @@ async def _schedule(ctx, days : int, number_of_papers : int):
         days (int): Find papers every x days.
         number_of_papers (int): Number of papers to find per search per topic.
     '''
-    user = ctx.author.id
+    user = ctx.user.id
     if number_of_papers < 6:
         if await user_exists(ctx, user):
             topics_json = await open_json("topics.json")
