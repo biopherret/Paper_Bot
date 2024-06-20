@@ -225,11 +225,25 @@ def text_to_mp3(text, title):
     os.remove(new_path)
     return file_to_send
 
-def update_embed(embed, topic_num, paper_num, success):
-    if success:
-        embed.set_field_at(topic_num, name=embed.fields[topic_num].name, value=f":white_check_mark: Paper {paper_num} summarized successfully", inline=False)
-    else:
-        embed.set_field_at(topic_num, name=embed.fields[topic_num].name, value=f":x: Paper {paper_num} could not be summarized", inline=False)
+def make_paper_message(topic_list, recent_list, hyperlink_lists, status_lists):
+    embed = discord.Embed(title="Papers I Found For You")
+    complete = True
+    for i in range(len(status_lists)):
+        for j in range(len(status_lists[i])):
+            if status_lists[i][j] == None:
+                complete = False
+                hyperlink_lists[i][j] = f":white_square_button:{hyperlink_lists[i][j]}"
+            elif status_lists[i][j] == True:
+                hyperlink_lists[i][j] = f":white_check_mark:{hyperlink_lists[i][j]}"
+            elif status_lists[i][j] == False:
+                hyperlink_lists[i][j] = f":x:{hyperlink_lists[i][j]}"
+
+    for i in range(len(topic_list)):
+        embed.add_field(name=f'{topic_list[i]} (Recent Only: {recent_list[i]})', value="\n".join(hyperlink_lists[i]), inline=False)
+    if not complete:
+        embed.add_field(name="Now attempting to summarize papers...", value = '', inline=False)
+    else: 
+        embed.add_field(name="I've finished summarizing papers!", value = '', inline=False)
     return embed
 
 async def find_papers(user, num_papers):
@@ -239,29 +253,31 @@ async def find_papers(user, num_papers):
     found_articles = await getArticles(topics_list, num_papers, user)
     num_found = int(len(found_articles))
 
-    embed = discord.Embed(title="Papers I Found For You")
+    hyperlinked_papers_lists = []
     for topic_dict in topics_list:
-        hyperlinked_papers_list = [await truncate_hyperlinked_title(user, article_dict['title'], article_dict['online_link']) for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
-        embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value=":white_large_square:\n".join(hyperlinked_papers_list), inline=False)
-    embed.add_field(name="Now attempting to summarize papers...", value = '', inline=False)
-    discord_user = await bot.fetch_user(user)
-    message = await discord_user.send(embed = embed)
+        hyperlinked_papers_lists.append([await truncate_hyperlinked_title(user, article_dict['title'], article_dict['online_link']) for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']])
 
-    i = 0
-    #progress_mes = await discord_user.send("I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper\nProgress: {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))
-    for article_dict in found_articles:
-        i += 1
-        context_txt = await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'])
-        if context_txt != None:
-            summary_txt = await get_summary_from_LM(context_txt)
-            if summary_txt != None:
-                file = await text_to_mp3(summary_txt, article_dict['title'])
-                if file != None:
-                    success = True
-                    await discord_user.send(file=file, content = "")
-        await message.edit(embed = update_embed(embed, topics_list.index({"topic": article_dict['topic'], "recent": 0}), found_articles.index(article_dict), success))
-        #await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper.\nProgress: {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))   
-    #await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper.\nProgress: Done!")
+    discord_user = await bot.fetch_user(user)
+    status_lists = [[None for _ in range(num_found)] for _ in range(len(topics_list))]
+    message = await discord_user.send(embed = make_paper_message([topic_dict['topic'] for topic_dict in topics_list], [topic_dict['recent'] for topic_dict in topics_list], hyperlinked_papers_lists, status_lists))
+
+    for count_t, topic_dict in enumerate(topics_list): #for each topic
+        for count_a, article_dict in enumerate([article for article in found_articles if article['topic'] == topic_dict['topic']]): #for each article in that topic
+            success = False
+            context_txt = await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'])
+            if context_txt != None:
+                summary_txt = await get_summary_from_LM(context_txt)
+                if summary_txt != None:
+                    file = await text_to_mp3(summary_txt, article_dict['title'])
+                    if file != None:
+                        success = True
+                        await discord_user.send(file=file, content = "")
+            if success:
+                status_lists[count_t][count_a] = True
+            else:
+                status_lists[count_t][count_a] = False
+
+            await message.edit(embed = make_paper_message([topic_dict['topic'] for topic_dict in topics_list], [topic_dict['recent'] for topic_dict in topics_list], hyperlinked_papers_lists, status_lists))
 
 @bot.event
 async def on_ready():
