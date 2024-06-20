@@ -29,7 +29,6 @@ serpapi_token = open("serpapi_token.txt", "r").read()
 
 #TODO: add command to remove only one topic
 #TODO: message when you can't get a summary
-#TODO: edit message to say done instae of new message saying done
 #TODO: rename about help
 #TODO: pic a proficle picture and staus
 #TODO: remove optino to do user from the read me
@@ -253,8 +252,8 @@ async def find_papers(user, num_papers):
                 file = await text_to_mp3(summary_txt, article_dict['title'])
                 if file != None:
                     await discord_user.send(file=file, content = "")
-        await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper.\n {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))   
-    await discord_user.send("Done!")
+        await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper.\nProgress: {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))   
+    await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper.\nProgress: Done!")
 
 @bot.event
 async def on_ready():
