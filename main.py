@@ -29,8 +29,6 @@ serpapi_token = open("serpapi_token.txt", "r").read()
 
 #TODO: add command to remove only one topic
 #TODO: message when you can't get a summary
-#TODO: schedule change author to user
-#TODO: schedlue max 5 papers
 #TODO: remove clear history from users
 #TODO: actually force them to use y or n
 #TODO: add catch not found to send command message
@@ -351,7 +349,7 @@ async def _schedule(ctx, days : int, number_of_papers : int):
     Args:
         ctx (Interaction): The context of the command
         days (int): Find papers every x days.
-        number_of_papers (int): Number of papers to find per search per topic.
+        number_of_papers (int): Number of papers to find per search per topic (Max 5).
     '''
     user = ctx.user.id
     if number_of_papers < 6:
