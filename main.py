@@ -28,6 +28,18 @@ discord_token = open("discord_token.txt", "r").read()
 serpapi_token = open("serpapi_token.txt", "r").read()
 
 #TODO: add command to remove only one topic
+#TODO: move how to get started to abvove commands
+#TODO: make it more clear that its a progross bar
+#TODO: message when you can't get a summary
+#TODO: schedule change author to user
+#TODO: schedlue max 5 papers
+#TODO: remove clear history from users
+#TODO: actually force them to use y or n
+#TODO: add catch not found to send command message
+#TODO: edit message to say done instae of new message saying done
+#TODO: rename about help
+#TODO: pic a proficle picture and staus
+#TODO: remove optino to do user from the read me
 
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
@@ -260,11 +272,12 @@ async def on_ready():
 @bot.tree.command(name="clear_history", description="Clear all Paper Bot topic settings and articles (remove all previously found papers from history).")
 async def _clear_history(ctx):  
     user = ctx.user.id
-    topics_json = await open_json("topics.json")
-    topics_json.pop(str(user)) #remove the user from the json
-    await write_json(topics_json, "topics.json")
+    if await user_exists(ctx, user):
+        topics_json = await open_json("topics.json")
+        topics_json.pop(str(user)) #remove the user from the json
+        await write_json(topics_json, "topics.json")
 
-    await send_command_response(ctx, user, "Your history has been cleared! All topic settings and found articles have been removed.")
+        await send_command_response(ctx, user, "Your history has been cleared! All topic settings and found articles have been removed.")
 
 @bot.tree.command(name="clear_topics", description="Clear your saved topic settings")
 async def _clear_topics(ctx):
