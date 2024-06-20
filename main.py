@@ -28,7 +28,6 @@ discord_token = open("discord_token.txt", "r").read()
 serpapi_token = open("serpapi_token.txt", "r").read()
 
 #TODO: add command to remove only one topic
-#TODO: message when you can't get a summary
 #TODO: pick a profile picture and status
 
 async def write_json(data, file_name):
@@ -94,7 +93,7 @@ async def truncate_hyperlinked_title(user, title, link):
         else:
             return title
     else:
-        max_title_length = 200 - len(link) - 6 - 23 #:white_square_button: [title](link)\n
+        max_title_length = 200 - len(link) - 6 - 22 #:white_square_button: [title](link)\n
         if max_title_length < 30:
             discord_user = await bot.fetch_user(user)
             await discord_user.send(f"The hyperlink for [{title}]({link}) was too long to include in the main message.")
@@ -239,7 +238,6 @@ def make_paper_message(topic_list, recent_list, hyperlink_lists, status_lists, n
     complete = True
     for i in range(len(status_lists)):
         for j in range(num_papers):
-            print(hyperlink_lists[i][j])
             if status_lists[i][j] == None:
                 complete = False
                 hyperlink_lists[i][j] = f":white_square_button: {hyperlink_lists[i][j]}"
@@ -432,15 +430,15 @@ async def _help(ctx):
     embed.add_field(name="Commands", value="/add_topic lets you add new topics to your user profile\n/view_topics will show you your current topic settings\n/clear_history will completely remove your user profile (topics, found articles, and schedule)\n/find_papers_now will find papers from each of your topics, and summarize them for you\n/schedule allows you to set a schedule for how often you want Paper Bot to automatically send you papers\n/summarize_pdf lets you send Paper Bot a pdf of a particular paper for it to summarize", inline=False)
     await ctx.response.send_message(embed=embed)
 
-# button = discord.ui.Button(label = "Click me!", style=discord.ButtonStyle.grey)
-# async def button_callback(interaction:discord.Interaction):
-#     await interaction.response.send_message("workie!",ephemeral=True)
-# view = discord.ui.View(timeout = None)
-# view.add_item(button)
+button = discord.ui.Button(label = "Click me!", style=discord.ButtonStyle.grey)
+async def button_callback(interaction:discord.Interaction):
+    await interaction.response.send_message("workie!",ephemeral=True)
+view = discord.ui.View(timeout = None)
+view.add_item(button)
 
-# @bot.tree.command(name="tester", description="tester")
-# async def _hello(ctx: discord.Interaction):
-#     await ctx.response.send_message("tester", view=view)
+@bot.tree.command(name="tester", description="tester")
+async def _hello(ctx: discord.Interaction):
+    await ctx.response.send_message("tester", view=view)
 
 @tasks.loop(hours = 24)
 async def schedule_find_papers():
