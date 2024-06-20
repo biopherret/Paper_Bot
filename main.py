@@ -239,13 +239,14 @@ def make_paper_message(topic_list, recent_list, hyperlink_lists, status_lists, n
     complete = True
     for i in range(len(status_lists)):
         for j in range(num_papers):
+            print(hyperlink_lists[i][j])
             if status_lists[i][j] == None:
                 complete = False
                 hyperlink_lists[i][j] = f":white_square_button: {hyperlink_lists[i][j]}"
             elif status_lists[i][j] == True:
-                hyperlink_lists[i][j] = f":white_check_mark: {hyperlink_lists[i][j]}" #last index is to remove the white square button
+                hyperlink_lists[i][j] = f":white_check_mark: {hyperlink_lists[i][j]}"
             elif status_lists[i][j] == False:
-                hyperlink_lists[i][j] = f":x: {hyperlink_lists[i][j][22:]}"
+                hyperlink_lists[i][j] = f":x: {hyperlink_lists[i][j]}"
 
     for i in range(len(topic_list)):
         embed.add_field(name=f'{topic_list[i]} (Recent Only: {recent_list[i]})', value="\n".join(hyperlink_lists[i]), inline=False)
@@ -262,13 +263,13 @@ async def find_papers(user, num_papers):
     found_articles = await getArticles(topics_list, num_papers, user)
     num_found = int(len(found_articles))
 
-    hyperlinked_papers_lists = []
+    original_hyperlink_papers_lists = []
     for topic_dict in topics_list:
-        hyperlinked_papers_lists.append([await truncate_hyperlinked_title(user, article_dict['title'], article_dict['online_link']) for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']])
+        original_hyperlink_papers_lists.append([await truncate_hyperlinked_title(user, article_dict['title'], article_dict['online_link']) for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']])
 
     discord_user = await bot.fetch_user(user)
     status_lists = [[None for _ in range(num_found)] for _ in range(len(topics_list))]
-    message = await discord_user.send(embed = make_paper_message([topic_dict['topic'] for topic_dict in topics_list], [topic_dict['recent'] for topic_dict in topics_list], hyperlinked_papers_lists, status_lists, num_papers))
+    message = await discord_user.send(embed = make_paper_message([topic_dict['topic'] for topic_dict in topics_list], [topic_dict['recent'] for topic_dict in topics_list], original_hyperlink_papers_lists, status_lists, num_papers))
 
     for count_t, topic_dict in enumerate(topics_list): #for each topic
         for count_a, article_dict in enumerate([article for article in found_articles if article['topic'] == topic_dict['topic']]): #for each article in that topic
@@ -286,7 +287,7 @@ async def find_papers(user, num_papers):
             else:
                 status_lists[count_t][count_a] = False
 
-            await message.edit(embed = make_paper_message([topic_dict['topic'] for topic_dict in topics_list], [topic_dict['recent'] for topic_dict in topics_list], hyperlinked_papers_lists, status_lists, num_papers))
+            await message.edit(embed = make_paper_message([topic_dict['topic'] for topic_dict in topics_list], [topic_dict['recent'] for topic_dict in topics_list], original_hyperlink_papers_lists, status_lists, num_papers))
 
 @bot.event
 async def on_ready():
