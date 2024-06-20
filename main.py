@@ -28,7 +28,6 @@ discord_token = open("discord_token.txt", "r").read()
 serpapi_token = open("serpapi_token.txt", "r").read()
 
 #TODO: add command to remove only one topic
-#TODO: make it more clear that its a progross bar
 #TODO: message when you can't get a summary
 #TODO: schedule change author to user
 #TODO: schedlue max 5 papers
@@ -246,7 +245,7 @@ async def find_papers(user, num_papers):
     await discord_user.send(embed = embed)
 
     i = 0
-    progress_mes = await discord_user.send("I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper\n {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))
+    progress_mes = await discord_user.send("I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper\nProgress: {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))
     for article_dict in found_articles:
         i += 1
         context_txt = await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'])
