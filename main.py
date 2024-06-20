@@ -29,7 +29,6 @@ serpapi_token = open("serpapi_token.txt", "r").read()
 
 #TODO: add command to remove only one topic
 #TODO: message when you can't get a summary
-#TODO: remove clear history from users
 #TODO: actually force them to use y or n
 #TODO: add catch not found to send command message
 #TODO: edit message to say done instae of new message saying done
@@ -393,7 +392,7 @@ async def _about(ctx):
     embed = discord.Embed(title="About Paper Bot", description="Paper Bot is a Discord bot that helps you find and summarize academic papers. You can add topics of interest, schedule automatic paper searches, and more!")
     embed.add_field(name="How do I get Started?", value="To get started, use the /add_topic command to add a topic of interest. You can then use /find_papers_now to find papers for that topic, or use /schedule to have Paper Bot automatically send you papers every x days.", inline=False)
     embed.add_field(name="Why does Paper Bot not send me a summary for every paper?", value="Paper Bot requires access to the paper to be able to summarize it. Paper Bot uses both Goggle Scholar and web scraping to try to access the paper content, but some journal websites block these methods. For papers that paper bot wasn't able to summarize, you can retrieve the pdf from the provided links and use /summarize_pdf to retrieve the summary.", inline=False)
-    embed.add_field(name="Commands", value="/add_topic lets you add new topics to your user profile\n/view_topics will show you your current topic settings\n/clear_topics resets your topic settings\n/clear_history will completely remove your user profile (topics, found articles, and schedule)\n/find_papers_now will find papers from each of your topics, and summarize them for you\n/schedule allows you to set a schedule for how often you want Paper Bot to automatically send you papers\n/summarize_pdf lets you send Paper Bot a pdf of a particular paper for it to summarize", inline=False)
+    embed.add_field(name="Commands", value="/add_topic lets you add new topics to your user profile\n/view_topics will show you your current topic settings\n/clear_history will completely remove your user profile (topics, found articles, and schedule)\n/find_papers_now will find papers from each of your topics, and summarize them for you\n/schedule allows you to set a schedule for how often you want Paper Bot to automatically send you papers\n/summarize_pdf lets you send Paper Bot a pdf of a particular paper for it to summarize", inline=False)
     await ctx.response.send_message(embed=embed)
 
 # button = discord.ui.Button(label = "Click me!", style=discord.ButtonStyle.grey)
