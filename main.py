@@ -225,6 +225,13 @@ def text_to_mp3(text, title):
     os.remove(new_path)
     return file_to_send
 
+def update_embed(embed, topic_num, paper_num, success):
+    if success:
+        embed.set_field_at(topic_num, name=embed.fields[topic_num].name, value=f":white_check_mark: Paper {paper_num} summarized successfully", inline=False)
+    else:
+        embed.set_field_at(topic_num, name=embed.fields[topic_num].name, value=f":x: Paper {paper_num} could not be summarized", inline=False)
+    return embed
+
 async def find_papers(user, num_papers):
     topics_json = await open_json("topics.json")
     topics_list = topics_json[str(user)]["topic_settings"]
@@ -235,13 +242,13 @@ async def find_papers(user, num_papers):
     embed = discord.Embed(title="Papers I Found For You")
     for topic_dict in topics_list:
         hyperlinked_papers_list = [await truncate_hyperlinked_title(user, article_dict['title'], article_dict['online_link']) for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
-        embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value="▫" + "\n".join(hyperlinked_papers_list), inline=False)
+        embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value=":white_large_square:\n".join(hyperlinked_papers_list), inline=False)
     embed.add_field(name="Now attempting to summarize papers...", value = '', inline=False)
     discord_user = await bot.fetch_user(user)
     message = await discord_user.send(embed = embed)
 
     i = 0
-    progress_mes = await discord_user.send("I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper\nProgress: {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))
+    #progress_mes = await discord_user.send("I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper\nProgress: {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))
     for article_dict in found_articles:
         i += 1
         context_txt = await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'])
@@ -250,9 +257,11 @@ async def find_papers(user, num_papers):
             if summary_txt != None:
                 file = await text_to_mp3(summary_txt, article_dict['title'])
                 if file != None:
+                    success = True
                     await discord_user.send(file=file, content = "")
-        await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper.\nProgress: {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))   
-    await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper.\nProgress: Done!")
+        await message.edit(embed = update_embed(embed, topics_list.index({"topic": article_dict['topic'], "recent": 0}), found_articles.index(article_dict), success))
+        #await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper.\nProgress: {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))   
+    #await progress_mes.edit(content = "I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper.\nProgress: Done!")
 
 @bot.event
 async def on_ready():
