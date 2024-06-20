@@ -29,7 +29,6 @@ serpapi_token = open("serpapi_token.txt", "r").read()
 
 #TODO: add command to remove only one topic
 #TODO: message when you can't get a summary
-#TODO: add catch not found to send command message
 #TODO: edit message to say done instae of new message saying done
 #TODO: rename about help
 #TODO: pic a proficle picture and staus
@@ -103,18 +102,21 @@ async def truncate_hyperlinked_title(user, title, link):
         return f'[{title}]({link})'
 
 async def send_command_response(ctx, user, message, is_embed=False):
-    if not isinstance(ctx.channel, discord.channel.DMChannel): #if the slash command was used in a server
-        await ctx.response.send_message("Sending you a DM to keep things organized. To avoid spamming the server, please use Paper Bot in DMs.") #sending a message in response to the slash command to only use DMs in the future
-        discord_user = await bot.fetch_user(user)
-        if is_embed:
-            await discord_user.send(embed=message)
-        else:
-            await discord_user.send(message) #send the message as a DM
-    else: #if the slash command was used in a DM
-        if is_embed:
-            await ctx.response.send_message(embed=message)
-        else:
-            await ctx.response.send_message(message) #send the message as a DM, in response to the slash command
+    try:
+        if not isinstance(ctx.channel, discord.channel.DMChannel): #if the slash command was used in a server
+            await ctx.response.send_message("Sending you a DM to keep things organized. To avoid spamming the server, please use Paper Bot in DMs.") #sending a message in response to the slash command to only use DMs in the future
+            discord_user = await bot.fetch_user(user)
+            if is_embed:
+                await discord_user.send(embed=message)
+            else:
+                await discord_user.send(message) #send the message as a DM
+        else: #if the slash command was used in a DM
+            if is_embed:
+                await ctx.response.send_message(embed=message)
+            else:
+                await ctx.response.send_message(message) #send the message as a DM, in response to the slash command
+    except:
+        await ctx.response.send_message("I'm sorry, sometimes discord doesn't respond to me properly. Please try again later.")
 
 async def user_exists(ctx, user):
     topics_json = await open_json("topics.json")
