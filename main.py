@@ -29,9 +29,7 @@ serpapi_token = open("serpapi_token.txt", "r").read()
 
 #TODO: add command to remove only one topic
 #TODO: message when you can't get a summary
-#TODO: rename about help
-#TODO: pic a proficle picture and staus
-#TODO: remove optino to do user from the read me
+#TODO: pick a profile picture and status
 
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
