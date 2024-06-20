@@ -29,7 +29,6 @@ serpapi_token = open("serpapi_token.txt", "r").read()
 
 #TODO: add command to remove only one topic
 #TODO: message when you can't get a summary
-#TODO: actually force them to use y or n
 #TODO: add catch not found to send command message
 #TODO: edit message to say done instae of new message saying done
 #TODO: rename about help
@@ -315,8 +314,11 @@ async def _add_topic(ctx, topic : str, recent : str):
 
     if recent == 'y':
         recent = 1
-    else:
+    elif recent == 'n':
         recent = 0
+    else:
+        await send_command_response(ctx, user, "Please use 'y' or 'n' to indicate if you want to restrict the search to recent papers.")
+        return
 
     topics_json[str(user)]['topic_settings'].append({"topic": topic, "recent": recent}) #add the new topic
     await write_json(topics_json, "topics.json")
