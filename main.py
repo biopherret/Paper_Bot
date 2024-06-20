@@ -235,9 +235,10 @@ async def find_papers(user, num_papers):
     embed = discord.Embed(title="Papers I Found For You")
     for topic_dict in topics_list:
         hyperlinked_papers_list = [await truncate_hyperlinked_title(user, article_dict['title'], article_dict['online_link']) for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']]
-        embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value="\n".join(hyperlinked_papers_list), inline=False)
+        embed.add_field(name=f'{topic_dict["topic"]} (Recent Only: {["No", "Yes"][topic_dict["recent"]]})', value="▫" + "\n".join(hyperlinked_papers_list), inline=False)
+    embed.add_field(name="Now attempting to summarize papers...", inline=False)
     discord_user = await bot.fetch_user(user)
-    await discord_user.send(embed = embed)
+    message = await discord_user.send(embed = embed)
 
     i = 0
     progress_mes = await discord_user.send("I will now attempt to summarize the papers for you. This may take a while, and I am not always able to summarize every paper\nProgress: {}".format(progressBar.filledBar(num_found, i, size = num_found)[0]))
