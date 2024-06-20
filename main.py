@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, tasks
-import os
+import os, copy
 
 import json #for managing tokens and user data
 
@@ -269,7 +269,7 @@ async def find_papers(user, num_papers):
 
     discord_user = await bot.fetch_user(user)
     status_lists = [[None for _ in range(num_found)] for _ in range(len(topics_list))]
-    message = await discord_user.send(embed = make_paper_message([topic_dict['topic'] for topic_dict in topics_list], [topic_dict['recent'] for topic_dict in topics_list], original_hyperlink_papers_lists, status_lists, num_papers))
+    message = await discord_user.send(embed = make_paper_message([topic_dict['topic'] for topic_dict in topics_list], [topic_dict['recent'] for topic_dict in topics_list], copy.deepcopy(original_hyperlink_papers_lists), status_lists, num_papers))
 
     for count_t, topic_dict in enumerate(topics_list): #for each topic
         for count_a, article_dict in enumerate([article for article in found_articles if article['topic'] == topic_dict['topic']]): #for each article in that topic
@@ -287,7 +287,7 @@ async def find_papers(user, num_papers):
             else:
                 status_lists[count_t][count_a] = False
 
-            await message.edit(embed = make_paper_message([topic_dict['topic'] for topic_dict in topics_list], [topic_dict['recent'] for topic_dict in topics_list], original_hyperlink_papers_lists, status_lists, num_papers))
+            await message.edit(embed = make_paper_message([topic_dict['topic'] for topic_dict in topics_list], [topic_dict['recent'] for topic_dict in topics_list], copy.deepcopy(original_hyperlink_papers_lists), status_lists, num_papers))
 
 @bot.event
 async def on_ready():
