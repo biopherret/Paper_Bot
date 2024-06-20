@@ -229,7 +229,9 @@ def make_paper_message(topic_list, recent_list, hyperlink_lists, status_lists):
     embed = discord.Embed(title="Papers I Found For You")
     complete = True
     for i in range(len(status_lists)):
+        print(i)
         for j in range(len(status_lists[i])):
+            print(j)
             if status_lists[i][j] == None:
                 complete = False
                 hyperlink_lists[i][j] = f":white_square_button:{hyperlink_lists[i][j]}"
