@@ -88,15 +88,21 @@ async def read_web(link):
     return soup.get_text()
     
 async def truncate_hyperlinked_title(user, title, link):
-    max_title_length = 200 - len(link) - 6 #[title](link)\n
-    if max_title_length < 30:
-        discord_user = await bot.fetch_user(user)
-        await discord_user.send(f"The hyperlink for [{title}]({link}) was too long to include in the main message.")
-        return f"{title[:200]}..."
-    if len(title) >= max_title_length:
-        return f'[{title[:max_title_length] + "..."}]({link})'
+    if link == None:
+        if len(title) >= 200:
+            return f"{title[:200]}..."
+        else:
+            return title
     else:
-        return f'[{title}]({link})'
+        max_title_length = 200 - len(link) - 6 #[title](link)\n
+        if max_title_length < 30:
+            discord_user = await bot.fetch_user(user)
+            await discord_user.send(f"The hyperlink for [{title}]({link}) was too long to include in the main message.")
+            return f"{title[:200]}..."
+        if len(title) >= max_title_length:
+            return f'[{title[:max_title_length] + "..."}]({link})'
+        else:
+            return f'[{title}]({link})'
 
 async def send_command_response(ctx, user, message, is_embed=False):
     try:
