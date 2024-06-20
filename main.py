@@ -443,7 +443,7 @@ class MyView(discord.ui.View):
         print("yes")
 
 @bot.tree.command(name="tester", description="tester")
-async def hello(ctx: discord.Interaction):
+async def _tester(ctx: discord.Interaction):
     # add the view to a message
     await ctx.response.send_message("tester", view=MyView())
 
