@@ -430,15 +430,22 @@ async def _help(ctx):
     embed.add_field(name="Commands", value="/add_topic lets you add new topics to your user profile\n/view_topics will show you your current topic settings\n/clear_history will completely remove your user profile (topics, found articles, and schedule)\n/find_papers_now will find papers from each of your topics, and summarize them for you\n/schedule allows you to set a schedule for how often you want Paper Bot to automatically send you papers\n/summarize_pdf lets you send Paper Bot a pdf of a particular paper for it to summarize", inline=False)
     await ctx.response.send_message(embed=embed)
 
-button = discord.ui.Button(label = "Click me!", style=discord.ButtonStyle.grey)
-async def button_callback(interaction:discord.Interaction):
-    await interaction.response.send_message("workie!",ephemeral=True)
-view = discord.ui.View(timeout = None)
-view.add_item(button)
+#Custom View Class
+class MyView(discord.ui.View):
+    def __init__(self):
+        super().__init__()
+
+    #setting up button (you can add multiple such)
+    @discord.ui.button(label='test', style=discord.ButtonStyle.grey)
+    async def asdf(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # on interaction
+        await interaction.response.send_message('workie', ephemeral=True)
+        print("yes")
 
 @bot.tree.command(name="tester", description="tester")
-async def _hello(ctx: discord.Interaction):
-    await ctx.response.send_message("tester", view=view)
+async def hello(ctx: discord.Interaction):
+    # add the view to a message
+    await ctx.response.send_message("tester", view=MyView())
 
 @tasks.loop(hours = 24)
 async def schedule_find_papers():
