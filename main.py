@@ -89,12 +89,12 @@ async def read_web(link):
     
 async def truncate_hyperlinked_title(user, title, link):
     if link == None:
-        if len(title) >= 200:
+        if len(title) >= 200 - 6 - 22:
             return f"{title[:200]}..."
         else:
             return title
     else:
-        max_title_length = 200 - len(link) - 6 #[title](link)\n
+        max_title_length = 200 - len(link) - 6 -22 #:white_square_button: [title](link)\n
         if max_title_length < 30:
             discord_user = await bot.fetch_user(user)
             await discord_user.send(f"The hyperlink for [{title}]({link}) was too long to include in the main message.")
@@ -238,16 +238,14 @@ def make_paper_message(topic_list, recent_list, hyperlink_lists, status_lists, n
     embed = discord.Embed(title="Papers I Found For You")
     complete = True
     for i in range(len(status_lists)):
-        print(i)
         for j in range(num_papers):
-            print(j)
             if status_lists[i][j] == None:
                 complete = False
-                hyperlink_lists[i][j] = f":white_square_button:{hyperlink_lists[i][j]}"
+                hyperlink_lists[i][j] = f":white_square_button: {hyperlink_lists[i][j]}"
             elif status_lists[i][j] == True:
-                hyperlink_lists[i][j] = f":white_check_mark:{hyperlink_lists[i][j]}"
+                hyperlink_lists[i][j] = f":white_check_mark: {hyperlink_lists[i][j][22:]}" #last index is to remove the white square button
             elif status_lists[i][j] == False:
-                hyperlink_lists[i][j] = f":x:{hyperlink_lists[i][j]}"
+                hyperlink_lists[i][j] = f":x: {hyperlink_lists[i][j]}"
 
     for i in range(len(topic_list)):
         embed.add_field(name=f'{topic_list[i]} (Recent Only: {recent_list[i]})', value="\n".join(hyperlink_lists[i]), inline=False)
