@@ -446,7 +446,7 @@ class TopicOptions(discord.ui.View):
 @bot.tree.command(name="remove_topic", description="tester")
 async def _remove_topic(ctx: discord.Interaction):
     # add the view to a message
-    await ctx.response.send_message("testing", view=TopicOptions())
+    await ctx.response.send_message("testing", view=TopicOptions(['topic 1', 'topic 2']))
 
 
 
