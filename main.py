@@ -435,7 +435,7 @@ class topic_button(discord.ui.Button['TopicOptions']):
         super().__init__(style=discord.ButtonStyle.secondary, label = topic['topic'])
         async def callback(self, interaction: discord.Interaction, button: discord.ui.Button):
             topics_json = await open_json("topics.json")
-            topics_json[str(user)]['topic_settings'].remove(topic)
+            topics_json[str(user)]['topic_settings'] = [topic_dict for topic_dict in topics_json[str(user)]['topic_settings'] if topic_dict['topic'] != button.label]
             await write_json(topics_json, "topics.json")
     
             await interaction.response.send_message(f'{button.label} has been removed from your topic list', ephemeral=True)
@@ -446,14 +446,14 @@ class TopicOptions(discord.ui.View):
         for topic in topics:
             self.add_item(topic_button(topic, user))
 
-@bot.tree.command(name="remove_topic", description="tester")
+@bot.tree.command(name="remove_topic", description="Allows you to remove any number of your topics.")
 async def _remove_topic(ctx: discord.Interaction):
     user = ctx.user.id
     if await user_exists(ctx, user):
         topics_json = await open_json("topics.json")
         topics_list = topics_json[str(user)]['topic_settings']
     
-        await ctx.response.send_message("testing", view=TopicOptions(topics_list, user))
+        await ctx.response.send_message("Which topic do you want to remove?", view=TopicOptions(topics_list, user))
 
 
 
