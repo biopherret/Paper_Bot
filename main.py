@@ -20,9 +20,12 @@ import asyncio
 
 import typing, functools #to prevent hf from blocking the main thread
 
+from math import ceil #for dividing long messages into multiple messages
+
 #TODO: many keys
 #TODO: send me a warning when new keys
 #TODO: give option between text and audio summary
+#TODO: put profile pic in embeds
 
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
 hf_chat_client = Client("biopherret/Paper_Summarizer")
@@ -233,10 +236,10 @@ def text_to_mp3(text, title):
     os.rename(filepath, new_path) #rename the file to the title
 
     file_to_send = discord.File(new_path)
-    os.remove(new_path)
+    #os.remove(new_path)
     return file_to_send
 
-def make_paper_message(topic_list, recent_list, hyperlink_lists, status_lists, num_papers):
+async def make_paper_message(topic_list, recent_list, hyperlink_lists, status_lists, num_papers):
     embed = discord.Embed(title="Papers I Found For You", color = 0x99e3ee)
     complete = True
     for i in range(len(status_lists)):
@@ -258,7 +261,30 @@ def make_paper_message(topic_list, recent_list, hyperlink_lists, status_lists, n
         embed.add_field(name="I've finished summarizing papers!", value = '', inline=False)
     return embed
 
-async def find_papers(user, num_papers):
+async def send_summary_to_user(user, summary_txt, message_or_audio, title):
+    discord_user = await bot.fetch_user(user)
+    if summary_txt != None and message_or_audio == "audio":
+        file = await text_to_mp3(summary_txt, title)
+        success = True
+        if file != None:
+            await discord_user.send(file=file, content = "")
+        else:
+            await discord_user.send(f'The text to speech AI failed for {title}, so sending you the summary as a message instead.')
+            for i in range(ceil(len(summary_txt) / 4096)):
+                embed = discord.Embed(title=title, color = 0x99e3ee)
+                embed.description = (summary_txt[(4096*i):(4096*(i+1))])
+                await discord_user.send(embed=embed)
+    elif summary_txt != None and message_or_audio == "message":
+        success = True
+        for i in range(ceil(len(summary_txt) / 4096)):
+            embed = discord.Embed(title=title, color = 0x99e3ee)
+            embed.description = (summary_txt[(4096*i):(4096*(i+1))])
+            await discord_user.send(embed=embed)
+    else:
+        success = False
+    return success
+
+async def find_papers(user, num_papers, message_or_audio):
     topics_json = await open_json("topics.json")
     topics_list = topics_json[str(user)]["topic_settings"]
 
@@ -271,7 +297,7 @@ async def find_papers(user, num_papers):
 
     discord_user = await bot.fetch_user(user)
     status_lists = [[None for _ in range(num_found)] for _ in range(len(topics_list))]
-    message = await discord_user.send(embed = make_paper_message([topic_dict['topic'] for topic_dict in topics_list], [topic_dict['recent'] for topic_dict in topics_list], copy.deepcopy(original_hyperlink_papers_lists), status_lists, num_papers))
+    message = await discord_user.send(embed = await make_paper_message([topic_dict['topic'] for topic_dict in topics_list], [topic_dict['recent'] for topic_dict in topics_list], copy.deepcopy(original_hyperlink_papers_lists), status_lists, num_papers))
 
     for count_t, topic_dict in enumerate(topics_list): #for each topic
         for count_a, article_dict in enumerate([article for article in found_articles if article['topic'] == topic_dict['topic']]): #for each article in that topic
@@ -279,17 +305,13 @@ async def find_papers(user, num_papers):
             context_txt = await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'])
             if context_txt != None:
                 summary_txt = await get_summary_from_LM(context_txt)
-                if summary_txt != None:
-                    file = await text_to_mp3(summary_txt, article_dict['title'])
-                    if file != None:
-                        success = True
-                        await discord_user.send(file=file, content = "")
+                success = await send_summary_to_user(user, summary_txt, message_or_audio, article_dict['title'])
             if success:
                 status_lists[count_t][count_a] = True
             else:
                 status_lists[count_t][count_a] = False
 
-            await message.edit(embed = make_paper_message([topic_dict['topic'] for topic_dict in topics_list], [topic_dict['recent'] for topic_dict in topics_list], copy.deepcopy(original_hyperlink_papers_lists), status_lists, num_papers))
+            await message.edit(embed = await make_paper_message([topic_dict['topic'] for topic_dict in topics_list], [topic_dict['recent'] for topic_dict in topics_list], copy.deepcopy(original_hyperlink_papers_lists), status_lists, num_papers))
 
 @bot.event
 async def on_ready():
@@ -335,7 +357,7 @@ async def _add_topic(ctx, topic : str, recent : str):
     user = ctx.user.id #save topic preferences in json
     topics_json = await open_json("topics.json")
     if str(user) not in topics_json.keys(): #if this user dosn't exist yet
-        topics_json[str(user)] = {'topic_settings': [], 'found_articles': [], 'search_schedule' : None, 'auto_num' : 0} #create a dictionary object for the new user
+        topics_json[str(user)] = {'topic_settings': [], 'found_articles': [], 'search_schedule' : None, 'auto_num' : 0, 'auto_message_or_audio' : None} #create a dictionary object for the new user
         discord_user = await bot.fetch_user(user)
         await discord_user.send("Welcome to Paper Bot! I've created a new user profile for you.")
 
@@ -354,46 +376,62 @@ async def _add_topic(ctx, topic : str, recent : str):
 
 
 @bot.tree.command(name="find_papers_now", description="Find papers based on your topic interests")
-async def _find_papers_now(ctx, num_papers : int):
+async def _find_papers_now(ctx, num_papers : int, message_or_audio : str):
     '''Find papers based on your topic instrests
 
     Args:
         ctx (Interaction): The context of the command
         num_papers (int): The number of papers you want to find for each topic (Max 5)
+        message_or_audio (str): Do you want the AI summary as a message or an audio file (message/audio)?
     '''
     user = ctx.user.id
     if num_papers < 6:
-        if await user_exists(ctx, user):
-            await send_command_response(ctx, user, "Finding papers for you...") #sending an initial message b/c if the initial response from the bot takes too long, discord will send a no-response error message
-            await find_papers(user, num_papers)
+        if message_or_audio == "message" or message_or_audio == "audio":
+            if await user_exists(ctx, user):
+                await send_command_response(ctx, user, "Finding papers for you...") #sending an initial message b/c if the initial response from the bot takes too long, discord will send a no-response error message
+                await find_papers(user, num_papers, message_or_audio)
+        else:
+            await send_command_response(ctx, user, 'Please specify if you want the summary as "message" or "audio".')
     else: #if they are trying to find more than 5 papers per topic
         await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
     
 
 @bot.tree.command(name="schedule", description="Set the frequency Paper Bot will automatically find papers and send them to your DM.")
-async def _schedule(ctx, days : int, number_of_papers : int):
+async def _schedule(ctx, days : int, number_of_papers : int, message_or_audio : str):
     '''Set the frequency Paper Bot will automatically find papers and send them to your DM.
 
     Args:
         ctx (Interaction): The context of the command
         days (int): Find papers every x days.
         number_of_papers (int): Number of papers to find per search per topic (Max 5).
+        message_or_audio (str): Do you want the AI summary as a message or an audio file (text/audio)?
     '''
     user = ctx.user.id
     if number_of_papers < 6:
-        if await user_exists(ctx, user):
-            topics_json = await open_json("topics.json")
-            topics_json[str(user)]['search_schedule'] = days
-            topics_json[str(user)]['auto_num'] = number_of_papers
-            await write_json(topics_json, "topics.json")
+        if message_or_audio == "message" or message_or_audio == "audio":
+            if await user_exists(ctx, user):
+                topics_json = await open_json("topics.json")
+                topics_json[str(user)]['search_schedule'] = days
+                topics_json[str(user)]['auto_num'] = number_of_papers
+                topics_json[str(user)]['auto_message_or_audio'] = message_or_audio
+                await write_json(topics_json, "topics.json")
 
-            await send_command_response(ctx, user, f"Paper Bot will now find {number_of_papers} papers per topic every {days} days.")
+                await send_command_response(ctx, user, f"Paper Bot will now find {number_of_papers} papers per topic every {days} days.")
+        else:
+            await send_command_response(ctx, user, 'Please specify if you want the summary as "message" or "audio".')
     else: #if they are trying to find more than 5 papers per topic
         await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
 
 
 @bot.tree.command(name="summarize_pdf", description="Summarize a PDF file")
-async def _summarize_pdf(ctx, pdf : discord.Attachment):
+async def _summarize_pdf(ctx, pdf : discord.Attachment, message_or_audio : str):
+    '''_summary_
+
+    Args:
+        ctx (Interaction): Discrod Interaction
+        pdf (discord.Attachment): A pdf file of the paper you want to summarize
+        message_or_audio (str): Do you want the AI summary as a message or an audio file (text/audio)?
+    '''
     user = ctx.user.id
     await send_command_response(ctx, user, "I'm working on summarizing your PDF. This may take a while...")
 
@@ -404,17 +442,12 @@ async def _summarize_pdf(ctx, pdf : discord.Attachment):
         context_txt += page.extract_text()
     os.remove(pdf.filename)
 
-    prompt = f'The following text is extracted from a PDF file of an academic paper. Ignoring the formatting text and the works cited, please summarize this paper. Thank you! Here is the paper text: "{context_txt}"'
-    summary_txt = await get_summary_from_LM(prompt)
-    discord_user = await bot.fetch_user(user)
-    if summary_txt != None:
-        file = await text_to_mp3(summary_txt, pdf.filename)
-        if file != None:
-            await discord_user.send(file=file, content = "")
-        else:
-            await discord_user.send("I'm sorry, I was unable to summarize this paper. Please try again later.")
-    else:
-        await discord_user.send("I'm sorry, I was unable to summarize this paper. Please try again later.")
+    summary_txt = await get_summary_from_LM(context_txt)
+    success = await send_summary_to_user(user, summary_txt, message_or_audio, pdf.filename)
+    if not success:
+        discord_user = await bot.fetch_user(user)
+        await discord_user.send("I'm sorry, I couldn't summarize the PDF. Please try again later.")
+
 
 @bot.tree.command(name="help", description="Learn more about Paper Bot")
 async def _help(ctx):
@@ -464,8 +497,9 @@ async def schedule_find_papers():
     for user in users:
         frequency = topics_json[user]['search_schedule']
         num = topics_json[user]['auto_num']
+        message_or_audio = topics_json[user]['auto_message_or_audio']
         if int(day_count) % int(frequency) == 0:
-            await find_papers(user, num)
+            await find_papers(user, num, message_or_audio)
             await dev_user.send(f"Sent papers to <@{user}>")
 
 @schedule_find_papers.before_loop #this executes before the above loop starts
