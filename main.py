@@ -434,6 +434,7 @@ class topic_button(discord.ui.Button['TopicOptions']):
     def __init__(self, topic, user):
         super().__init__(style=discord.ButtonStyle.secondary, label = topic['topic'])
         async def callback(self, interaction: discord.Interaction, button: discord.ui.Button):
+            view : TopicOptions = self.view
             topics_json = await open_json("topics.json")
             print(topics_json[str(user)]['topic_settings'])
             print([topic_dict for topic_dict in topics_json[str(user)]['topic_settings'] if topic_dict['topic'] != button.label])
