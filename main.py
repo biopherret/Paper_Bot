@@ -436,10 +436,11 @@ class MyView(discord.ui.View):
         super().__init__()
 
     #setting up button (you can add multiple such)
-    @discord.ui.button(label='test', style=discord.ButtonStyle.grey)
+    @discord.ui.button(label = 'another test', style=discord.ButtonStyle.grey)
+    @discord.ui.button(label = 'test', style=discord.ButtonStyle.grey)
     async def asdf(self, interaction: discord.Interaction, button: discord.ui.Button):
         # on interaction
-        await interaction.response.send_message(button, ephemeral=True)
+        await interaction.response.send_message(button.label, ephemeral=True)
 
 @bot.tree.command(name="remove_topic", description="tester")
 async def _remove_topic(ctx: discord.Interaction):
