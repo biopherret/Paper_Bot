@@ -1,5 +1,5 @@
 # How to access paper bot
-Follow [this link](https://discord.com/oauth2/authorize?client_id=1252693045938491483) to add the bot to either a server you have admin privileges for. (Do not select "try it now", this is a beta feature not supported by discord.py yet.)
+Follow [this link](https://discord.com/oauth2/authorize?client_id=1252693045938491483) to add the bot to either a server you have admin privileges for.
 
 # Getting Started
 To make a user profile simply add your first topic of interest
