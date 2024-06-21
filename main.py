@@ -306,15 +306,15 @@ async def _clear_history(ctx):
 
         await send_command_response(ctx, user, "Your history has been cleared! All topic settings and found articles have been removed.")
 
-@bot.tree.command(name="clear_topics", description="Clear your saved topic settings")
-async def _clear_topics(ctx):
-    user = ctx.user.id
-    if await user_exists(ctx, user):
-        topics_json = await open_json("topics.json")
-        topics_json[str(user)]['topic_settings'] = [] #empty the topic settings list
-        await write_json(topics_json, "topics.json")
+# @bot.tree.command(name="clear_topics", description="Clear your saved topic settings")
+# async def _clear_topics(ctx):
+#     user = ctx.user.id
+#     if await user_exists(ctx, user):
+#         topics_json = await open_json("topics.json")
+#         topics_json[str(user)]['topic_settings'] = [] #empty the topic settings list
+#         await write_json(topics_json, "topics.json")
 
-        await send_command_response(ctx, user, "Your topic settings have been cleared!")    
+#         await send_command_response(ctx, user, "Your topic settings have been cleared!")    
 
 @bot.tree.command(name="view_topics", description="View your saved topic settings.")
 async def _view_topics(ctx):
@@ -439,13 +439,12 @@ class MyView(discord.ui.View):
     @discord.ui.button(label='test', style=discord.ButtonStyle.grey)
     async def asdf(self, interaction: discord.Interaction, button: discord.ui.Button):
         # on interaction
-        await interaction.response.send_message('workie', ephemeral=True)
-        print("yes")
+        await interaction.response.send_message(button, ephemeral=True)
 
-@bot.tree.command(name="tester", description="tester")
-async def _tester(ctx: discord.Interaction):
+@bot.tree.command(name="remove_topic", description="tester")
+async def _remove_topic(ctx: discord.Interaction):
     # add the view to a message
-    await ctx.response.send_message("tester", view=MyView())
+    await ctx.response.send_message("testing", view=MyView())
 
 @tasks.loop(hours = 24)
 async def schedule_find_papers():
