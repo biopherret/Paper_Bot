@@ -12,6 +12,7 @@ or using /schedule to schedule paper bot to send you papers every x days at 9AM 
 <img src="https://media.discordapp.net/attachments/1099433298914189393/1253853300999192657/image.png?ex=66775d62&is=66760be2&hm=a371ff9b8255d176a876a76fb931aba7e2db856f24d6237e8e883bddb59fcae7&=&format=webp&quality=lossless&width=508&height=76">
 
 In both cases Paper Bot will find related papers and send you links to them. And then work on summarizing them.
+
 <img src="https://media.discordapp.net/attachments/1099433298914189393/1253851856351002645/image.png?ex=66775c09&is=66760a89&hm=bd4d7a9b4f321e5765d0fa1b3f15894a37aad3ccd17a1a3f0187e2d84d85e7f4&=&format=webp&quality=lossless&width=224&height=314">
 
 You'll notice that Paper Bot was not able to summarize every paper, this is often because the journal website blocks web scraping, so Paper Bot isn't able to get the paper content. 
