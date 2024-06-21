@@ -444,7 +444,7 @@ class TopicOptions(discord.ui.View):
     def __init__(self, topics, user):
         super().__init__()
         for topic in topics:
-            self.add_item(topic_button(topic))
+            self.add_item(topic_button(topic, user))
 
 @bot.tree.command(name="remove_topic", description="tester")
 async def _remove_topic(ctx: discord.Interaction):
