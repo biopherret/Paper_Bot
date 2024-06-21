@@ -433,7 +433,7 @@ async def _help(ctx):
 class topic_button(discord.ui.Button['TopicOptions']):
     def __init__(self, topic, user):
         super().__init__(style=discord.ButtonStyle.secondary, label = topic['topic'])
-        async def callback(self, interaction: discord.Interaction, button: discord.ui.Button):
+        async def callback(self, interaction: discord.Interaction):
             view : TopicOptions = self.view
             topics_json = await open_json("topics.json")
             print(topics_json[str(user)]['topic_settings'])
@@ -441,7 +441,7 @@ class topic_button(discord.ui.Button['TopicOptions']):
             topics_json[str(user)]['topic_settings'] = [topic_dict for topic_dict in topics_json[str(user)]['topic_settings'] if topic_dict['topic'] != button.label]
             await write_json(topics_json, "topics.json")
     
-            await interaction.response.send_message(f'{button.label} has been removed from your topic list', ephemeral=True)
+            await interaction.response.send_message(f'{topic} has been removed from your topic list', ephemeral=True)
 
 class TopicOptions(discord.ui.View):
     def __init__(self, topics, user):
