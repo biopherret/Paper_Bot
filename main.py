@@ -431,23 +431,25 @@ async def _help(ctx):
     await ctx.response.send_message(embed=embed)
 
 class topic_button(discord.ui.Button['TopicOptions']):
-    def __init__(self, topic, user):
+    def __init__(self, topic):
         super().__init__(style=discord.ButtonStyle.secondary, label = topic['topic'])
-        async def callback(self, interaction: discord.Interaction):
-            view : TopicOptions = self.view
-            topics_json = await open_json("topics.json")
-            print(topics_json[str(user)]['topic_settings'])
-            print([topic_dict for topic_dict in topics_json[str(user)]['topic_settings'] if topic_dict['topic'] != button.label])
-            topics_json[str(user)]['topic_settings'] = [topic_dict for topic_dict in topics_json[str(user)]['topic_settings'] if topic_dict['topic'] != button.label]
-            await write_json(topics_json, "topics.json")
+    async def callback(self, ctx: discord.Interaction):
+        user = ctx.user.id
+        topic_to_remove = self.label
+
+        topics_json = await open_json("topics.json")
+        print(topics_json[str(user)]['topic_settings'])
+        print([topic_dict for topic_dict in topics_json[str(user)]['topic_settings'] if topic_dict['topic'] != topic_to_remove])
+        topics_json[str(user)]['topic_settings'] = [topic_dict for topic_dict in topics_json[str(user)]['topic_settings'] if topic_dict['topic'] != topic_to_remove]
+        await write_json(topics_json, "topics.json")
     
-            await interaction.response.send_message(f'{topic} has been removed from your topic list', ephemeral=True)
+        await ctx.response.send_message(f'{topic_to_remove} has been removed from your topic list', ephemeral=True)
 
 class TopicOptions(discord.ui.View):
-    def __init__(self, topics, user):
+    def __init__(self, topics):
         super().__init__()
         for topic in topics:
-            self.add_item(topic_button(topic, user))
+            self.add_item(topic_button(topic))
 
 @bot.tree.command(name="remove_topic", description="Allows you to remove any number of your topics.")
 async def _remove_topic(ctx: discord.Interaction):
@@ -456,7 +458,7 @@ async def _remove_topic(ctx: discord.Interaction):
         topics_json = await open_json("topics.json")
         topics_list = topics_json[str(user)]['topic_settings']
     
-        await ctx.response.send_message("Which topic do you want to remove?", view=TopicOptions(topics_list, user))
+        await ctx.response.send_message("Which topic do you want to remove?", view=TopicOptions(topics_list))
 
 
 
