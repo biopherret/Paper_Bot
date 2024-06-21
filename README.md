@@ -19,3 +19,18 @@ You'll notice that Paper Bot was not able to summarize every paper, this is ofte
 When this happens, you can use the links provided in the first message to find a pdf of the paper and directly ask for a summary using /summarize_pdf
 <img src="https://github.com/biopherret/Paper_Bot/assets/59324379/789cac54-9c33-4762-9672-943ca08f229a">
 <img src="https://github.com/biopherret/Paper_Bot/assets/59324379/12b0d8ed-da6a-4b8e-8eab-0b19cbf3970d">
+
+# Commands
+/add_topic lets you add new topics to your user profile
+
+/view_topics will show you your current topic settings
+
+/remove_topic will let you remove up too all of your current topics
+
+/find_papers_now will find papers from each of your topics, and summarize them for you
+
+/schedule allows you to set a schedule for how often you want Paper Bot to automatically send you papers
+
+/summarize_pdf lets you send Paper Bot a pdf of a particular paper for it to summarize
+
+/clear_history will completely remove your user profile (topics, found articles, and schedule)
