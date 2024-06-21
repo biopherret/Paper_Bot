@@ -20,6 +20,16 @@ import asyncio
 
 import typing, functools #to prevent hf from blocking the main thread
 
+#TODO: many keys
+#TODO: send me a warning when new keys
+#TODO: move commands to readme and remove them from help
+#TODO: link github in help
+#TODO: add what is paper bot to help
+#TODO: give option between text and audio summary
+#TODO: add print report about if schedules went through
+#TODO: make titles a fun color
+#TODO: add profile pic to embed messages
+
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
 hf_chat_client = Client("biopherret/Paper_Summarizer")
 hf_tts_client = Client("https://neongeckocom-neon-tts-plugin-coqui.hf.space/")
@@ -244,7 +254,8 @@ def make_paper_message(topic_list, recent_list, hyperlink_lists, status_lists, n
                 hyperlink_lists[i][j] = f":x: {hyperlink_lists[i][j]}"
 
     for i in range(len(topic_list)):
-        embed.add_field(name=f'{topic_list[i]} (Recent Only: {recent_list[i]})', value="\n".join(hyperlink_lists[i]), inline=False)
+        recent = ['No', 'Yes'][recent_list[i]]
+        embed.add_field(name=f'{topic_list[i]} (Recent Only: {recent})', value="\n".join(hyperlink_lists[i]), inline=False)
     if not complete:
         embed.add_field(name="Now attempting to summarize papers...", value = '', inline=False)
     else: 
