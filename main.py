@@ -188,6 +188,9 @@ async def getArticles(topics_list, num_papers, user):
 
                                 #change current token to +1 and try again
             i += 1
+            if 'organic_results' not in search.keys(): #if there are no search results
+                continue #continue to the next search
+
             for r in range(len(search['organic_results'])): #for each article found in the search
                 title = search['organic_results'][r]['title']
                 if await not_a_repeat_article(title, found_articles):
