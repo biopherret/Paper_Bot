@@ -22,18 +22,16 @@ import typing, functools #to prevent hf from blocking the main thread
 
 from math import ceil #for dividing long messages into multiple messages
 
-#TODO: many keys
-#TODO: send me a warning when new keys
-
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
 hf_chat_client = Client("biopherret/Paper_Summarizer")
 hf_tts_client = Client("https://neongeckocom-neon-tts-plugin-coqui.hf.space/")
 
 discord_token = open("discord_token.txt", "r").read()
 profile_pic_url = 'https://cdn.discordapp.com/attachments/1252697568396443679/1253814342177128500/Paper_Bot.png?ex=66773919&is=6675e799&hm=d18a0208886b173ee5d7088f03ac5621dea066a32494834d11e0fb3dd19ec0e3&'
-serpapi_token = open("serpapi_token.txt", "r").read()
+serpapi_tokens = open("serpapi_tokens.txt", "r").readlines()
+serpapi_token_num = open("serpapi_token_num.txt", "r").read()
 
-dev_user_id = 337933564911943682 #replace with your discord user id
+dev_user_id = 337933564911943682
 
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
@@ -141,6 +139,9 @@ async def send_warning_to_schedule_users():
         await discord_user.send("Warning: I just woke up from a nap, this means I have lost track of how many days its been since I last sent you papers. I will send you papers at 9AM, and after your paper frequency will return to normal.")
 
 async def getArticles(topics_list, num_papers, user):
+    serpapi_token_num = int(open("serpapi_token_num.txt", "r").read())
+    serpapi_token = serpapi_tokens[serpapi_token_num]
+
     topics_json = await open_json("topics.json")
     found_articles = topics_json[str(user)]["found_articles"]
     new_articles = []
@@ -159,7 +160,33 @@ async def getArticles(topics_list, num_papers, user):
                 'num': 20,
                 'start': i*20
                 }
-            search=serpapi.search(params)
+            try:
+                search=serpapi.search(params)
+            except:
+                if int(serpapi_token_num) == len(serpapi_tokens) - 1: #if we are at the last token
+                    with open(os.cwd(), 'w') as file:
+                        file.write("0")
+                    serpapi_token_num = 0 #go back to the first token
+                else: #if we are not at the last token
+                    serpapi_token_num += 1 #try the next one
+
+                with open(os.cwd(), 'w') as file: #record the new token number
+                    file.write(str(serpapi_token_num))
+                discord_dev_user = await bot.fetch_user(dev_user_id)
+                await discord_dev_user.send(f"Ran out of serpapi tokens. Switching to token number {serpapi_token_num} out of {len(serpapi_tokens)}.")
+
+                new_params = {
+                "engine": "google_scholar",
+                "q": topic_dict['topic'],
+                "api_key": serpapi_tokens[serpapi_token_num],
+                "scisbd": topic_dict['recent'],
+                "hl": "en",
+                'num': 20,
+                'start': i*20
+                }
+                search=serpapi.search(new_params)
+
+                                #change current token to +1 and try again
             i += 1
             for r in range(len(search['organic_results'])): #for each article found in the search
                 title = search['organic_results'][r]['title']
