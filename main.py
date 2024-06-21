@@ -306,15 +306,15 @@ async def _clear_history(ctx):
 
         await send_command_response(ctx, user, "Your history has been cleared! All topic settings and found articles have been removed.")
 
-# @bot.tree.command(name="clear_topics", description="Clear your saved topic settings")
-# async def _clear_topics(ctx):
-#     user = ctx.user.id
-#     if await user_exists(ctx, user):
-#         topics_json = await open_json("topics.json")
-#         topics_json[str(user)]['topic_settings'] = [] #empty the topic settings list
-#         await write_json(topics_json, "topics.json")
+@bot.tree.command(name="clear_topics", description="Clear your saved topic settings")
+async def _clear_topics(ctx):
+    user = ctx.user.id
+    if await user_exists(ctx, user):
+        topics_json = await open_json("topics.json")
+        topics_json[str(user)]['topic_settings'] = [] #empty the topic settings list
+        await write_json(topics_json, "topics.json")
 
-#         await send_command_response(ctx, user, "Your topic settings have been cleared!")    
+        await send_command_response(ctx, user, "Your topic settings have been cleared!")    
 
 @bot.tree.command(name="view_topics", description="View your saved topic settings.")
 async def _view_topics(ctx):
@@ -431,22 +431,29 @@ async def _help(ctx):
     await ctx.response.send_message(embed=embed)
 
 class topic_button(discord.ui.Button['TopicOptions']):
-    def __init__(self, topic):
+    def __init__(self, topic, user):
         super().__init__(style=discord.ButtonStyle.secondary, label = topic)
         async def callback(self, interaction: discord.Interaction, button: discord.ui.Button):
-         # on interaction
-         await interaction.response.send_message(button.label, ephemeral=True)
+            topics_json = await open_json("topics.json")
+            topics_json[str(user)]['topic_settings'].remove(topic)
+            await write_json(topics_json, "topics.json")
+    
+            await interaction.response.send_message(f'{button.label} has been removed from your topic list', ephemeral=True)
 
 class TopicOptions(discord.ui.View):
-    def __init__(self, topics):
+    def __init__(self, topics, user):
         super().__init__()
         for topic in topics:
             self.add_item(topic_button(topic))
 
 @bot.tree.command(name="remove_topic", description="tester")
 async def _remove_topic(ctx: discord.Interaction):
-    # add the view to a message
-    await ctx.response.send_message("testing", view=TopicOptions(['topic 1', 'topic 2']))
+    user = ctx.user.id
+    if await user_exists(ctx, user):
+        topics_json = await open_json("topics.json")
+        topics_list = topics_json[str(user)]['topic_settings']
+    
+        await ctx.response.send_message("testing", view=TopicOptions(topics_list, user))
 
 
 
