@@ -27,9 +27,6 @@ hf_tts_client = Client("https://neongeckocom-neon-tts-plugin-coqui.hf.space/")
 discord_token = open("discord_token.txt", "r").read()
 serpapi_token = open("serpapi_token.txt", "r").read()
 
-#TODO: add command to remove only one topic
-#TODO: pick a profile picture and status
-
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
         json.dump(data, file, indent = 4)
@@ -234,7 +231,7 @@ def text_to_mp3(text, title):
     return file_to_send
 
 def make_paper_message(topic_list, recent_list, hyperlink_lists, status_lists, num_papers):
-    embed = discord.Embed(title="Papers I Found For You")
+    embed = discord.Embed(title="Papers I Found For You", color = 0xd5f6fb)
     complete = True
     for i in range(len(status_lists)):
         for j in range(num_papers):
@@ -313,7 +310,7 @@ async def _view_topics(ctx):
         topics_json = await open_json("topics.json")
         topics_list = topics_json[str(user)]['topic_settings']
 
-        embed = discord.Embed(title="Your Topics", description="Here are your current topic settings:")
+        embed = discord.Embed(title="Your Topics", description="Here are your current topic settings:", color = 0xd5f6fb)
         for topic_dict in topics_list:
             embed.add_field(name=topic_dict['topic'], value=f"Recent papers only?: {['No', 'Yes'][topic_dict['recent']]}", inline=False)
 
@@ -414,7 +411,7 @@ async def _summarize_pdf(ctx, pdf : discord.Attachment):
 
 @bot.tree.command(name="help", description="Learn more about Paper Bot")
 async def _help(ctx):
-    embed = discord.Embed(title="About Paper Bot", description="Paper Bot is a Discord bot that helps you find and summarize academic papers. You can add topics of interest, schedule automatic paper searches, and more!")
+    embed = discord.Embed(title="About Paper Bot", description="Paper Bot is a Discord bot that helps you find and summarize academic papers. You can add topics of interest, schedule automatic paper searches, and more!", color = 0xd5f6fb)
     embed.add_field(name="How do I get Started?", value="To get started, use the /add_topic command to add a topic of interest. You can then use /find_papers_now to find papers for that topic, or use /schedule to have Paper Bot automatically send you papers every x days.", inline=False)
     embed.add_field(name="Why does Paper Bot not send me a summary for every paper?", value="Paper Bot requires access to the paper to be able to summarize it. Paper Bot uses both Goggle Scholar and web scraping to try to access the paper content, but some journal websites block these methods. For papers that paper bot wasn't able to summarize, you can retrieve the pdf from the provided links and use /summarize_pdf to retrieve the summary.", inline=False)
     embed.add_field(name="Commands", value="/add_topic lets you add new topics to your user profile\n/view_topics will show you your current topic settings\n/clear_history will completely remove your user profile (topics, found articles, and schedule)\n/find_papers_now will find papers from each of your topics, and summarize them for you\n/schedule allows you to set a schedule for how often you want Paper Bot to automatically send you papers\n/summarize_pdf lets you send Paper Bot a pdf of a particular paper for it to summarize", inline=False)
@@ -447,25 +444,6 @@ async def _remove_topic(ctx: discord.Interaction):
         topics_list = topics_json[str(user)]['topic_settings']
     
         await ctx.response.send_message("Which topic do you want to remove?", view=TopicOptions(topics_list))
-
-
-
-# #Custom View Class
-# class MyView(discord.ui.View):
-#     def __init__(self, topic_list):
-#         super().__init__()
-
-#     #setting up button (you can add multiple such)
-#     @discord.ui.button(label = 'another test', style=discord.ButtonStyle.grey)
-#     @discord.ui.button(label = 'test', style=discord.ButtonStyle.grey)
-#     async def asdf(self, interaction: discord.Interaction, button: discord.ui.Button):
-#         # on interaction
-#         await interaction.response.send_message(button.label, ephemeral=True)
-
-# @bot.tree.command(name="remove_topic", description="tester")
-# async def _remove_topic(ctx: discord.Interaction):
-#     # add the view to a message
-#     await ctx.response.send_message("testing", view=MyView())
 
 @tasks.loop(hours = 24)
 async def schedule_find_papers():
