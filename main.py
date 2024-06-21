@@ -432,20 +432,20 @@ async def _help(ctx):
 
 #Custom View Class
 class MyView(discord.ui.View):
-    def __init__(self):
+    def __init__(self, topic_list):
         super().__init__()
 
-    #setting up button (you can add multiple such)
-    @discord.ui.button(label = 'another test', style=discord.ButtonStyle.grey)
-    @discord.ui.button(label = 'test', style=discord.ButtonStyle.grey)
-    async def asdf(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # on interaction
-        await interaction.response.send_message(button.label, ephemeral=True)
+        #setting up button (you can add multiple such)
+        @discord.ui.button(label = topic_list[0], style=discord.ButtonStyle.grey)
+        @discord.ui.button(label = 'test', style=discord.ButtonStyle.grey)
+        async def asdf(self, interaction: discord.Interaction, button: discord.ui.Button):
+            # on interaction
+            await interaction.response.send_message(button.label, ephemeral=True)
 
 @bot.tree.command(name="remove_topic", description="tester")
 async def _remove_topic(ctx: discord.Interaction):
     # add the view to a message
-    await ctx.response.send_message("testing", view=MyView())
+    await ctx.response.send_message("testing", view=MyView(['topic 1', 'topic 2']))
 
 @tasks.loop(hours = 24)
 async def schedule_find_papers():
