@@ -164,13 +164,13 @@ async def getArticles(topics_list, num_papers, user):
                 search=serpapi.search(params)
             except:
                 if int(serpapi_token_num) == len(serpapi_tokens) - 1: #if we are at the last token
-                    with open(os.cwd(), 'w') as file:
+                    with open(os.getcwd(), 'w') as file:
                         file.write("0")
                     serpapi_token_num = 0 #go back to the first token
                 else: #if we are not at the last token
                     serpapi_token_num += 1 #try the next one
 
-                with open(os.cwd(), 'w') as file: #record the new token number
+                with open(os.getcwd(), 'w') as file: #record the new token number
                     file.write(str(serpapi_token_num))
                 discord_dev_user = await bot.fetch_user(dev_user_id)
                 await discord_dev_user.send(f"Ran out of serpapi tokens. Switching to token number {serpapi_token_num} out of {len(serpapi_tokens)}.")
