@@ -24,14 +24,13 @@ from math import ceil #for dividing long messages into multiple messages
 
 #TODO: many keys
 #TODO: send me a warning when new keys
-#TODO: give option between text and audio summary
-#TODO: put profile pic in embeds
 
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
 hf_chat_client = Client("biopherret/Paper_Summarizer")
 hf_tts_client = Client("https://neongeckocom-neon-tts-plugin-coqui.hf.space/")
 
 discord_token = open("discord_token.txt", "r").read()
+profile_pic_url = 'https://cdn.discordapp.com/attachments/1252697568396443679/1253814342177128500/Paper_Bot.png?ex=66773919&is=6675e799&hm=d18a0208886b173ee5d7088f03ac5621dea066a32494834d11e0fb3dd19ec0e3&'
 serpapi_token = open("serpapi_token.txt", "r").read()
 
 dev_user_id = 337933564911943682 #replace with your discord user id
@@ -236,11 +235,12 @@ def text_to_mp3(text, title):
     os.rename(filepath, new_path) #rename the file to the title
 
     file_to_send = discord.File(new_path)
-    #os.remove(new_path)
+    os.remove(new_path)
     return file_to_send
 
 async def make_paper_message(topic_list, recent_list, hyperlink_lists, status_lists, num_papers):
     embed = discord.Embed(title="Papers I Found For You", color = 0x99e3ee)
+    embed.set_thumbnail(url=profile_pic_url)
     complete = True
     for i in range(len(status_lists)):
         for j in range(num_papers):
@@ -272,12 +272,14 @@ async def send_summary_to_user(user, summary_txt, message_or_audio, title):
             await discord_user.send(f'The text to speech AI failed for {title}, so sending you the summary as a message instead.')
             for i in range(ceil(len(summary_txt) / 4096)):
                 embed = discord.Embed(title=title, color = 0x99e3ee)
+                embed.set_thumbnail(url=profile_pic_url)
                 embed.description = (summary_txt[(4096*i):(4096*(i+1))])
                 await discord_user.send(embed=embed)
     elif summary_txt != None and message_or_audio == "message":
         success = True
         for i in range(ceil(len(summary_txt) / 4096)):
             embed = discord.Embed(title=title, color = 0x99e3ee)
+            embed.set_thumbnail(url=profile_pic_url)
             embed.description = (summary_txt[(4096*i):(4096*(i+1))])
             await discord_user.send(embed=embed)
     else:
@@ -340,6 +342,7 @@ async def _view_topics(ctx):
         topics_list = topics_json[str(user)]['topic_settings']
 
         embed = discord.Embed(title="Your Topics", description="Here are your current topic settings:", color = 0x99e3ee)
+        embed.set_thumbnail(url=profile_pic_url)
         for topic_dict in topics_list:
             embed.add_field(name=topic_dict['topic'], value=f"Recent papers only?: {['No', 'Yes'][topic_dict['recent']]}", inline=False)
 
@@ -452,6 +455,7 @@ async def _summarize_pdf(ctx, pdf : discord.Attachment, message_or_audio : str):
 @bot.tree.command(name="help", description="Learn more about Paper Bot")
 async def _help(ctx):
     embed = discord.Embed(title="About Paper Bot", description="Paper Bot is a Discord bot that helps you find and summarize academic papers. You can add topics of interest, schedule automatic paper searches, and more!", color = 0x99e3ee)
+    embed.set_thumbnail(url=profile_pic_url)
     embed.add_field(name="How do I get Started?", value="To get started, use the /add_topic command to add a topic of interest. You can then use /find_papers_now to find papers for that topic, or use /schedule to have Paper Bot automatically send you papers every x days.", inline=False)
     embed.add_field(name="Why does Paper Bot not send me a summary for every paper?", value="Paper Bot requires access to the paper to be able to summarize it. Paper Bot uses both Goggle Scholar and web scraping to try to access the paper content, but some journal websites block these methods. For papers that paper bot wasn't able to summarize, you can retrieve the pdf from the provided links and use /summarize_pdf to retrieve the summary.", inline=False)
     embed.add_field(name="Source Code", value="For more information you can check out the public [github repo](https://github.com/biopherret/Paper_Bot)", inline=False)
