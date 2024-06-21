@@ -22,7 +22,6 @@ import typing, functools #to prevent hf from blocking the main thread
 
 #TODO: many keys
 #TODO: send me a warning when new keys
-#TODO: link github in help
 #TODO: give option between text and audio summary
 #TODO: add print report about if schedules went through
 #TODO: make titles a fun color
@@ -423,6 +422,7 @@ async def _help(ctx):
     embed = discord.Embed(title="About Paper Bot", description="Paper Bot is a Discord bot that helps you find and summarize academic papers. You can add topics of interest, schedule automatic paper searches, and more!", color = 0x99e3ee)
     embed.add_field(name="How do I get Started?", value="To get started, use the /add_topic command to add a topic of interest. You can then use /find_papers_now to find papers for that topic, or use /schedule to have Paper Bot automatically send you papers every x days.", inline=False)
     embed.add_field(name="Why does Paper Bot not send me a summary for every paper?", value="Paper Bot requires access to the paper to be able to summarize it. Paper Bot uses both Goggle Scholar and web scraping to try to access the paper content, but some journal websites block these methods. For papers that paper bot wasn't able to summarize, you can retrieve the pdf from the provided links and use /summarize_pdf to retrieve the summary.", inline=False)
+    embed.add_field(name="Source Code", value="For more information you can check out the public [github repo](https://github.com/biopherret/Paper_Bot)", inline=False)
     await ctx.response.send_message(embed=embed)
 
 class topic_button(discord.ui.Button['TopicOptions']):
