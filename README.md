@@ -3,22 +3,22 @@ Follow [this link](https://discord.com/oauth2/authorize?client_id=12526930459384
 
 # Getting Started
 To make a user profile simply add your first topic of interest
-<img src="https://github.com/biopherret/Paper_Bot/assets/59324379/4d3e3ec3-40c6-459d-98bc-3817ab1f5d0e">
+<img src="https://media.discordapp.net/attachments/1099433298914189393/1253850263798808606/image.png?ex=66775a8e&is=6676090e&hm=25633bd244a5b30853bad9740bb837c97403f82da7797146ad8d11aa0a93a43e&=&format=webp&quality=lossless&width=447&height=89">
 
 Then you can find papers either at will using the /find_papers_now command
-<img src="https://github.com/biopherret/Paper_Bot/assets/59324379/f2a230bf-f79d-4ad7-bd67-60d61c2c3446">
+<img src="https://media.discordapp.net/attachments/1099433298914189393/1253850357013155902/image.png?ex=66775aa4&is=66760924&hm=5081e1befe202a57bc3fc043c9b878b4bc6d0c08356843a2b812aa2fb041380c&=&format=webp&quality=lossless&width=523&height=80">
 
 or using /schedule to schedule paper bot to send you papers every x days at 9AM PST.
-<img src="https://github.com/biopherret/Paper_Bot/assets/59324379/9a1079fd-f9e9-4f81-9a62-23b90a00ec76">
+<img src="https://media.discordapp.net/attachments/1099433298914189393/1253853300999192657/image.png?ex=66775d62&is=66760be2&hm=a371ff9b8255d176a876a76fb931aba7e2db856f24d6237e8e883bddb59fcae7&=&format=webp&quality=lossless&width=508&height=76">
 
 In both cases Paper Bot will find related papers and send you links to them. And then work on summarizing them.
-<img src="https://github.com/biopherret/Paper_Bot/assets/59324379/9c0b5cce-d207-428c-b990-30821874e001">
+<img src="https://media.discordapp.net/attachments/1099433298914189393/1253851856351002645/image.png?ex=66775c09&is=66760a89&hm=bd4d7a9b4f321e5765d0fa1b3f15894a37aad3ccd17a1a3f0187e2d84d85e7f4&=&format=webp&quality=lossless&width=224&height=314">
 
 You'll notice that Paper Bot was not able to summarize every paper, this is often because the journal website blocks web scraping, so Paper Bot isn't able to get the paper content. 
 
 When this happens, you can use the links provided in the first message to find a pdf of the paper and directly ask for a summary using /summarize_pdf
-<img src="https://github.com/biopherret/Paper_Bot/assets/59324379/789cac54-9c33-4762-9672-943ca08f229a">
-<img src="https://github.com/biopherret/Paper_Bot/assets/59324379/12b0d8ed-da6a-4b8e-8eab-0b19cbf3970d">
+<img src="https://media.discordapp.net/attachments/1099433298914189393/1253852634016645161/image.png?ex=66775cc3&is=66760b43&hm=a6d0293c2067d52f4564a2462c412517d3bf6dabd592b989af051e9bdf5b4245&=&format=webp&quality=lossless&width=533&height=288">
+<img src="https://media.discordapp.net/attachments/1099433298914189393/1253852824111026226/image.png?ex=66775cf0&is=66760b70&hm=2b8515bd666d0ee1017c35306c75c5dbce2546d888aeb09f775c8f34e980f9d2&=&format=webp&quality=lossless&width=447&height=187">
 
 # Commands
 /add_topic lets you add new topics to your user profile
