@@ -23,9 +23,6 @@ import typing, functools #to prevent hf from blocking the main thread
 #TODO: many keys
 #TODO: send me a warning when new keys
 #TODO: give option between text and audio summary
-#TODO: add print report about if schedules went through
-#TODO: make titles a fun color
-#TODO: add profile pic to embed messages
 
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
 hf_chat_client = Client("biopherret/Paper_Summarizer")
@@ -33,6 +30,8 @@ hf_tts_client = Client("https://neongeckocom-neon-tts-plugin-coqui.hf.space/")
 
 discord_token = open("discord_token.txt", "r").read()
 serpapi_token = open("serpapi_token.txt", "r").read()
+
+dev_user_id = 337933564911943682 #replace with your discord user id
 
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
@@ -455,14 +454,19 @@ async def _remove_topic(ctx: discord.Interaction):
 
 @tasks.loop(hours = 24)
 async def schedule_find_papers():
+    dev_user = await bot.fetch_user(dev_user_id)
+
     day_count = await uptime_days_rounded_down()
     topics_json = await open_json("topics.json")
     users = [user for user in topics_json.keys() if topics_json[user]['search_schedule'] != None] #get all users with a search schedule
+
+    await dev_user.send(f"Good morning! It's day {day_count} and there are {len(users)} who have schedules set up.")
     for user in users:
         frequency = topics_json[user]['search_schedule']
         num = topics_json[user]['auto_num']
         if int(day_count) % int(frequency) == 0:
             await find_papers(user, num)
+            await dev_user.send(f"Sent papers to <@{user}>")
 
 @schedule_find_papers.before_loop #this executes before the above loop starts
 async def before_schedule_find_papers():
