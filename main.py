@@ -432,7 +432,7 @@ async def _help(ctx):
 
 class topic_button(discord.ui.Button['TopicOptions']):
     def __init__(self, topic, user):
-        super().__init__(style=discord.ButtonStyle.secondary, label = topic)
+        super().__init__(style=discord.ButtonStyle.secondary, label = topic['topic'])
         async def callback(self, interaction: discord.Interaction, button: discord.ui.Button):
             topics_json = await open_json("topics.json")
             topics_json[str(user)]['topic_settings'].remove(topic)
