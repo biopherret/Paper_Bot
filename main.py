@@ -304,17 +304,7 @@ async def _clear_history(ctx):
         topics_json.pop(str(user)) #remove the user from the json
         await write_json(topics_json, "topics.json")
 
-        await send_command_response(ctx, user, "Your history has been cleared! All topic settings and found articles have been removed.")
-
-@bot.tree.command(name="clear_topics", description="Clear your saved topic settings")
-async def _clear_topics(ctx):
-    user = ctx.user.id
-    if await user_exists(ctx, user):
-        topics_json = await open_json("topics.json")
-        topics_json[str(user)]['topic_settings'] = [] #empty the topic settings list
-        await write_json(topics_json, "topics.json")
-
-        await send_command_response(ctx, user, "Your topic settings have been cleared!")    
+        await send_command_response(ctx, user, "Your history has been cleared! All topic settings and found articles have been removed.") 
 
 @bot.tree.command(name="view_topics", description="View your saved topic settings.")
 async def _view_topics(ctx):
@@ -438,8 +428,6 @@ class topic_button(discord.ui.Button['TopicOptions']):
         topic_to_remove = self.label
 
         topics_json = await open_json("topics.json")
-        print(topics_json[str(user)]['topic_settings'])
-        print([topic_dict for topic_dict in topics_json[str(user)]['topic_settings'] if topic_dict['topic'] != topic_to_remove])
         topics_json[str(user)]['topic_settings'] = [topic_dict for topic_dict in topics_json[str(user)]['topic_settings'] if topic_dict['topic'] != topic_to_remove]
         await write_json(topics_json, "topics.json")
     
