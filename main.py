@@ -430,22 +430,42 @@ async def _help(ctx):
     embed.add_field(name="Commands", value="/add_topic lets you add new topics to your user profile\n/view_topics will show you your current topic settings\n/clear_history will completely remove your user profile (topics, found articles, and schedule)\n/find_papers_now will find papers from each of your topics, and summarize them for you\n/schedule allows you to set a schedule for how often you want Paper Bot to automatically send you papers\n/summarize_pdf lets you send Paper Bot a pdf of a particular paper for it to summarize", inline=False)
     await ctx.response.send_message(embed=embed)
 
-#Custom View Class
-class MyView(discord.ui.View):
-    def __init__(self, topic_list):
-        super().__init__()
+class topic_button(discord.ui.Button['TopicOptions']):
+    def __init__(self, topic):
+        super().__init__(style=discord.ButtonStyle.secondary, label = topic)
+        async def callback(self, interaction: discord.Interaction, button: discord.ui.Button):
+         # on interaction
+         await interaction.response.send_message(button.label, ephemeral=True)
 
-        #setting up button (you can add multiple such)
-        @discord.ui.button(label = topic_list[0], style=discord.ButtonStyle.grey)
-        @discord.ui.button(label = 'test', style=discord.ButtonStyle.grey)
-        async def asdf(self, interaction: discord.Interaction, button: discord.ui.Button):
-            # on interaction
-            await interaction.response.send_message(button.label, ephemeral=True)
+class TopicOptions(discord.ui.View):
+    def __init__(self, topics):
+        super().__init__()
+        for topic in topics:
+            self.add_item(topic_button(topic))
 
 @bot.tree.command(name="remove_topic", description="tester")
 async def _remove_topic(ctx: discord.Interaction):
     # add the view to a message
-    await ctx.response.send_message("testing", view=MyView(['topic 1', 'topic 2']))
+    await ctx.response.send_message("testing", view=TopicOptions())
+
+
+
+# #Custom View Class
+# class MyView(discord.ui.View):
+#     def __init__(self, topic_list):
+#         super().__init__()
+
+#     #setting up button (you can add multiple such)
+#     @discord.ui.button(label = 'another test', style=discord.ButtonStyle.grey)
+#     @discord.ui.button(label = 'test', style=discord.ButtonStyle.grey)
+#     async def asdf(self, interaction: discord.Interaction, button: discord.ui.Button):
+#         # on interaction
+#         await interaction.response.send_message(button.label, ephemeral=True)
+
+# @bot.tree.command(name="remove_topic", description="tester")
+# async def _remove_topic(ctx: discord.Interaction):
+#     # add the view to a message
+#     await ctx.response.send_message("testing", view=MyView())
 
 @tasks.loop(hours = 24)
 async def schedule_find_papers():
