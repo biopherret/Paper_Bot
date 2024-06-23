@@ -135,8 +135,9 @@ async def send_warning_to_schedule_users():
     topics_json = await open_json("topics.json")
     users = [user for user in topics_json.keys() if topics_json[user]['search_schedule'] != None] #get all users with a search schedule
     for user in users:
+        x = topics_json[user]['search_schedule']
         discord_user = await bot.fetch_user(user)
-        await discord_user.send("Warning: I just woke up from a nap, this means I have lost track of how many days its been since I last sent you papers. I will send you papers at 9AM, and after your paper frequency will return to normal.")
+        await discord_user.send(f"Warning: I just woke up from a nap, this means I have lost track of how many days its been since I last sent you papers. I will send you papers in {x} days at 9AM, and after your paper frequency will return to normal.")
 
 async def getArticles(topics_list, num_papers, user):
     serpapi_token_num = int(open("serpapi_token_num.txt", "r").read())
@@ -163,15 +164,17 @@ async def getArticles(topics_list, num_papers, user):
             try:
                 search=serpapi.search(params)
             except:
+                print("Ran out of serpapi tokens")
                 if int(serpapi_token_num) == len(serpapi_tokens) - 1: #if we are at the last token
-                    with open(os.getcwd(), 'w') as file:
-                        file.write("0")
+                    print("switch to the first token")
                     serpapi_token_num = 0 #go back to the first token
                 else: #if we are not at the last token
+                    print('switch to the next token')
                     serpapi_token_num += 1 #try the next one
 
                 with open(os.getcwd(), 'w') as file: #record the new token number
                     file.write(str(serpapi_token_num))
+                print('switch recorded')
                 discord_dev_user = await bot.fetch_user(dev_user_id)
                 await discord_dev_user.send(f"Ran out of serpapi tokens. Switching to token number {serpapi_token_num} out of {len(serpapi_tokens)}.")
 
@@ -349,12 +352,17 @@ async def find_papers(user, num_papers, message_or_audio):
 
 @bot.event
 async def on_ready():
+    print("Ready!")
+
+@tasks.loop(count=1)
+async def wait_until_ready():
+    await bot.wait_until_ready()
     await bot.tree.sync()
     global start_time
     start_time = datetime.now()
     await send_warning_to_schedule_users()
     schedule_find_papers.start()
-    print("Ready!")
+
 
 @bot.tree.command(name="clear_history", description="Clear all Paper Bot topic settings and articles (remove all previously found papers from history).")
 async def _clear_history(ctx):  
@@ -529,12 +537,14 @@ async def schedule_find_papers():
     topics_json = await open_json("topics.json")
     users = [user for user in topics_json.keys() if topics_json[user]['search_schedule'] != None] #get all users with a search schedule
 
-    await dev_user.send(f"Good morning! It's day {day_count} and there are {len(users)} who have schedules set up.")
+    await dev_user.send(f"Good morning! It's day {day_count} and there are {len(users)} users who have schedules set up.")
     for user in users:
         frequency = topics_json[user]['search_schedule']
         num = topics_json[user]['auto_num']
         message_or_audio = topics_json[user]['auto_message_or_audio']
+        print(f"Day count: {day_count}, Frequency: {frequency}, User: {user}, {int(day_count) % int(frequency)}")
         if int(day_count) % int(frequency) == 0:
+            await dev_user.send(f"Attempting to send papers to <@{user}>")
             await find_papers(user, num, message_or_audio)
             await dev_user.send(f"Sent papers to <@{user}>")
 
