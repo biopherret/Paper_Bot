@@ -554,4 +554,5 @@ async def before_schedule_find_papers():
     next_run_in_seconds = await get_next_run_time(target_time)
     await asyncio.sleep(next_run_in_seconds)
 
+wait_until_ready.start()
 bot.run(discord_token)
