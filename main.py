@@ -528,6 +528,7 @@ async def _remove_topic(ctx: discord.Interaction):
 
 @tasks.loop(hours = 24)
 async def schedule_find_papers():
+    print('schedule loop started')
     dev_user = await bot.fetch_user(dev_user_id)
 
     day_count = await uptime_days_rounded_down()
@@ -547,6 +548,7 @@ async def schedule_find_papers():
 
 @schedule_find_papers.before_loop #this executes before the above loop starts
 async def before_schedule_find_papers():
+    print('schedule loop waiting...')
     await send_warning_to_schedule_users()
     target_time = time(hour=9, minute=00)
     next_run_in_seconds = await get_next_run_time(target_time)
