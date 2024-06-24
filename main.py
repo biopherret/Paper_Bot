@@ -355,8 +355,11 @@ async def on_ready():
     await bot.tree.sync()
     global start_time
     start_time = datetime.now()
+    await bot.wait_until_ready()
+    schedule_find_papers.start()
     
     print("Ready!")
+    
 
 @bot.tree.command(name="clear_history", description="Clear all Paper Bot topic settings and articles (remove all previously found papers from history).")
 async def _clear_history(ctx):  
@@ -525,7 +528,6 @@ async def _remove_topic(ctx: discord.Interaction):
 
 @tasks.loop(hours = 24)
 async def schedule_find_papers():
-    await send_warning_to_schedule_users()
     dev_user = await bot.fetch_user(dev_user_id)
 
     day_count = await uptime_days_rounded_down()
@@ -545,10 +547,9 @@ async def schedule_find_papers():
 
 @schedule_find_papers.before_loop #this executes before the above loop starts
 async def before_schedule_find_papers():
-    await bot.wait_until_ready()
+    await send_warning_to_schedule_users()
     target_time = time(hour=9, minute=00)
     next_run_in_seconds = await get_next_run_time(target_time)
     await asyncio.sleep(next_run_in_seconds)
 
-schedule_find_papers.start()
 bot.run(discord_token)
