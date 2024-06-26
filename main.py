@@ -123,7 +123,8 @@ async def send_command_response(ctx, user, message, is_embed=False):
         await ctx.response.send_message("I'm sorry, sometimes discord doesn't respond to me properly. Please try again later.")
 
 async def user_exists(ctx, user):
-    user_data = await open_json("topics.json")["users"]
+    topics_json = await open_json("topics.json")
+    user_data = topics_json["users"]
     if str(user) in user_data.keys():
         return True
     else:
@@ -131,7 +132,8 @@ async def user_exists(ctx, user):
         return False
     
 async def send_warning_to_schedule_users():
-    user_data = await open_json("topics.json")["users"]
+    topics_json = await open_json("topics.json")
+    user_data = topics_json["users"]
     users = [user for user in user_data.keys() if user_data[user]['search_schedule'] != None] #get all users with a search schedule
     for user in users:
         x = user_data[user]['search_schedule']
@@ -311,7 +313,8 @@ async def send_summary_to_user(user, summary_txt, message_or_audio, title):
     return success
 
 async def find_papers(user, num_papers, message_or_audio):
-    user_data = await open_json("topics.json")["users"]
+    topics_json = await open_json("topics.json")
+    user_data = topics_json["users"]
     topics_list = user_data[str(user)]["topic_settings"]
 
     found_articles = await getArticles(topics_list, num_papers, user)
@@ -364,7 +367,8 @@ async def _clear_history(ctx):
 async def _view_topics(ctx):
     user = ctx.user.id
     if await user_exists(ctx, user):
-        user_data = await open_json("topics.json")["users"]
+        topics_json = await open_json("topics.json")
+        user_data = topics_json["users"]
         topics_list = user_data[str(user)]['topic_settings']
 
         embed = discord.Embed(title="Your Topics", description="Here are your current topic settings:", color = 0x99e3ee)
@@ -521,7 +525,8 @@ async def schedule_find_papers():
     dev_user = await bot.fetch_user(dev_user_id)
 
     day_count = await uptime_days_rounded_down()
-    user_data = await open_json("topics.json")["users"]
+    topics_json = await open_json("topics.json")
+    user_data = topics_json["users"]
     users = [user for user in user_data.keys() if user_data[user]['search_schedule'] != None] #get all users with a search schedule
 
     await dev_user.send(f"Good morning! It's day {day_count} and there are {len(users)} users who have schedules set up.")
