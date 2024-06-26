@@ -348,6 +348,10 @@ async def on_ready():
     global start_time
     start_time = datetime.now()
     await bot.wait_until_ready()
+
+    topics_json = await open_json("topics.json")
+    topics_json['schedule_loop_allready_running'] = "n"
+    await write_json(topics_json, "topics.json")
     schedule_find_papers.start()
     
     print("Ready!")
@@ -521,7 +525,13 @@ async def _remove_topic(ctx: discord.Interaction):
 
 @tasks.loop(hours = 24)
 async def schedule_find_papers():
+    topics_json = await open_json("topics.json")
+    if topics_json['schedule_loop_allready_running'] == "y": #don't start the loop again if it has already started
+        return
+    
     print('schedule loop started')
+    topics_json['schedule_loop_allready_running'] = "y"
+    await write_json(topics_json, "topics.json")
     dev_user = await bot.fetch_user(dev_user_id)
 
     day_count = await uptime_days_rounded_down()
