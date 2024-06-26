@@ -29,7 +29,8 @@ hf_tts_client = Client("https://neongeckocom-neon-tts-plugin-coqui.hf.space/")
 discord_token = open("discord_token.txt", "r").read()
 profile_pic_url = 'https://cdn.discordapp.com/attachments/1252697568396443679/1253814342177128500/Paper_Bot.png?ex=66773919&is=6675e799&hm=d18a0208886b173ee5d7088f03ac5621dea066a32494834d11e0fb3dd19ec0e3&'
 serpapi_tokens = open("serpapi_tokens.txt", "r").readlines()
-serpapi_token_num = open("serpapi_token_num.txt", "r").read()
+topics_json = open("topics.json", "r").read()
+serpapi_token_num = topics_json['current_serpapi_token_num']
 
 dev_user_id = 337933564911943682
 
@@ -140,10 +141,10 @@ async def send_warning_to_schedule_users():
         await discord_user.send(f"Warning: I just woke up from a nap, this means I have lost track of how many days its been since I last sent you papers. I will send you papers in {x} days at 9AM, and after your paper frequency will return to normal.")
 
 async def getArticles(topics_list, num_papers, user):
-    serpapi_token_num = int(open("serpapi_token_num.txt", "r").read())
+    topics_json = await open_json("topics.json")
+    serpapi_token_num = topics_json['current_serpapi_token_num']
     serpapi_token = serpapi_tokens[serpapi_token_num]
 
-    topics_json = await open_json("topics.json")
     found_articles = topics_json[str(user)]["found_articles"]
     new_articles = []
 
@@ -172,8 +173,8 @@ async def getArticles(topics_list, num_papers, user):
                     print('switch to the next token')
                     serpapi_token_num += 1 #try the next one
 
-                with open(os.getcwd(), 'w') as file: #record the new token number
-                    file.write(str(serpapi_token_num))
+                topics_json['current_serpapi_token_num'] = serpapi_token_num
+                await write_json(topics_json, "topics.json")
                 print('switch recorded')
                 discord_dev_user = await bot.fetch_user(dev_user_id)
                 await discord_dev_user.send(f"Ran out of serpapi tokens. Switching to token number {serpapi_token_num} out of {len(serpapi_tokens)}.")
