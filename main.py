@@ -176,19 +176,8 @@ async def getArticles(topics_list, num_papers, user):
                 print('switch recorded')
                 discord_dev_user = await bot.fetch_user(dev_user_id)
                 await discord_dev_user.send(f"Ran out of serpapi tokens. Switching to token number {serpapi_token_num} out of {len(serpapi_tokens)}.")
-
-                new_params = {
-                "engine": "google_scholar",
-                "q": topic_dict['topic'],
-                "api_key": serpapi_tokens[serpapi_token_num],
-                "scisbd": topic_dict['recent'],
-                "hl": "en",
-                'num': 20,
-                'start': i*20
-                }
-                search=serpapi.search(new_params)
-
-                                #change current token to +1 and try again
+                #change current token to +1 and continue in the loop
+                continue
             i += 1
             if 'organic_results' not in search.keys(): #if there are no search results
                 discord_user = await bot.fetch_user(user)
