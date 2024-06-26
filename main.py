@@ -123,27 +123,28 @@ async def send_command_response(ctx, user, message, is_embed=False):
         await ctx.response.send_message("I'm sorry, sometimes discord doesn't respond to me properly. Please try again later.")
 
 async def user_exists(ctx, user):
-    topics_json = await open_json("topics.json")
-    if str(user) in topics_json.keys():
+    user_data = await open_json("topics.json")["users"]
+    if str(user) in user_data.keys():
         return True
     else:
         await send_command_response(ctx, user, "You don't have any topics saved! Use the /add_topic command to add a topic.")
         return False
     
 async def send_warning_to_schedule_users():
-    topics_json = await open_json("topics.json")
-    users = [user for user in topics_json.keys() if topics_json[user]['search_schedule'] != None] #get all users with a search schedule
+    user_data = await open_json("topics.json")["users"]
+    users = [user for user in user_data.keys() if user_data[user]['search_schedule'] != None] #get all users with a search schedule
     for user in users:
-        x = topics_json[user]['search_schedule']
+        x = user_data[user]['search_schedule']
         discord_user = await bot.fetch_user(user)
         await discord_user.send(f"Warning: I just woke up from a nap, this means I have lost track of how many days its been since I last sent you papers. I will send you papers in {x} days at 9AM, and after your paper frequency will return to normal.")
 
 async def getArticles(topics_list, num_papers, user):
     topics_json = await open_json("topics.json")
     serpapi_token_num = topics_json['current_serpapi_token_num']
+    user_data = topics_json["users"]
     serpapi_token = serpapi_tokens[serpapi_token_num]
 
-    found_articles = topics_json[str(user)]["found_articles"]
+    found_articles = user_data[str(user)]["found_articles"]
     new_articles = []
 
     for topic_dict in topics_list:
@@ -310,8 +311,8 @@ async def send_summary_to_user(user, summary_txt, message_or_audio, title):
     return success
 
 async def find_papers(user, num_papers, message_or_audio):
-    topics_json = await open_json("topics.json")
-    topics_list = topics_json[str(user)]["topic_settings"]
+    user_data = await open_json("topics.json")["users"]
+    topics_list = user_data[str(user)]["topic_settings"]
 
     found_articles = await getArticles(topics_list, num_papers, user)
     num_found = int(len(found_articles))
@@ -354,7 +355,7 @@ async def _clear_history(ctx):
     user = ctx.user.id
     if await user_exists(ctx, user):
         topics_json = await open_json("topics.json")
-        topics_json.pop(str(user)) #remove the user from the json
+        topics_json["users"].pop(str(user)) #remove the user from the json
         await write_json(topics_json, "topics.json")
 
         await send_command_response(ctx, user, "Your history has been cleared! All topic settings and found articles have been removed.") 
@@ -363,8 +364,8 @@ async def _clear_history(ctx):
 async def _view_topics(ctx):
     user = ctx.user.id
     if await user_exists(ctx, user):
-        topics_json = await open_json("topics.json")
-        topics_list = topics_json[str(user)]['topic_settings']
+        user_data = await open_json("topics.json")["users"]
+        topics_list = user_data[str(user)]['topic_settings']
 
         embed = discord.Embed(title="Your Topics", description="Here are your current topic settings:", color = 0x99e3ee)
         embed.set_thumbnail(url=profile_pic_url)
@@ -384,8 +385,8 @@ async def _add_topic(ctx, topic : str, recent : str):
     '''
     user = ctx.user.id #save topic preferences in json
     topics_json = await open_json("topics.json")
-    if str(user) not in topics_json.keys(): #if this user dosn't exist yet
-        topics_json[str(user)] = {'topic_settings': [], 'found_articles': [], 'search_schedule' : None, 'auto_num' : 0, 'auto_message_or_audio' : None} #create a dictionary object for the new user
+    if str(user) not in topics_json["users"].keys(): #if this user dosn't exist yet
+        topics_json["user"][str(user)] = {'topic_settings': [], 'found_articles': [], 'search_schedule' : None, 'auto_num' : 0, 'auto_message_or_audio' : None} #create a dictionary object for the new user
         discord_user = await bot.fetch_user(user)
         await discord_user.send("Welcome to Paper Bot! I've created a new user profile for you.")
 
@@ -397,7 +398,7 @@ async def _add_topic(ctx, topic : str, recent : str):
         await send_command_response(ctx, user, "Please use 'y' or 'n' to indicate if you want to restrict the search to recent papers.")
         return
 
-    topics_json[str(user)]['topic_settings'].append({"topic": topic, "recent": recent}) #add the new topic
+    topics_json["users"][str(user)]['topic_settings'].append({"topic": topic, "recent": recent}) #add the new topic
     await write_json(topics_json, "topics.json")
     
     await send_command_response(ctx, user, "Your new topic has been added!")
@@ -439,9 +440,9 @@ async def _schedule(ctx, days : int, number_of_papers : int, message_or_audio : 
         if message_or_audio == "message" or message_or_audio == "audio":
             if await user_exists(ctx, user):
                 topics_json = await open_json("topics.json")
-                topics_json[str(user)]['search_schedule'] = days
-                topics_json[str(user)]['auto_num'] = number_of_papers
-                topics_json[str(user)]['auto_message_or_audio'] = message_or_audio
+                topics_json["users"][str(user)]['search_schedule'] = days
+                topics_json["users"][str(user)]['auto_num'] = number_of_papers
+                topics_json["users"][str(user)]['auto_message_or_audio'] = message_or_audio
                 await write_json(topics_json, "topics.json")
 
                 await send_command_response(ctx, user, f"Paper Bot will now find {number_of_papers} papers per topic every {days} days.")
@@ -494,7 +495,7 @@ class topic_button(discord.ui.Button['TopicOptions']):
         topic_to_remove = self.label
 
         topics_json = await open_json("topics.json")
-        topics_json[str(user)]['topic_settings'] = [topic_dict for topic_dict in topics_json[str(user)]['topic_settings'] if topic_dict['topic'] != topic_to_remove]
+        topics_json["users"][str(user)]['topic_settings'] = [topic_dict for topic_dict in topics_json[str(user)]['topic_settings'] if topic_dict['topic'] != topic_to_remove]
         await write_json(topics_json, "topics.json")
     
         await ctx.response.send_message(f'{topic_to_remove} has been removed from your topic list', ephemeral=True)
@@ -510,7 +511,7 @@ async def _remove_topic(ctx: discord.Interaction):
     user = ctx.user.id
     if await user_exists(ctx, user):
         topics_json = await open_json("topics.json")
-        topics_list = topics_json[str(user)]['topic_settings']
+        topics_list = topics_json["users"][str(user)]['topic_settings']
     
         await ctx.response.send_message("Which topic do you want to remove?", view=TopicOptions(topics_list))
 
@@ -520,14 +521,14 @@ async def schedule_find_papers():
     dev_user = await bot.fetch_user(dev_user_id)
 
     day_count = await uptime_days_rounded_down()
-    topics_json = await open_json("topics.json")
-    users = [user for user in topics_json.keys() if topics_json[user]['search_schedule'] != None] #get all users with a search schedule
+    user_data = await open_json("topics.json")["users"]
+    users = [user for user in user_data.keys() if user_data[user]['search_schedule'] != None] #get all users with a search schedule
 
     await dev_user.send(f"Good morning! It's day {day_count} and there are {len(users)} users who have schedules set up.")
     for user in users:
-        frequency = topics_json[user]['search_schedule']
-        num = topics_json[user]['auto_num']
-        message_or_audio = topics_json[user]['auto_message_or_audio']
+        frequency = user_data[user]['search_schedule']
+        num = user_data[user]['auto_num']
+        message_or_audio = user_data[user]['auto_message_or_audio']
         print(f"Day count: {day_count}, Frequency: {frequency}, User: {user}, {int(day_count) % int(frequency)}")
         if int(day_count) % int(frequency) == 0:
             await dev_user.send(f"Attempting to send papers to <@{user}>")
