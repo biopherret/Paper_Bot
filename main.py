@@ -30,6 +30,7 @@ discord_token = open("discord_token.txt", "r").read()
 profile_pic_url = 'https://cdn.discordapp.com/attachments/1252697568396443679/1253814342177128500/Paper_Bot.png?ex=66773919&is=6675e799&hm=d18a0208886b173ee5d7088f03ac5621dea066a32494834d11e0fb3dd19ec0e3&'
 serpapi_tokens = open("serpapi_tokens.txt", "r").readlines()
 topics_json = open("topics.json", "r").read()
+print(type(topics_json))
 serpapi_token_num = topics_json['current_serpapi_token_num']
 
 dev_user_id = 337933564911943682
