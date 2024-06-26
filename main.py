@@ -22,19 +22,6 @@ import typing, functools #to prevent hf from blocking the main thread
 
 from math import ceil #for dividing long messages into multiple messages
 
-bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
-hf_chat_client = Client("biopherret/Paper_Summarizer")
-hf_tts_client = Client("https://neongeckocom-neon-tts-plugin-coqui.hf.space/")
-
-discord_token = open("discord_token.txt", "r").read()
-profile_pic_url = 'https://cdn.discordapp.com/attachments/1252697568396443679/1253814342177128500/Paper_Bot.png?ex=66773919&is=6675e799&hm=d18a0208886b173ee5d7088f03ac5621dea066a32494834d11e0fb3dd19ec0e3&'
-serpapi_tokens = open("serpapi_tokens.txt", "r").readlines()
-topics_json = open("topics.json", "r").read()
-print(type(topics_json))
-serpapi_token_num = topics_json['current_serpapi_token_num']
-
-dev_user_id = 337933564911943682
-
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
         json.dump(data, file, indent = 4)
@@ -42,6 +29,18 @@ async def write_json(data, file_name):
 async def open_json(file_name):
     with open (file_name) as file:
         return json.load(file)
+
+bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
+hf_chat_client = Client("biopherret/Paper_Summarizer")
+hf_tts_client = Client("https://neongeckocom-neon-tts-plugin-coqui.hf.space/")
+
+discord_token = open("discord_token.txt", "r").read()
+profile_pic_url = 'https://cdn.discordapp.com/attachments/1252697568396443679/1253814342177128500/Paper_Bot.png?ex=66773919&is=6675e799&hm=d18a0208886b173ee5d7088f03ac5621dea066a32494834d11e0fb3dd19ec0e3&'
+serpapi_tokens = open("serpapi_tokens.txt", "r").readlines()
+topics_json = open_json("topics.json")
+serpapi_token_num = topics_json['current_serpapi_token_num']
+
+dev_user_id = 337933564911943682
 
 #calling hugging face blocks the thread (even if in a async function) this decorator will run the function in a separate thread
 def to_thread(func: typing.Callable) -> typing.Coroutine:
