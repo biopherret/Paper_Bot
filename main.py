@@ -11,8 +11,6 @@ from pypdf import PdfReader
 
 from bs4 import BeautifulSoup #for reading text from web pages
 
-from StringProgressBar import progressBar #to report progress of long tasks
-
 from gradio_client import Client #to access a huggingface language model
 
 from datetime import datetime, time, timedelta #for managing scheduler
@@ -21,8 +19,6 @@ import asyncio
 import typing, functools #to prevent hf from blocking the main thread
 
 from math import ceil #for dividing long messages into multiple messages
-
-##TODO: make schedule option be days of the week rather than frequency so that changeing the frequency dos'nt affect they way schedule works
 
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
@@ -64,12 +60,11 @@ async def get_next_run_time(target_time):
         next_run += timedelta(days=1)
     return (next_run - now).total_seconds()
 
-async def uptime_days_rounded_down():
-    delta = datetime.now().date() - start_time.date()
-    if str(delta) == "0:00:00":
-        return 0
-    else:
-        return str(delta).split()[0]
+async def get_day_of_week():
+    day_int = datetime.today().weekday()
+    week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+    return week[day_int]
     
 async def read_pdf(doc_link, title):
     response = urllib.request.urlopen(doc_link)
@@ -445,12 +440,14 @@ class schedule_button(discord.ui.Button['DayOptions']):
         day_selected = self.label
 
         topics_json = await open_json("topics.json") #TODO: change the button color when they select it
-        if day_selected in topics_json["users"][str(user)]['search_schedule']:
-            await ctx.response.send_message(f'You will no longer receive papers on {day_selected}', ephemeral=True)
-            topics_json["users"][str(user)]['search_schedule'].remove(day_selected)
+        if day_selected in topics_json["users"][str(user)]['search_schedule']: #if the day is already in the schedule
+            self.style = discord.ButtonStyle.grey 
+            await ctx.response.edit_message(view=self.view) #update the button color
+            topics_json["users"][str(user)]['search_schedule'].remove(day_selected) #remove the day from the schedule
         else:
+            self.style = discord.ButtonStyle.green
+            await ctx.response.edit_message(view=self.view) #update the button color
             topics_json["users"][str(user)]['search_schedule'].append(day_selected)
-            await ctx.response.send_message(f'You will now receive papers every {day_selected}', ephemeral=True)
         print(topics_json["users"][str(user)]['search_schedule'])
         await write_json(topics_json, "topics.json")
 
@@ -483,7 +480,7 @@ async def _schedule(ctx, number_of_papers : int, message_or_audio : str):
                 await send_command_response(ctx, user, f"Paper Bot will now find {number_of_papers} papers on each day you schedule it")
 
                 discord_user = await bot.fetch_user(user)
-                await discord_user.send("Please select (or deselect) what days of the week you want more papers?", view=DayOptions(current_days))
+                await discord_user.send("Please select (or deselect) what days of the week you want more papers", view=DayOptions(current_days))
         else:
             await send_command_response(ctx, user, 'Please specify if you want the summary as "message" or "audio".')
     else: #if they are trying to find more than 5 papers per topic
@@ -564,18 +561,18 @@ async def schedule_find_papers():
     await write_json(topics_json, "topics.json")
     dev_user = await bot.fetch_user(dev_user_id)
 
-    day_count = await uptime_days_rounded_down()
+    today = await get_day_of_week()
     topics_json = await open_json("topics.json")
     user_data = topics_json["users"]
     users = [user for user in user_data.keys() if user_data[user]['search_schedule'] != None] #get all users with a search schedule
 
-    await dev_user.send(f"Good morning! It's day {day_count} and there are {len(users)} users who have schedules set up.")
+    await dev_user.send(f"Good morning! It's a {today} and there are {len(users)} users who have schedules set up.")
     for user in users:
-        frequency = user_data[user]['search_schedule']
+        schedule_days = user_data[user]['search_schedule']
         num = user_data[user]['auto_num']
         message_or_audio = user_data[user]['auto_message_or_audio']
-        print(f"Day count: {day_count}, Frequency: {frequency}, User: {user}, {int(day_count) % int(frequency)}")
-        if int(day_count) % int(frequency) == 0:
+
+        if today in schedule_days:
             await dev_user.send(f"Attempting to send papers to <@{user}>")
             await find_papers(user, num, message_or_audio)
             await dev_user.send(f"Sent papers to <@{user}>")
