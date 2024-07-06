@@ -128,15 +128,6 @@ async def user_exists(ctx, user):
         await send_command_response(ctx, user, "You don't have any topics saved! Use the /add_topic command to add a topic.")
         return False
     
-async def send_warning_to_schedule_users():
-    topics_json = await open_json("topics.json")
-    user_data = topics_json["users"]
-    users = [user for user in user_data.keys() if user_data[user]['search_schedule'] != None] #get all users with a search schedule
-    for user in users:
-        x = user_data[user]['search_schedule']
-        discord_user = await bot.fetch_user(user)
-        await discord_user.send(f"Warning: I just woke up from a nap, this means I have lost track of how many days its been since I last sent you papers. I will send you papers in {x} days at 9AM, and after your paper frequency will return to normal.")
-
 async def getArticles(topics_list, num_papers, user):
     topics_json = await open_json("topics.json")
     serpapi_token_num = topics_json['current_serpapi_token_num']
@@ -580,7 +571,6 @@ async def schedule_find_papers():
 @schedule_find_papers.before_loop #this executes before the above loop starts
 async def before_schedule_find_papers():
     print('schedule loop waiting...')
-    await send_warning_to_schedule_users()
     target_time = time(hour=9, minute=00)
     next_run_in_seconds = await get_next_run_time(target_time)
     await asyncio.sleep(next_run_in_seconds)
