@@ -435,13 +435,16 @@ async def _find_papers_now(ctx, num_papers : int, message_or_audio : str):
         await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
 
 class schedule_button(discord.ui.Button['DayOptions']):
-    def __init__(self, day):
-        super().__init__(style=discord.ButtonStyle.secondary, label = day) #TODO: color button depending on if day is already scheduled
+    def __init__(self, day, current_days):
+        if day in current_days:
+            super().__init__(style=discord.ButtonStyle.green, label = day)
+        else:
+            super().__init__(style=discord.ButtonStyle.grey, label = day) 
     async def callback(self, ctx: discord.Interaction):
         user = ctx.user.id
         day_selected = self.label
 
-        topics_json = await open_json("topics.json")
+        topics_json = await open_json("topics.json") #TODO: change the button color when they select it
         if day_selected in topics_json["users"][str(user)]['search_schedule']:
             await ctx.response.send_message(f'You will no longer receive papers on {day_selected}', ephemeral=True)
             topics_json["users"][str(user)]['search_schedule'].remove(day_selected)
@@ -450,14 +453,12 @@ class schedule_button(discord.ui.Button['DayOptions']):
             await ctx.response.send_message(f'You will now receive papers every {day_selected}', ephemeral=True)
         print(topics_json["users"][str(user)]['search_schedule'])
         await write_json(topics_json, "topics.json")
-    
-        
 
 class DayOptions(discord.ui.View):
-    def __init__(self):
+    def __init__(self, current_days):
         super().__init__()
         for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']:
-            self.add_item(schedule_button(day)) 
+            self.add_item(schedule_button(day, current_days)) 
 
 @bot.tree.command(name="schedule", description="Set the frequency Paper Bot will automatically find papers and send them to your DM.")
 async def _schedule(ctx, number_of_papers : int, message_or_audio : str):
@@ -477,10 +478,12 @@ async def _schedule(ctx, number_of_papers : int, message_or_audio : str):
                 topics_json["users"][str(user)]['auto_message_or_audio'] = message_or_audio
                 await write_json(topics_json, "topics.json")
 
-                await send_command_response(ctx, user, f"Paper Bot will now find {number_of_papers} papers on each day you schedule it.")
+                current_days = topics_json["users"][str(user)]['search_schedule']
+
+                await send_command_response(ctx, user, f"Paper Bot will now find {number_of_papers} papers on each day you schedule it")
 
                 discord_user = await bot.fetch_user(user)
-                await discord_user.send("On what days do you want paper bot to send you papers?", view=DayOptions())
+                await discord_user.send("Please select (or deselect) what days of the week you want more papers?", view=DayOptions(current_days))
         else:
             await send_command_response(ctx, user, 'Please specify if you want the summary as "message" or "audio".')
     else: #if they are trying to find more than 5 papers per topic
