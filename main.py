@@ -439,14 +439,19 @@ class schedule_button(discord.ui.Button['DayOptions']):
         super().__init__(style=discord.ButtonStyle.secondary, label = day) #TODO: color button depending on if day is already scheduled
     async def callback(self, ctx: discord.Interaction):
         user = ctx.user.id
-        day_to_add = self.label
+        day_selected = self.label
 
-        topics_json = await open_json("topics.json") #TODO: remove days if they are deselected
-        
-        topics_json["users"][str(user)]['search_schedule'].append(day_to_add)
+        topics_json = await open_json("topics.json")
+        if day_selected in topics_json["users"][str(user)]['search_schedule']:
+            await ctx.response.send_message(f'You will no longer receive papers on {day_selected}', ephemeral=True)
+            topics_json["users"][str(user)]['search_schedule'].remove(day_selected)
+        else:
+            topics_json["users"][str(user)]['search_schedule'].append(day_selected)
+            await ctx.response.send_message(f'You will now receive papers every {day_selected}', ephemeral=True)
+        print(topics_json["users"][str(user)]['search_schedule'])
         await write_json(topics_json, "topics.json")
     
-        await ctx.response.send_message(f'You will now receive papers every {day_to_add}', ephemeral=True)
+        
 
 class DayOptions(discord.ui.View):
     def __init__(self):
