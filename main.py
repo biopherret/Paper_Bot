@@ -22,6 +22,8 @@ import typing, functools #to prevent hf from blocking the main thread
 
 from math import ceil #for dividing long messages into multiple messages
 
+##TODO: make schedule option be days of the week rather than frequency so that changeing the frequency dos'nt affect they way schedule works
+
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
         json.dump(data, file, indent = 4)
@@ -394,7 +396,7 @@ async def _add_topic(ctx, topic : str, recent : str):
     user = ctx.user.id #save topic preferences in json
     topics_json = await open_json("topics.json")
     if str(user) not in topics_json["users"].keys(): #if this user dosn't exist yet
-        topics_json["user"][str(user)] = {'topic_settings': [], 'found_articles': [], 'search_schedule' : None, 'auto_num' : 0, 'auto_message_or_audio' : None} #create a dictionary object for the new user
+        topics_json["users"][str(user)] = {'topic_settings': [], 'found_articles': [], 'search_schedule' : [], 'auto_num' : 0, 'auto_message_or_audio' : None} #create a dictionary object for the new user
         discord_user = await bot.fetch_user(user)
         await discord_user.send("Welcome to Paper Bot! I've created a new user profile for you.")
 
@@ -431,15 +433,33 @@ async def _find_papers_now(ctx, num_papers : int, message_or_audio : str):
             await send_command_response(ctx, user, 'Please specify if you want the summary as "message" or "audio".')
     else: #if they are trying to find more than 5 papers per topic
         await send_command_response(ctx, user, "You can only find up to 5 papers per topic at a time. Please try again with a smaller number.")
+
+class schedule_button(discord.ui.Button['DayOptions']):
+    def __init__(self, day):
+        super().__init__(style=discord.ButtonStyle.secondary, label = day) #TODO: color button depending on if day is already scheduled
+    async def callback(self, ctx: discord.Interaction):
+        user = ctx.user.id
+        day_to_add = self.label
+
+        topics_json = await open_json("topics.json") #TODO: remove days if they are deselected
+        
+        topics_json["users"][str(user)]['search_schedule'].append(day_to_add)
+        await write_json(topics_json, "topics.json")
     
+        await ctx.response.send_message(f'You will now receive papers every {day_to_add}', ephemeral=True)
+
+class DayOptions(discord.ui.View):
+    def __init__(self):
+        super().__init__()
+        for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']:
+            self.add_item(schedule_button(day)) 
 
 @bot.tree.command(name="schedule", description="Set the frequency Paper Bot will automatically find papers and send them to your DM.")
-async def _schedule(ctx, days : int, number_of_papers : int, message_or_audio : str):
+async def _schedule(ctx, number_of_papers : int, message_or_audio : str):
     '''Set the frequency Paper Bot will automatically find papers and send them to your DM.
 
     Args:
         ctx (Interaction): The context of the command
-        days (int): Find papers every x days.
         number_of_papers (int): Number of papers to find per search per topic (Max 5).
         message_or_audio (str): Do you want the AI summary as a message or an audio file (text/audio)?
     '''
@@ -448,12 +468,14 @@ async def _schedule(ctx, days : int, number_of_papers : int, message_or_audio : 
         if message_or_audio == "message" or message_or_audio == "audio":
             if await user_exists(ctx, user):
                 topics_json = await open_json("topics.json")
-                topics_json["users"][str(user)]['search_schedule'] = days
                 topics_json["users"][str(user)]['auto_num'] = number_of_papers
                 topics_json["users"][str(user)]['auto_message_or_audio'] = message_or_audio
                 await write_json(topics_json, "topics.json")
 
-                await send_command_response(ctx, user, f"Paper Bot will now find {number_of_papers} papers per topic every {days} days.")
+                await send_command_response(ctx, user, f"Paper Bot will now find {number_of_papers} papers on each day you schedule it.")
+
+                discord_user = await bot.fetch_user(user)
+                await discord_user.send("On what days do you want paper bot to send you papers?", view=DayOptions())
         else:
             await send_command_response(ctx, user, 'Please specify if you want the summary as "message" or "audio".')
     else: #if they are trying to find more than 5 papers per topic
