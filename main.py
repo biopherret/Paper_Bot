@@ -20,6 +20,9 @@ import typing, functools #to prevent hf from blocking the main thread
 
 from math import ceil #for dividing long messages into multiple messages
 
+#TODO: wake up paper summarizer in teh loop?
+#TODO: re-connect to paper summarizer before makeing each summary (b/c some papers just break it for some reason)
+
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
         json.dump(data, file, indent = 4)
@@ -29,7 +32,6 @@ async def open_json(file_name):
         return json.load(file)
 
 bot = commands.Bot(command_prefix = '.', intents=discord.Intents.default())
-hf_chat_client = Client("biopherret/Paper_Summarizer")
 hf_tts_client = Client("https://neongeckocom-neon-tts-plugin-coqui.hf.space/")
 
 discord_token = open("discord_token.txt", "r").read()
@@ -224,6 +226,7 @@ async def get_text_for_LM(paper_title, doc_type, doc_link, online_link):
 @to_thread
 def get_summary_from_LM(context_text):
     prompt = f'The following text is extracted from a PDF file of an academic paper. Ignoring the formatting text and the works cited, please summarize this paper. Thank you! Here is the paper text: "{context_text}"'
+    hf_chat_client = Client("biopherret/Paper_Summarizer") #wake up the chatbot
     try:
         result = hf_chat_client.predict(prompt,
             "You are a friendly Chatbot here to help PhD students by summarizing it for them.",
