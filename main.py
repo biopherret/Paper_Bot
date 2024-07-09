@@ -219,29 +219,29 @@ async def get_text_for_LM(paper_title, doc_type, doc_link, online_link):
         return context_text
     except:
         return None
+    
+def split_text(text, max_length):
+    return [text[i:i+max_length] for i in range(0, len(text), max_length)]
 
 @to_thread
 def get_summary_from_LM(context_text):
-    prompt = f'The following text is extracted from a PDF file of an academic paper. Ignoring the formatting text and the works cited, please summarize this paper. Thank you! Here is the paper text: "{context_text}"'
     hf_chat_client = Client("biopherret/Paper_Summarizer") #wake up the chatbot
-    result = hf_chat_client.predict(prompt,
+    if len(context_text) > 103699:
+        context_text = context_text[:103699] #limit the text to 103699 characters
+
+    prompt = f'The following text is extracted from a PDF file of an academic paper. Ignoring the formatting text and the works cited, please summarize this paper:\n\n{context_text}'
+
+    try:
+        result = hf_chat_client.predict(prompt,
             "You are a friendly Chatbot here to help PhD students by summarizing it for them.",
             512,
             0.7,
             0.95,
             api_name="/chat")
-    return result
-    #try:
-    #    result = hf_chat_client.predict(prompt,
-    #        "You are a friendly Chatbot here to help PhD students by summarizing it for them.",
-    #        512,
-    #        0.7,
-    #        0.95,
-    #        api_name="/chat")
-    #    return result
-    #except:
-    #    print(f'text:{context_text}')
-    #    return None
+        return result
+    except:
+        print(f'text:{context_text}')
+        return None
 
 @to_thread
 def text_to_mp3(text, title):
