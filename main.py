@@ -20,9 +20,6 @@ import typing, functools #to prevent hf from blocking the main thread
 
 from math import ceil #for dividing long messages into multiple messages
 
-#TODO: wake up paper summarizer in teh loop?
-#TODO: re-connect to paper summarizer before makeing each summary (b/c some papers just break it for some reason)
-
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
         json.dump(data, file, indent = 4)
@@ -236,6 +233,7 @@ def get_summary_from_LM(context_text):
             api_name="/chat")
         return result
     except:
+        print(f'text:{context_text}')
         return None
 
 @to_thread
