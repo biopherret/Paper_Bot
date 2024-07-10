@@ -20,6 +20,8 @@ import typing, functools #to prevent hf from blocking the main thread
 
 from math import ceil #for dividing long messages into multiple messages
 
+import tiktoken
+
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
         json.dump(data, file, indent = 4)
@@ -226,22 +228,36 @@ def split_text(text, max_length):
 @to_thread
 def get_summary_from_LM(context_text):
     hf_chat_client = Client("biopherret/Paper_Summarizer") #wake up the chatbot
-    if len(context_text) > 103699:
-        context_text = context_text[:103699] #limit the text to 103699 characters
+    
+    if len(context_text) > 103600:
+        print(f'context text length: {len(context_text)}')
+        context_text = context_text[:103600] #limit the text to 103699 characters
 
     prompt = f'The following text is extracted from a PDF file of an academic paper. Ignoring the formatting text and the works cited, please summarize this paper:\n\n{context_text}'
 
-    try:
-        result = hf_chat_client.predict(prompt,
+    encoding = tiktoken.encoding_for_model("gpt2")
+    token_num = len(encoding.encode(prompt))
+    print(token_num)
+
+    result = hf_chat_client.predict(prompt,
             "You are a friendly Chatbot here to help PhD students by summarizing it for them.",
             512,
             0.7,
             0.95,
             api_name="/chat")
-        return result
-    except:
-        print(f'text:{context_text}')
-        return None
+    return result
+
+    #try:
+    #    result = hf_chat_client.predict(prompt,
+    #        "You are a friendly Chatbot here to help PhD students by summarizing it for them.",
+    #        512,
+    #        0.7,
+    #        0.95,
+    #        api_name="/chat")
+    #    return result
+    #except:
+    #    print(f'prompt length:{len(prompt)}')
+    #    return None
 
 @to_thread
 def text_to_mp3(text, title):
@@ -529,7 +545,7 @@ class topic_button(discord.ui.Button['TopicOptions']):
         topic_to_remove = self.label
 
         topics_json = await open_json("topics.json")
-        topics_json["users"][str(user)]['topic_settings'] = [topic_dict for topic_dict in topics_json[str(user)]['topic_settings'] if topic_dict['topic'] != topic_to_remove]
+        topics_json["users"][str(user)]['topic_settings'] = [topic_dict for topic_dict in topics_json["users"][str(user)]['topic_settings'] if topic_dict['topic'] != topic_to_remove]
         await write_json(topics_json, "topics.json")
     
         await ctx.response.send_message(f'{topic_to_remove} has been removed from your topic list', ephemeral=True)
