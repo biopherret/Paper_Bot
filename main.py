@@ -20,7 +20,7 @@ import typing, functools #to prevent hf from blocking the main thread
 
 from math import ceil #for dividing long messages into multiple messages
 
-import tiktoken
+#import tiktoken
 
 async def write_json(data, file_name):
     with open (file_name, 'w') as file:
@@ -229,35 +229,35 @@ def split_text(text, max_length):
 def get_summary_from_LM(context_text):
     hf_chat_client = Client("biopherret/Paper_Summarizer") #wake up the chatbot
     
-    if len(context_text) > 103600:
-        print(f'context text length: {len(context_text)}')
-        context_text = context_text[:103600] #limit the text to 103699 characters
+    #if len(context_text) > 103600:
+    #    print(f'context text length: {len(context_text)}')
+    #    context_text = context_text[:103600] #limit the text to 103699 characters
 
     prompt = f'The following text is extracted from a PDF file of an academic paper. Ignoring the formatting text and the works cited, please summarize this paper:\n\n{context_text}'
 
-    encoding = tiktoken.encoding_for_model("gpt2")
-    token_num = len(encoding.encode(prompt))
-    print(token_num)
+    #encoding = tiktoken.encoding_for_model("gpt2")
+    #token_num = len(encoding.encode(prompt))
+    #print(token_num)
 
-    result = hf_chat_client.predict(prompt,
+    #result = hf_chat_client.predict(prompt,
+    #        "You are a friendly Chatbot here to help PhD students by summarizing it for them.",
+    #        512,
+    #        0.7,
+    #        0.95,
+    #       api_name="/chat")
+    #return result
+
+    try:
+        result = hf_chat_client.predict(prompt,
             "You are a friendly Chatbot here to help PhD students by summarizing it for them.",
             512,
             0.7,
             0.95,
             api_name="/chat")
-    return result
-
-    #try:
-    #    result = hf_chat_client.predict(prompt,
-    #        "You are a friendly Chatbot here to help PhD students by summarizing it for them.",
-    #        512,
-    #        0.7,
-    #        0.95,
-    #        api_name="/chat")
-    #    return result
-    #except:
-    #    print(f'prompt length:{len(prompt)}')
-    #    return None
+        return result
+    except:
+        print(f'prompt length:{len(prompt)}')
+        return None
 
 @to_thread
 def text_to_mp3(text, title):
