@@ -240,11 +240,11 @@ def get_summary_from_LM(context_text):
     #print(token_num)
 
     #result = hf_chat_client.predict(prompt,
-    #        "You are a friendly Chatbot here to help PhD students by summarizing it for them.",
-    #        512,
-    #        0.7,
-    #        0.95,
-    #       api_name="/chat")
+    #       "You are a friendly Chatbot here to help PhD students by summarizing it for them.",
+    #       512,
+    #       0.7,
+    #       0.95,
+    #      api_name="/chat")
     #return result
 
     try:
@@ -567,12 +567,12 @@ async def _remove_topic(ctx: discord.Interaction):
 
 @tasks.loop(hours = 24)
 async def schedule_find_papers():
-    topics_json = await open_json("topics.json")
-    if topics_json['schedule_loop_allready_running'] == "y": #don't start the loop again if it has already started
-        return
+    #topics_json = await open_json("topics.json")
+    #if topics_json['schedule_loop_allready_running'] == "y": #don't start the loop again if it has already started
+    #    return
     
     print('schedule loop started')
-    topics_json['schedule_loop_allready_running'] = "y"
+    #topics_json['schedule_loop_allready_running'] = "y"
     await write_json(topics_json, "topics.json")
     dev_user = await bot.fetch_user(dev_user_id)
 
