@@ -573,7 +573,7 @@ async def schedule_find_papers():
     
     print('schedule loop started')
     #topics_json['schedule_loop_allready_running'] = "y"
-    await write_json(topics_json, "topics.json")
+    #await write_json(topics_json, "topics.json")
     dev_user = await bot.fetch_user(dev_user_id)
 
     today = await get_day_of_week()
