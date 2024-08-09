@@ -480,7 +480,7 @@ class DayOptions(discord.ui.View):
 
 @bot.tree.command(name="schedule", description="Set the frequency Paper Bot will automatically find papers and send them to your DM.")
 async def _schedule(ctx, number_of_papers : int, message_or_audio : str):
-    '''Set the frequency Paper Bot will automatically find papers and send them to your DM.
+    '''Set on what days Paper Bot will automatically find papers and send them to your DM.
 
     Args:
         ctx (Interaction): The context of the command
