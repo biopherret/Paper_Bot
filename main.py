@@ -226,12 +226,12 @@ def split_text(text, max_length):
     return [text[i:i+max_length] for i in range(0, len(text), max_length)]
 
 @to_thread
-def get_summary_from_LM(context_text):
+async def get_summary_from_LM(context_text):
     try:
         hf_chat_client = Client("biopherret/Paper_Summarizer") #wake up the chatbot
     except:
-        dev_user = await bot.fetch_user(dev_user_id)
-        await dev_user.send('The chatbot is not responding, please wake it up.')
+        discord_dev_user = await bot.fetch_user(dev_user_id)
+        await discord_dev_user.send('The chatbot is not responding, please wake it up.')
     
     #if len(context_text) > 103600:
     #    print(f'context text length: {len(context_text)}')
