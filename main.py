@@ -280,8 +280,10 @@ async def make_paper_message(topic_list, recent_list, hyperlink_lists, status_li
     embed = discord.Embed(title="Papers I Found For You", color = 0x99e3ee)
     embed.set_thumbnail(url=profile_pic_url)
     complete = True
+    print(hyperlink_lists)
     for i in range(len(status_lists)):
         for j in range(num_papers):
+            print(i,j)
             if status_lists[i][j] == None:
                 complete = False
                 hyperlink_lists[i][j] = f":white_square_button: {hyperlink_lists[i][j]}"
