@@ -585,7 +585,7 @@ async def schedule_find_papers():
     today = await get_day_of_week()
     topics_json = await open_json("topics.json")
     user_data = topics_json["users"]
-    users = [user for user in user_data.keys() if user_data[user]['search_schedule'] != None] #get all users with a search schedule
+    users = [user for user in user_data.keys() if user_data[user]['search_schedule'] != []] #get all users with a search schedule
 
     await dev_user.send(f"Good morning! It's a {today} and there are {len(users)} users who have schedules set up.")
     for user in users:
