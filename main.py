@@ -354,6 +354,8 @@ async def find_papers(user, num_papers, message_or_audio):
             if context_txt != None:
                 summary_txt = await get_summary_from_LM(context_txt)
                 if type(summary_txt)  != str: #if the LM failed to give back text
+                    discord_dev_user = await bot.fetch_user(dev_user_id)
+                    await discord_dev_user.send(f"The chat bot is not returning text, go check on it.")
                     success = False
                 else:
                     success = await send_summary_to_user(user, summary_txt, message_or_audio, article_dict['title'])
@@ -533,6 +535,8 @@ async def _summarize_pdf(ctx, pdf : discord.Attachment, message_or_audio : str):
 
     summary_txt = await get_summary_from_LM(context_txt)
     if type(sumarry_txt) != str:
+        discord_dev_user = await bot.fetch_user(dev_user_id)
+        await discord_dev_user.send(f"Chat bot is not returning text, go check on it.")
         sucess = False
     else:
         success = await send_summary_to_user(user, summary_txt, message_or_audio, pdf.filename)
