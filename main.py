@@ -225,13 +225,14 @@ async def get_text_for_LM(paper_title, doc_type, doc_link, online_link):
 def split_text(text, max_length):
     return [text[i:i+max_length] for i in range(0, len(text), max_length)]
 
-#@to_thread
-async def get_summary_from_LM(context_text):
+@to_thread
+def get_summary_from_LM(context_text):
     try:
         hf_chat_client = Client("biopherret/Paper_Summarizer") #wake up the chatbot
     except:
-        discord_dev_user = await bot.fetch_user(dev_user_id)
-        await discord_dev_user.send('The chatbot is not responding, please wake it up.')
+        #discord_dev_user = await bot.fetch_user(dev_user_id)
+        #await discord_dev_user.send('The chatbot is not responding, please wake it up.')
+        print('The chatbot is not respondnig, please wake it up')
     
     #if len(context_text) > 103600:
     #    print(f'context text length: {len(context_text)}')
@@ -352,7 +353,7 @@ async def find_papers(user, num_papers, message_or_audio):
             success = False
             context_txt = await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'])
             if context_txt != None:
-                summary_txt = await get_summary_from_LM(context_txt)
+                summary_txt = get_summary_from_LM(context_txt)
                 if type(summary_txt)  != str: #if the LM failed to give back text
                     print(type(summary_txt))
                     discord_dev_user = await bot.fetch_user(dev_user_id)
@@ -534,7 +535,7 @@ async def _summarize_pdf(ctx, pdf : discord.Attachment, message_or_audio : str):
         context_txt += page.extract_text()
     os.remove(pdf.filename)
 
-    summary_txt = await get_summary_from_LM(context_txt)
+    summary_txt = get_summary_from_LM(context_txt)
     if type(sumarry_txt) != str:
         print(type(sumarry_txt))
         discord_dev_user = await bot.fetch_user(dev_user_id)
