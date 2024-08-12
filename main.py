@@ -531,7 +531,7 @@ async def _summarize_pdf(ctx, pdf : discord.Attachment, message_or_audio : str):
         context_txt += page.extract_text()
     os.remove(pdf.filename)
 
-    summary_txt = await get_summary_from_LM(context_txt)
+    async with get_summary_from_LM(context_txt) as summary_txt:
     if type(sumarry_txt) != str:
         sucess = False
     else:
