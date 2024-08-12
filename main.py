@@ -353,7 +353,10 @@ async def find_papers(user, num_papers, message_or_audio):
             context_txt = await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'])
             if context_txt != None:
                 summary_txt = await get_summary_from_LM(context_txt)
-                success = await send_summary_to_user(user, summary_txt, message_or_audio, article_dict['title'])
+                if type(summary_txt)  != str: #if the LM failed to give back text
+                    success = False
+                else
+                    success = await send_summary_to_user(user, summary_txt, message_or_audio, article_dict['title'])
             if success:
                 status_lists[count_t][count_a] = True
             else:
@@ -529,7 +532,10 @@ async def _summarize_pdf(ctx, pdf : discord.Attachment, message_or_audio : str):
     os.remove(pdf.filename)
 
     summary_txt = await get_summary_from_LM(context_txt)
-    success = await send_summary_to_user(user, summary_txt, message_or_audio, pdf.filename)
+    if type(sumarry_txt) != str:
+        sucess = False
+    else:
+        success = await send_summary_to_user(user, summary_txt, message_or_audio, pdf.filename)
     if not success:
         discord_user = await bot.fetch_user(user)
         await discord_user.send("I'm sorry, I couldn't summarize the PDF. Please try again later.")
