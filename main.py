@@ -286,7 +286,7 @@ async def make_paper_message(topic_list, recent_list, hyperlink_lists, status_li
     complete = True
     for i in range(len(status_lists)): #for each topic
         if status_lists[i] == []: #if no papers were found
-            hyperlink_lists[i] = "No Papers Found"
+            hyperlink_lists[i] = ["No Papers Found"]
         for j in range(len(status_lists[i])): #for each paper found in that topic
             if status_lists[i][j] == None:
                 complete = False
