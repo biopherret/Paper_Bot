@@ -355,7 +355,7 @@ async def find_papers(user, num_papers, message_or_audio):
                 summary_txt = await get_summary_from_LM(context_txt)
                 if type(summary_txt)  != str: #if the LM failed to give back text
                     success = False
-                else
+                else:
                     success = await send_summary_to_user(user, summary_txt, message_or_audio, article_dict['title'])
             if success:
                 status_lists[count_t][count_a] = True
