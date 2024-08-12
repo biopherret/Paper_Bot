@@ -314,6 +314,7 @@ async def send_summary_to_user(user, summary_txt, message_or_audio, title):
             await discord_user.send(file=file, content = "")
         else:
             await discord_user.send(f'The text to speech AI failed for "{title}", so sending you the summary as a message instead.')
+            print(type(summary_txt))
             for i in range(ceil(len(summary_txt) / 4096)):
                 embed = discord.Embed(title=title, color = 0x99e3ee)
                 embed.set_thumbnail(url=profile_pic_url)
