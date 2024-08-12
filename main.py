@@ -353,7 +353,7 @@ async def find_papers(user, num_papers, message_or_audio):
             success = False
             context_txt = await get_text_for_LM(article_dict['title'], article_dict['doc_type'], article_dict['doc_link'], article_dict['online_link'])
             if context_txt != None:
-                summary_txt = get_summary_from_LM(context_txt)
+                summary_txt = await get_summary_from_LM(context_txt)
                 if type(summary_txt)  != str: #if the LM failed to give back text
                     print(type(summary_txt))
                     discord_dev_user = await bot.fetch_user(dev_user_id)
@@ -535,7 +535,7 @@ async def _summarize_pdf(ctx, pdf : discord.Attachment, message_or_audio : str):
         context_txt += page.extract_text()
     os.remove(pdf.filename)
 
-    summary_txt = get_summary_from_LM(context_txt)
+    summary_txt = await get_summary_from_LM(context_txt)
     if type(sumarry_txt) != str:
         print(type(sumarry_txt))
         discord_dev_user = await bot.fetch_user(dev_user_id)
