@@ -225,7 +225,7 @@ async def get_text_for_LM(paper_title, doc_type, doc_link, online_link):
 def split_text(text, max_length):
     return [text[i:i+max_length] for i in range(0, len(text), max_length)]
 
-@to_thread
+#@to_thread
 async def get_summary_from_LM(context_text):
     try:
         hf_chat_client = Client("biopherret/Paper_Summarizer") #wake up the chatbot
