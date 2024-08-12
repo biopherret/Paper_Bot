@@ -354,7 +354,7 @@ async def find_papers(user, num_papers, message_or_audio):
             if context_txt != None:
                 summary_txt = await get_summary_from_LM(context_txt)
                 if type(summary_txt)  != str: #if the LM failed to give back text
-                    print(type(sumarry_txt))
+                    print(type(summary_txt))
                     discord_dev_user = await bot.fetch_user(dev_user_id)
                     await discord_dev_user.send(f"The chat bot is not returning text, go check on it.")
                     success = False
