@@ -343,7 +343,7 @@ async def find_papers(user, num_papers, message_or_audio):
         original_hyperlink_papers_lists.append([await truncate_hyperlinked_title(user, article_dict['title'], article_dict['online_link']) for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']])
 
     discord_user = await bot.fetch_user(user)
-    status_lists =  [[None for _ in range(len(topic_dict['hyperlinked_paper_names']))] for topic_dict in topics_list] ###TODO: this might break at foldons
+    status_lists =  [[None for j in range(len(original_hyperlink_papers_lists[i]))] for i in range(len(topics_list))] ###TODO: this might break at foldons
     message = await discord_user.send(embed = await make_paper_message([topic_dict['topic'] for topic_dict in topics_list], [topic_dict['recent'] for topic_dict in topics_list], copy.deepcopy(original_hyperlink_papers_lists), status_lists))
 
     for count_t, topic_dict in enumerate(topics_list): #for each topic
