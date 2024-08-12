@@ -284,10 +284,10 @@ async def make_paper_message(topic_list, recent_list, hyperlink_lists, status_li
     embed = discord.Embed(title="Papers I Found For You", color = 0x99e3ee)
     embed.set_thumbnail(url=profile_pic_url)
     complete = True
-    print(status_lists)
     for i in range(len(status_lists)): #for each topic
+        if status_lists[i] == []: #if no papers were found
+            hyperlink_lists[i][0] = "No Papers Found"
         for j in range(len(status_lists[i])): #for each paper found in that topic
-            print(i,j)
             if status_lists[i][j] == None:
                 complete = False
                 hyperlink_lists[i][j] = f":white_square_button: {hyperlink_lists[i][j]}"
@@ -344,7 +344,7 @@ async def find_papers(user, num_papers, message_or_audio):
         original_hyperlink_papers_lists.append([await truncate_hyperlinked_title(user, article_dict['title'], article_dict['online_link']) for article_dict in found_articles if article_dict['topic'] == topic_dict['topic']])
 
     discord_user = await bot.fetch_user(user)
-    status_lists =  [[None for j in range(len(original_hyperlink_papers_lists[i]))] for i in range(len(topics_list))] ###TODO: this might break at foldons
+    status_lists =  [[None for j in range(len(original_hyperlink_papers_lists[i]))] for i in range(len(topics_list))]
     message = await discord_user.send(embed = await make_paper_message([topic_dict['topic'] for topic_dict in topics_list], [topic_dict['recent'] for topic_dict in topics_list], copy.deepcopy(original_hyperlink_papers_lists), status_lists))
 
     for count_t, topic_dict in enumerate(topics_list): #for each topic
@@ -464,7 +464,7 @@ class schedule_button(discord.ui.Button['DayOptions']):
         user = ctx.user.id
         day_selected = self.label
 
-        topics_json = await open_json("topics.json") #TODO: change the button color when they select it
+        topics_json = await open_json("topics.json")
         if day_selected in topics_json["users"][str(user)]['search_schedule']: #if the day is already in the schedule
             self.style = discord.ButtonStyle.grey 
             await ctx.response.edit_message(view=self.view) #update the button color
