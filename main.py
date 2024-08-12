@@ -253,7 +253,7 @@ def get_summary_from_LM(context_text):
     #return result
 
     try:
-        result = await hf_chat_client.predict(prompt,
+        result = hf_chat_client.predict(prompt,
             "You are a friendly Chatbot here to help PhD students by summarizing it for them.",
             512,
             0.7,
