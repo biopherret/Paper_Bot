@@ -173,7 +173,7 @@ async def getArticles(topics_list, num_papers, user):
             i += 1
             if 'organic_results' not in search.keys(): #if there are no search results
                 discord_user = await bot.fetch_user(user)
-                await discord_user.send(f"Sorry, I couldn't find any papers for {topic_dict['topic']}, try setting your topic to something else.")
+                await discord_user.send(f"Sorry, I couldn't find {num_papers} papers for {topic_dict['topic']}, try setting your topic to something else.")
                 break
 
             for r in range(len(search['organic_results'])): #for each article found in the search
