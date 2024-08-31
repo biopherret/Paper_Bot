@@ -584,7 +584,7 @@ async def schedule_find_papers():
         return
     
     print('schedule loop started')
-    topics_json['schedule_loop_last_ran'] = currentS_date
+    topics_json['schedule_loop_last_ran'] = current_date
     await write_json(topics_json, "topics.json")
     print('status set to schedlue loop started today')
 
